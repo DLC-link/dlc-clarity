@@ -1,0 +1,3 @@
+[submodule "dlc-clarity-smart-contract"]
+	path = dlc-clarity-smart-contract
+	url = https://github.com/DLC-link/dlc-clarity-smart-contract.git
