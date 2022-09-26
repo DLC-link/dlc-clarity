@@ -4,3 +4,6 @@
 [submodule "dlc-stacks-loan-contract"]
 	path = dlc-stacks-loan-contract
 	url = https://github.com/DLC-link/dlc-stacks-loan-contract.git
+[submodule "dlc-redstone-smart-contract"]
+	path = dlc-redstone-smart-contract
+	url = git@github.com:DLC-link/dlc-redstone-smart-contract.git
