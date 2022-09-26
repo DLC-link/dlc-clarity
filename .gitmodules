@@ -1,3 +1,6 @@
 [submodule "dlc-clarity-smart-contract"]
 	path = dlc-clarity-smart-contract
 	url = https://github.com/DLC-link/dlc-clarity-smart-contract.git
+[submodule "dlc-stacks-loan-contract"]
+	path = dlc-stacks-loan-contract
+	url = https://github.com/DLC-link/dlc-stacks-loan-contract.git
