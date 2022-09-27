@@ -1,2 +1,34 @@
 [project]
 name = "DLC-Stacks"
+authors = []
+description = ""
+telemetry = false
+boot_contracts = ["pox", "costs-v2", "bns"]
+
+[[project.requirements]]
+contract_id = "STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify"
+
+[project.cache_location]
+path = ".requirements"
+
+[contracts.dlc-create-callback-trait]
+path = "dlc-clarity-smart-contract/traits/dlc-create-callback-trait.clar"
+
+[contracts.dlc-manager-basic-v0-1]
+path = "dlc-clarity-smart-contract/contracts/dlc-manager.clar"
+
+[contracts.sample-contract-basic-v0-1]
+path = "dlc-clarity-smart-contract/example/sample-protocol-contract.clar"
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[repl.analysis]
+passes = []
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
