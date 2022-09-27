@@ -11,15 +11,36 @@ contract_id = "STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify"
 [project.cache_location]
 path = ".requirements"
 
-[contracts.dlc-create-callback-trait]
-path = "dlc-clarity-smart-contract/traits/dlc-create-callback-trait.clar"
-
+# Basic
 [contracts.dlc-manager-basic-v0-1]
 path = "dlc-clarity-smart-contract/contracts/dlc-manager.clar"
 
 [contracts.sample-contract-basic-v0-1]
 path = "dlc-clarity-smart-contract/example/sample-protocol-contract.clar"
 
+# Priced
+[contracts.dlc-manager-priced-v0]
+path = "dlc-redstone-smart-contract/contracts/dlc-manager-priced.clar"
+
+[contracts.sample-contract-priced-v0]
+path = "dlc-redstone-smart-contract/example/sample-protocol-contract.clar"
+
+# Loan
+[contracts.dlc-manager-loan-v0]
+path = "dlc-stacks-loan-contract/contracts/dlc-manager-loan.clar"
+
+[contracts.sample-contract-loan-v0]
+path = "dlc-stacks-loan-contract/example/sample-protocol-contract.clar"
+
+# Traits
+[contracts.dlc-create-callback-trait]
+path = "dlc-clarity-smart-contract/traits/dlc-create-callback-trait.clar"
+
+[contract.dlc-link-callback-trait]
+path = "dlc-stacks-loan-contract/contracts/dlc-link-callback-trait.clar"
+
+
+# Other settings
 [repl]
 costs_version = 2
 parser_version = 2
