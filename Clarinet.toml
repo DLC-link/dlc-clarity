@@ -36,7 +36,7 @@ path = "dlc-stacks-loan-contract/example/sample-protocol-contract.clar"
 [contracts.dlc-create-callback-trait]
 path = "dlc-clarity-smart-contract/traits/dlc-create-callback-trait.clar"
 
-[contract.dlc-link-callback-trait]
+[contracts.dlc-link-callback-trait]
 path = "dlc-stacks-loan-contract/contracts/dlc-link-callback-trait.clar"
 
 
