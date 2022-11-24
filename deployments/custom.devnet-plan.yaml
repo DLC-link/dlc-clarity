@@ -40,26 +40,28 @@ plan:
             path: dlc-stacks-loan-contract/contracts/dlc-manager-loan.clar
             anchor-block-only: true
         - contract-publish:
-            contract-name: sample-contract-loan-v0
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 66810
-            path: dlc-stacks-loan-contract/example/sample-protocol-contract.clar
-            anchor-block-only: true
-        - contract-publish:
             contract-name: dlc-manager-priced-v0
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 93700
             path: dlc-redstone-smart-contract/contracts/dlc-manager-priced.clar
             anchor-block-only: true
+    - id: 1
+      transactions:
+        - contract-publish:
+            contract-name: sample-contract-loan-v0
+            expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
+            cost: 66810
+            path: dlc-stacks-loan-contract/example/sample-protocol-contract.clar
+            anchor-block-only: true
         - contract-publish:
             contract-name: sample-contract-priced-v0
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 37020
             path: dlc-redstone-smart-contract/example/sample-protocol-contract.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: sample-contract-basic-v0-1
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 36840
             path: dlc-clarity-smart-contract/example/sample-protocol-contract.clar
             anchor-block-only: true
@@ -70,21 +72,21 @@ plan:
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             method: register-contract
             parameters:
-              - "'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sample-contract-loan-v0"
+              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0"
             cost: 6000
         - contract-call:
             contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             method: register-contract
             parameters:
-              - "'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sample-contract-priced-v0"
+              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-priced-v0"
             cost: 6000
         - contract-call:
             contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-basic-v0-1
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             method: register-contract
             parameters:
-              - "'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sample-contract-basic-v0-1"
+              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-basic-v0-1"
             cost: 6000
     - id: 3
       transactions:

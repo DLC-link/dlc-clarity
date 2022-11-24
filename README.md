@@ -29,14 +29,15 @@ Also see: https://askubuntu.com/questions/8653/how-to-keep-processes-running-aft
 
 ## Steps to restart mocknet environment
 1. node2 (electrs-btc2.dlc.link):
-   1. Stop electrs in tmux window
+   1. Stop electrs in tmux window (optional)
    2. Stop bitcoind: `bitcoin-cli stop`
    3. Remove regtest folder: `rm -rf ~/.bitcoin/regtest`
 2. node1 (stx-btc1.dlc.link):
    1. stop clarinet in tmux window
    2. free up some space: `docker image prune` and `docker volume prune`
-   3. make necessary changes in node/clarinet/contracts
-   4. restart clarinet in tmux: `clarinet integrate -p deployments/custom.devnet-plan.yaml`
+   3. clear cache data `rm -rf .cache/*`
+   4. make necessary changes in node/clarinet/contracts
+   5. restart clarinet in tmux: `clarinet integrate -p deployments/custom.devnet-plan.yaml`
 3. node2:
    1. Restart bitcoind: `bitcoind -daemon -regtest`
    2. Check health : `bitcoin-cli -regtest getblockchaininfo` should show same blockheight as node1
