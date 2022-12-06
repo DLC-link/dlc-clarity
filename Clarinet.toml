@@ -11,6 +11,13 @@ contract_id = "STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify"
 [project.cache_location]
 path = ".requirements"
 
+# Unified Contract
+[contracts.dlc-manager-priced-v0-1]
+path = "contracts/dlc-manager.clar"
+
+[contracts.sample-contract-loan-v0-1]
+path = "examples/sample-contract-loan.clar"
+
 # Basic
 [contracts.dlc-manager-basic-v0-1]
 path = "dlc-clarity-smart-contract/contracts/dlc-manager.clar"
@@ -38,6 +45,9 @@ path = "dlc-clarity-smart-contract/traits/dlc-create-callback-trait.clar"
 
 [contracts.dlc-link-callback-trait]
 path = "dlc-stacks-loan-contract/contracts/dlc-link-callback-trait.clar"
+
+[contracts.dlc-link-callback-trait-v2]
+path = "contracts/dlc-link-callback-trait.clar"
 
 
 # Other settings

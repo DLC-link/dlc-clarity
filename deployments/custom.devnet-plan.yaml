@@ -28,6 +28,12 @@ plan:
             path: dlc-stacks-loan-contract/contracts/dlc-link-callback-trait.clar
             anchor-block-only: true
         - contract-publish:
+            contract-name: dlc-link-callback-trait-v2
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 1250
+            path: contracts/dlc-link-callback-trait.clar
+            anchor-block-only: true
+        - contract-publish:
             contract-name: dlc-manager-basic-v0-1
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 64940
@@ -44,6 +50,12 @@ plan:
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 93700
             path: dlc-redstone-smart-contract/contracts/dlc-manager-priced.clar
+            anchor-block-only: true
+        - contract-publish:
+            contract-name: dlc-manager-priced-v0-1
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 93700
+            path: contracts/dlc-manager.clar
             anchor-block-only: true
     - id: 1
       transactions:
@@ -64,6 +76,12 @@ plan:
             expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 36840
             path: dlc-clarity-smart-contract/example/sample-protocol-contract.clar
+            anchor-block-only: true
+        - contract-publish:
+            contract-name: sample-contract-loan-v0-1
+            expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
+            cost: 111940
+            path: examples/sample-contract-loan.clar
             anchor-block-only: true
     - id: 2
       transactions:
@@ -88,6 +106,13 @@ plan:
             parameters:
               - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-basic-v0-1"
             cost: 6000
+        - contract-call:
+            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            method: register-contract
+            parameters:
+              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1"
+            cost: 6000
     - id: 3
       transactions:
         - contract-call:
@@ -100,6 +125,14 @@ plan:
             cost: 6000
         - contract-call:
             contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            method: set-trusted-oracle
+            parameters:
+              - 0x03009dd87eb41d96ce8ad94aa22ea8b0ba4ac20c45e42f71726d6b180f93c3f298
+              - true
+            cost: 6000
+        - contract-call:
+            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             method: set-trusted-oracle
             parameters:
