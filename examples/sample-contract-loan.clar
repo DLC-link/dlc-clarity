@@ -33,7 +33,7 @@
 (define-map loans
   uint ;; The loan-id
   {
-    dlc_uuid: (optional (buff 8)),
+    dlc_uuid: (optional (buff 32)),
     ;; Other data about the loan and their specific contract
     status: (string-ascii 14),
     vault-loan: uint, ;; the borrowed amount
@@ -50,7 +50,7 @@
 ;; A map to link uuids and loan-ids
 ;; used to reverse-lookup loan-ids when the dlc-manager contract gives us a UUID
 (define-map uuid-loan-id
-  (buff 8)
+  (buff 32)
   uint
 )
 
@@ -58,7 +58,7 @@
   (map-get? loans loan-id)
 )
 
-(define-read-only (get-loan-id-by-uuid (uuid (buff 8)))
+(define-read-only (get-loan-id-by-uuid (uuid (buff 32)))
   (map-get? uuid-loan-id uuid)
 )
 
@@ -86,7 +86,7 @@
   (ok (var-get last-loan-id))
 )
 
-(define-read-only (get-loan-by-uuid (uuid (buff 8)))
+(define-read-only (get-loan-by-uuid (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -140,7 +140,7 @@
 
 ;; Implemented from the trait, this is what is used to pass back the uuid created by the DLC system
 ;; called by the dlc-manager contract
-(define-public (post-create-dlc-handler (loan-id uint) (uuid (buff 8)))
+(define-public (post-create-dlc-handler (loan-id uint) (uuid (buff 32)))
     (begin
       ;; If creation was successful, we save the results in the local maps
         (print { uuid: uuid, loan-id: loan-id, status: status-ready })
@@ -154,7 +154,7 @@
     )
 )
 
-(define-public (set-status-funded (uuid (buff 8))) 
+(define-public (set-status-funded (uuid (buff 32))) 
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -186,7 +186,7 @@
 
 ;; Implemented from the trait
 ;; When this function is called by the dlc-manager contract, we know the closing was successful, so we can finalise changes in this contract.
-(define-public (post-close-dlc-handler (uuid (buff 8)))
+(define-public (post-close-dlc-handler (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -213,7 +213,7 @@
   )
 )
 
-(define-public (get-btc-price-callback (btc-price uint) (uuid (buff 8)))
+(define-public (get-btc-price-callback (btc-price uint) (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))

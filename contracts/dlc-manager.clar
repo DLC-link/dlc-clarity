@@ -29,16 +29,16 @@
 (define-map trusted-oracles (buff 33) bool)
 
 ;; NFT to keep track of the open dlcs easily
-(define-non-fungible-token open-dlc (buff 8))
+(define-non-fungible-token open-dlc (buff 32))
 
 ;; NFT to keep track of registered contracts
 (define-non-fungible-token registered-contract principal)
 
 ;; A map storing DLC data
 (define-map dlcs
-  (buff 8)
+  (buff 32)
   {
-    uuid: (buff 8),
+    uuid: (buff 32),
     ;; closing-time: uint,  ;;seconds because stacks block has the timestamp in seconds
     ;; closing-price: (optional uint),
     actual-closing-time: uint,
@@ -54,11 +54,11 @@
 ;; Helper functions
 ;; ---------------------------------------------------------
 
-(define-read-only (get-dlc (uuid (buff 8)))
+(define-read-only (get-dlc (uuid (buff 32)))
   (map-get? dlcs uuid)
 )
 
-(define-read-only (get-callback-contract (uuid (buff 8)))
+(define-read-only (get-callback-contract (uuid (buff 32)))
   (let (
     (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     (callback-contract (get callback-contract dlc))
@@ -68,7 +68,7 @@
 )
 
 ;; @desc indicate that a DLC was funded on Bitcoin
-(define-public (set-status-funded (uuid (buff 8)) (callback-contract <cb-trait>))
+(define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
   (ok (try! (contract-call? callback-contract set-status-funded uuid)))
 )
 
@@ -95,24 +95,32 @@
   (default-to false (map-get? trusted-oracles pubkey))
 )
 
+(define-data-var local-nonce uint u0)
+
 ;; ---------------------------------------------------------
 ;; Main functions
 ;; ---------------------------------------------------------
 
-(define-public (create-dlc (emergency-refund-time uint) (callback-contract principal) (nonce uint))
-  (begin 
-    (print {
-      emergency-refund-time: emergency-refund-time,
-      creator: tx-sender,
-      callback-contract: callback-contract,
-      nonce: nonce,
-      event-source: "dlclink:create-dlc:v0-1" 
-    })
-    (ok true)
+(define-public (create-dlc (emergency-refund-time uint) (callback-contract principal) (callback-nonce uint))
+  (let (
+    (uuid (get-padded-buff-from-uint (var-get local-nonce)))
+    )
+    (begin
+      (print {
+        uuid: uuid,
+        emergency-refund-time: emergency-refund-time,
+        creator: tx-sender,
+        callback-contract: callback-contract,
+        nonce: callback-nonce,
+        event-source: "dlclink:create-dlc:v0-1" 
+      })
+      (var-set local-nonce (+ (var-get local-nonce) u1))
+      (ok true)
+    )
   )
 )
 
-(define-public (post-create-dlc (uuid (buff 8)) (emergency-refund-time uint) (creator principal) (callback-contract <cb-trait>) (nonce uint))
+(define-public (post-create-dlc (uuid (buff 32)) (emergency-refund-time uint) (creator principal) (callback-contract <cb-trait>) (callback-nonce uint))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
     (asserts! (is-none (map-get? dlcs uuid)) err-dlc-already-added)
@@ -131,14 +139,14 @@
       creator: creator,
       event-source: "dlclink:post-create-dlc:v0-1" 
     })
-    (try! (contract-call? callback-contract post-create-dlc-handler nonce uuid))
+    (try! (contract-call? callback-contract post-create-dlc-handler callback-nonce uuid))
     (nft-mint? open-dlc uuid dlc-manager-contract)
   )
 )
 
 ;; Closing flow
 
-(define-public (close-dlc (uuid (buff 8)) (outcome uint))
+(define-public (close-dlc (uuid (buff 32)) (outcome uint))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     )
@@ -156,7 +164,7 @@
   )
 )
 
-(define-public (post-close-dlc (uuid (buff 8)) (callback-contract <cb-trait>) (outcome uint)) 
+(define-public (post-close-dlc (uuid (buff 32)) (callback-contract <cb-trait>) (outcome uint)) 
   (let (
     (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     (block-timestamp (get-last-block-timestamp))
@@ -177,7 +185,7 @@
 
 ;; Priced Flow
 
-(define-public (get-btc-price (uuid (buff 8)))
+(define-public (get-btc-price (uuid (buff 32)))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     )
@@ -192,7 +200,7 @@
   )
 )
 
-(define-public (validate-price-data (uuid (buff 8)) (timestamp uint) (entries (list 10 {symbol: (buff 32), value: uint})) (signature (buff 65)) (callback-contract <cb-trait>))
+(define-public (validate-price-data (uuid (buff 32)) (timestamp uint) (entries (list 10 {symbol: (buff 32), value: uint})) (signature (buff 65)) (callback-contract <cb-trait>))
   (let (
     (signer (try! (contract-call? 'STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify recover-signer timestamp entries signature)))
     (block-timestamp (get-last-block-timestamp))
@@ -240,3 +248,69 @@
 (define-read-only (is-contract-registered (contract-address principal))
   (is-some (nft-get-owner? registered-contract contract-address))
 )
+
+;; ---------------------------------------------------------
+;; Utilities
+;; ---------------------------------------------------------
+
+(define-constant byte-list 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)
+
+(define-private (uint-to-buff-iter (b (buff 1)) (p {n: uint, a: (buff 32)}))
+	{
+		a: (unwrap-panic (as-max-len? (concat (if (is-eq (get n p) u0) 0x00 (unwrap-panic (element-at byte-list (mod (get n p) u256)))) (get a p)) u32)),
+		n: (/ (get n p) u256)
+	}
+)
+
+(define-read-only (uint256-to-buff-be (n uint))
+	(unwrap-panic (as-max-len? (get a (fold uint-to-buff-iter 0x0000000000000000000000000000000000000000000000000000000000000000 {n: n, a: 0x})) u32))
+)
+
+(define-constant pad32-padding (list
+	0x0000000000000000000000000000000000000000000000000000000000000000
+	0x00000000000000000000000000000000000000000000000000000000000000
+	0x000000000000000000000000000000000000000000000000000000000000
+	0x0000000000000000000000000000000000000000000000000000000000
+	0x00000000000000000000000000000000000000000000000000000000
+	0x000000000000000000000000000000000000000000000000000000
+	0x0000000000000000000000000000000000000000000000000000
+	0x00000000000000000000000000000000000000000000000000
+	0x000000000000000000000000000000000000000000000000
+	0x0000000000000000000000000000000000000000000000
+	0x00000000000000000000000000000000000000000000
+	0x000000000000000000000000000000000000000000
+	0x0000000000000000000000000000000000000000
+	0x00000000000000000000000000000000000000
+	0x000000000000000000000000000000000000
+	0x0000000000000000000000000000000000
+	0x00000000000000000000000000000000
+	0x000000000000000000000000000000
+	0x0000000000000000000000000000
+	0x00000000000000000000000000
+	0x000000000000000000000000
+	0x0000000000000000000000
+	0x00000000000000000000
+	0x000000000000000000
+	0x0000000000000000
+	0x00000000000000
+	0x000000000000
+	0x0000000000
+	0x00000000
+	0x000000
+	0x0000
+	0x00
+	0x
+))
+
+(define-read-only (right-pad32 (b (buff 32)))
+	(concat b (unwrap-panic (element-at pad32-padding (len b))))
+)
+
+(define-read-only (get-padded-buff-from-uint (n uint))
+  (right-pad32 (uint256-to-buff-be n))
+)
+
+;; ;; Returns a random (buff 32)
+;; (define-read-only (get-random-uuid (n uint)) 
+;;   (ok (keccak256 (concat (uint256-to-buff-be n) (unwrap-panic (get-block-info? vrf-seed block-height)))))
+;; )
