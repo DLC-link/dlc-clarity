@@ -19,13 +19,13 @@ plan:
             contract-name: dlc-create-callback-trait
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 1250
-            path: dlc-clarity-smart-contract/traits/dlc-create-callback-trait.clar
+            path: legacy-contracts/basic//dlc-create-callback-trait.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: dlc-link-callback-trait
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 1250
-            path: dlc-stacks-loan-contract/contracts/dlc-link-callback-trait.clar
+            path: legacy-contracts/loan/dlc-link-callback-trait.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: dlc-link-callback-trait-v2
@@ -37,19 +37,19 @@ plan:
             contract-name: dlc-manager-basic-v0-1
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 64940
-            path: dlc-clarity-smart-contract/contracts/dlc-manager.clar
+            path: legacy-contracts/basic//dlc-manager-basic.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: dlc-manager-loan-v0
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 119770
-            path: dlc-stacks-loan-contract/contracts/dlc-manager-loan.clar
+            path: legacy-contracts/loan/dlc-manager-loan.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: dlc-manager-priced-v0
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 93700
-            path: dlc-redstone-smart-contract/contracts/dlc-manager-priced.clar
+            path: legacy-contracts/priced/dlc-manager-priced.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: dlc-manager-priced-v0-1
@@ -63,19 +63,19 @@ plan:
             contract-name: sample-contract-loan-v0
             expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 66810
-            path: dlc-stacks-loan-contract/example/sample-protocol-contract.clar
+            path: legacy-contracts/loan/sample-protocol-contract.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: sample-contract-priced-v0
             expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 37020
-            path: dlc-redstone-smart-contract/example/sample-protocol-contract.clar
+            path: legacy-contracts/priced/sample-protocol-contract.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: sample-contract-basic-v0-1
             expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 36840
-            path: dlc-clarity-smart-contract/example/sample-protocol-contract.clar
+            path: legacy-contracts/basic/sample-protocol-contract.clar
             anchor-block-only: true
         - contract-publish:
             contract-name: sample-contract-loan-v0-1
