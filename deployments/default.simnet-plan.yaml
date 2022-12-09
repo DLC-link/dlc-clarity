@@ -67,7 +67,42 @@ plan:
             path: examples/sample-contract-loan.clar
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: callback-contract
+            contract-name: dlc-create-callback-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: tests/callback-contract-mock.clar
+            path: traits/dlc-create-callback-trait.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-basic-v0-1
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-manager.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: sample-contract-basic-v0-1
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: example/sample-protocol-contract.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-link-callback-trait
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-link-callback-trait.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-priced-v0
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-manager-priced.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-loan-v0
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-manager-loan.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: sample-contract-loan-v0
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: example/sample-protocol-contract.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: sample-contract-priced-v0
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: example/sample-protocol-contract.clar
             clarity-version: 1

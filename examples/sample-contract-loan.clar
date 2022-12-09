@@ -29,7 +29,7 @@
 ;; Contract name bindings
 (define-constant sample-protocol-contract .sample-contract-loan-v0-1)
 
-;; A map to store "loans": information about a DLC
+;; @desc A map to store "loans": information about a DLC
 (define-map loans
   uint ;; The loan-id
   {
@@ -45,9 +45,10 @@
   }
 )
 
+;; @desc A map to store loans belonging to a principal
 (define-map creator-loan-ids principal (list 50 uint))
 
-;; A map to link uuids and loan-ids
+;; @desc A map to link uuids and loan-ids
 ;; used to reverse-lookup loan-ids when the dlc-manager contract gives us a UUID
 (define-map uuid-loan-id
   (buff 32)
@@ -107,7 +108,7 @@
 ;; Main Functions
 ;; ---------------------------------------------------------
 
-;; An example function to initiate the creation of a DLC loan.
+;; @desc An example function to initiate the creation of a DLC loan.
 ;; - Increments the loan-id
 ;; - Calls the dlc-manager-contract's create-dlc function to initiate the creation
 ;; The DLC Contract will call back into the provided 'target' contract with the resulting UUID (and the provided loan-id).
@@ -138,6 +139,7 @@
     )
 )
 
+;; @desc Callback function after succesful DLC creation
 ;; Implemented from the trait, this is what is used to pass back the uuid created by the DLC system
 ;; called by the dlc-manager contract
 (define-public (post-create-dlc-handler (loan-id uint) (uuid (buff 32)))
@@ -154,6 +156,8 @@
     )
 )
 
+;; @desc Externally set a given DLCs status to funded. 
+;; Called by the dlc-manager contract after the necessary BTC events have happened.
 (define-public (set-status-funded (uuid (buff 32))) 
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
@@ -168,7 +172,7 @@
   )
 )
 
-;; An example function for closing the loan and initiating the closing of a DLC.
+;; @desc An example function for closing the loan and initiating the closing of a DLC.
 ;; Very similar to the creation process
 ;; See scripts/close-dlc-protocol.ts for an example of calling it.
 (define-public (repay-loan (loan-id uint))
@@ -184,6 +188,7 @@
   )
 )
 
+;; @desc Callback function: called after sucessful DLC closing
 ;; Implemented from the trait
 ;; When this function is called by the dlc-manager contract, we know the closing was successful, so we can finalise changes in this contract.
 (define-public (post-close-dlc-handler (uuid (buff 32)))
@@ -204,6 +209,7 @@
   )
 )
 
+;; @desc Closing flow with price data.
 (define-public (attempt-liquidate (loan-id uint)) 
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -213,6 +219,8 @@
   )
 )
 
+;; @desc Called by the dlc-manager contract with the validated BTC price.
+;; Liquidates loan if necessary at given level
 (define-public (get-btc-price-callback (btc-price uint) (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
@@ -223,6 +231,7 @@
   )
 )
 
+;; @desc Helper function to calculate if a loan is underwater at a given BTC price
 (define-private (check-liquidation (loan-id uint) (btc-price uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -233,13 +242,14 @@
   )
 )
 
-;; Calculating loan collateral value for a given btc-price * (10**8), with pennies precision.
+;; @desc Calculating loan collateral value for a given btc-price * (10**8), with pennies precision.
 ;; Since the deposit is in Sats, after multiplication we first shift by 2, then ushift by 16 to get pennies precision ($12345.67 = u1234567)
 (define-private (get-collateral-value (btc-deposit uint) (btc-price uint))
   (unshift-value (shift-value (* btc-deposit btc-price) ten-to-power-2) ten-to-power-16)
 )
 
-;; An example function to initiate the liquidation of a DLC loan contract.
+;; @desc An example function to initiate the liquidation of a DLC loan contract.
+;; If liquidation is required, this function will initiate a simple close-dlc flow with the calculated payout-ratio
 (define-private (liquidate-loan (loan-id uint) (btc-price uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -254,7 +264,7 @@
   )
 )
 
-;; Returns the resulting payout-ratio at the given btc-price (shifted by 10**8).
+;; @desc Returns the resulting payout-ratio at the given btc-price (shifted by 10**8).
 ;; This value is sent to the Oracle system for signing a point on the linear payout curve.
 ;; using uints, this means return values between 0-10000000000 (0.00-100.00 with room for extra precision in the future)
 ;; 0.00 means the borrower gets back its deposit, 100.00 means the entire collateral gets taken by the protocol.

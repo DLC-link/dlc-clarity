@@ -68,6 +68,7 @@
 )
 
 ;; @desc indicate that a DLC was funded on Bitcoin
+;; Called by the DLC.Link Observer
 (define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
   (ok (try! (contract-call? callback-contract set-status-funded uuid)))
 )
@@ -95,12 +96,20 @@
   (default-to false (map-get? trusted-oracles pubkey))
 )
 
+;; @desc An incrementing nonce used in generating UUIDs
 (define-data-var local-nonce uint u0)
 
 ;; ---------------------------------------------------------
 ;; Main functions
 ;; ---------------------------------------------------------
 
+;; ---------------------------------------------------------
+;; Creation flow
+
+;; @desc Initiates the DLC creation flow. See readme for more details.
+;; @param emergency-refund-time; the time at which the DLC will be available for refund
+;; @param callback-contract; the contract-principal where the post-create-dlc will call back to
+;; @param callback-nonce; provided for the dlc by the protocol-contract to connect it to the resulting uuid
 (define-public (create-dlc (emergency-refund-time uint) (callback-contract principal) (callback-nonce uint))
   (let (
     (uuid (get-padded-buff-from-uint (var-get local-nonce)))
@@ -120,6 +129,8 @@
   )
 )
 
+;; @desc Admin only: Called to finalize DLC Creation
+;; Calls back into the callback-contract with the new UUID
 (define-public (post-create-dlc (uuid (buff 32)) (emergency-refund-time uint) (creator principal) (callback-contract <cb-trait>) (callback-nonce uint))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
@@ -144,8 +155,12 @@
   )
 )
 
+;; ---------------------------------------------------------
 ;; Closing flow
 
+;; @desc Initiaties closing of a DLC
+;; @param uuid; the UUID of the DLC to be closed
+;; @param outcome; a value between 0-10000 (0-100.00% representing payout to the two parties)
 (define-public (close-dlc (uuid (buff 32)) (outcome uint))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
@@ -164,6 +179,7 @@
   )
 )
 
+;; @desc Admin only: Called to finalize DLC Closing
 (define-public (post-close-dlc (uuid (buff 32)) (callback-contract <cb-trait>) (outcome uint)) 
   (let (
     (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
@@ -183,8 +199,10 @@
   )
 )
 
+;; ---------------------------------------------------------
 ;; Priced Flow
 
+;; @desc Initiates a priced DLC closing
 (define-public (get-btc-price (uuid (buff 32)))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
@@ -200,6 +218,8 @@
   )
 )
 
+;; @desc DLC on-chain validation of BTC price data.
+;; Calls the get-btc-price-callback of the protocol-contract.
 (define-public (validate-price-data (uuid (buff 32)) (timestamp uint) (entries (list 10 {symbol: (buff 32), value: uint})) (signature (buff 65)) (callback-contract <cb-trait>))
   (let (
     (signer (try! (contract-call? 'STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify recover-signer timestamp entries signature)))
