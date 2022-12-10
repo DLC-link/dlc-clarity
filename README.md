@@ -2,7 +2,7 @@
 
 This smart contract is the interface for creating, closing and otherwise managing DLCs via the DLC.Link infrastructure.
 
-Learn more about [DLCs](https://github.com/DLC-link/stacks-contracts-all/tree/feat-unified-contract#what-are-dlcs) and [DLC.Link](https://github.com/DLC-link/stacks-contracts-all/tree/feat-unified-contract#about-dlc-link) below.
+Learn more about [DLCs](https://github.com/DLC-link/stacks-contracts-all/#what-are-dlcs) and [DLC.Link](https://github.com/DLC-link/stacks-contracts-all/#about-dlc-link) below.
 
 # Overview
 
