@@ -2,9 +2,7 @@
 
 This smart contract is the interface for creating, closing and otherwise managing DLCs via the DLC.Link infrastructure.
 
-// TODO: update links
-
-Learn more about [DLCs](https://github.com/DLC-link/dlc-redstone-smart-contract#What-Are-DLCs) and [DLC.Link](https://github.com/DLC-link/dlc-redstone-smart-contract#About-DLC-Link) below.
+Learn more about [DLCs](https://github.com/DLC-link/stacks-contracts-all/tree/feat-unified-contract#what-are-dlcs) and [DLC.Link](https://github.com/DLC-link/stacks-contracts-all/tree/feat-unified-contract#about-dlc-link) below.
 
 # Overview
 
