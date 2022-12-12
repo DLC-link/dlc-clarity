@@ -112,7 +112,7 @@
 ;; @param callback-nonce; provided for the dlc by the protocol-contract to connect it to the resulting uuid
 (define-public (create-dlc (emergency-refund-time uint) (callback-contract principal) (callback-nonce uint))
   (let (
-    (uuid (get-padded-buff-from-uint (var-get local-nonce)))
+    (uuid (get-random-uuid (var-get local-nonce)))
     )
     (begin
       (print {
@@ -231,7 +231,7 @@
     (asserts! (> timestamp block-timestamp) err-stale-data)
     (print {
       uuid: uuid,
-      closing-price: price,
+      price: price,
       event-source: "dlclink:validate-price-data:v0-1" 
     })
     (try! (contract-call? callback-contract get-btc-price-callback price uuid))
@@ -286,51 +286,7 @@
   (unwrap-panic (as-max-len? (get a (fold uint-to-buff-iter 0x0000000000000000000000000000000000000000000000000000000000000000 {n: n, a: 0x})) u32))
 )
 
-(define-constant pad32-padding (list
-  0x0000000000000000000000000000000000000000000000000000000000000000
-  0x00000000000000000000000000000000000000000000000000000000000000
-  0x000000000000000000000000000000000000000000000000000000000000
-  0x0000000000000000000000000000000000000000000000000000000000
-  0x00000000000000000000000000000000000000000000000000000000
-  0x000000000000000000000000000000000000000000000000000000
-  0x0000000000000000000000000000000000000000000000000000
-  0x00000000000000000000000000000000000000000000000000
-  0x000000000000000000000000000000000000000000000000
-  0x0000000000000000000000000000000000000000000000
-  0x00000000000000000000000000000000000000000000
-  0x000000000000000000000000000000000000000000
-  0x0000000000000000000000000000000000000000
-  0x00000000000000000000000000000000000000
-  0x000000000000000000000000000000000000
-  0x0000000000000000000000000000000000
-  0x00000000000000000000000000000000
-  0x000000000000000000000000000000
-  0x0000000000000000000000000000
-  0x00000000000000000000000000
-  0x000000000000000000000000
-  0x0000000000000000000000
-  0x00000000000000000000
-  0x000000000000000000
-  0x0000000000000000
-  0x00000000000000
-  0x000000000000
-  0x0000000000
-  0x00000000
-  0x000000
-  0x0000
-  0x00
-  0x
-))
-
-(define-read-only (right-pad32 (b (buff 32)))
-  (concat b (unwrap-panic (element-at pad32-padding (len b))))
+;; Returns a random (buff 32)
+(define-read-only (get-random-uuid (n uint)) 
+  (ok (keccak256 (concat (uint256-to-buff-be n) (unwrap-panic (get-block-info? vrf-seed (- block-height u1))))))
 )
-
-(define-read-only (get-padded-buff-from-uint (n uint))
-  (right-pad32 (uint256-to-buff-be n))
-)
-
-;; ;; Returns a random (buff 32)
-;; (define-read-only (get-random-uuid (n uint)) 
-;;   (ok (keccak256 (concat (uint256-to-buff-be n) (unwrap-panic (get-block-info? vrf-seed block-height)))))
-;; )

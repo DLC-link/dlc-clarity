@@ -3,8 +3,7 @@ import { ScriptFunction } from "../models/script-function.interface";
 
 import { network, contractAddress, contractName } from '../config/common'
 
-// const functionName = "get-random-uuid";
-const functionName = "get-padded-buff-from-uint";
+const functionName = "get-random-uuid";
 
 const txOptions = {
   contractAddress: contractAddress,

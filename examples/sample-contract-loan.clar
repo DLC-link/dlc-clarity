@@ -5,6 +5,7 @@
 ;; Error constants
 (define-constant err-cant-unwrap (err u1000))
 (define-constant err-contract-call-failed (err u1001))
+(define-constant err-cant-get-loan-id-by-uuid (err u1003))
 (define-constant err-unauthorised (err u2001))
 (define-constant err-unknown-loan-contract (err u2003))
 (define-constant err-doesnt-need-liquidation (err u2004))
@@ -89,7 +90,7 @@
 
 (define-read-only (get-loan-by-uuid (uuid (buff 32)))
   (let (
-    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
+    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     )
     (ok loan)
@@ -160,7 +161,7 @@
 ;; Called by the dlc-manager contract after the necessary BTC events have happened.
 (define-public (set-status-funded (uuid (buff 32))) 
   (let (
-    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
+    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     )
     (asserts! (not (is-eq (get status loan) status-funded)) err-dlc-already-funded)
@@ -193,7 +194,7 @@
 ;; When this function is called by the dlc-manager contract, we know the closing was successful, so we can finalise changes in this contract.
 (define-public (post-close-dlc-handler (uuid (buff 32)))
   (let (
-    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
+    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (currstatus (get status loan) )
     (newstatus  (unwrap! (if (is-eq currstatus status-pre-repaid)
@@ -223,7 +224,7 @@
 ;; Liquidates loan if necessary at given level
 (define-public (get-btc-price-callback (btc-price uint) (uuid (buff 32)))
   (let (
-    (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-unwrap ))
+    (loan-id (unwrap! (get-loan-id-by-uuid uuid) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     ) 
     (asserts! (unwrap! (check-liquidation loan-id btc-price) err-cant-unwrap) err-doesnt-need-liquidation)
@@ -232,7 +233,7 @@
 )
 
 ;; @desc Helper function to calculate if a loan is underwater at a given BTC price
-(define-private (check-liquidation (loan-id uint) (btc-price uint))
+(define-read-only (check-liquidation (loan-id uint) (btc-price uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (collateral-value (get-collateral-value (get vault-collateral loan) btc-price))

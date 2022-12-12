@@ -4,10 +4,12 @@ import Button from './button';
 import { setupLoan } from './scripts/functions/setup-loan';
 import { setOracle } from './scripts/functions/set-oracle'
 import { getUUID } from './scripts/functions/get-random-uuid';
+import { repayLoan } from './scripts/functions/repay-loan';
+import { attemptLiquidate } from './scripts/functions/liquidate-loan';
 
 const App = () => {
 
-  const fs = [ setOracle, setupLoan, getUUID ]
+  const fs = [ setOracle, setupLoan, getUUID, repayLoan, attemptLiquidate ]
 
   return (
     <div>

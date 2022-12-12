@@ -40,7 +40,7 @@ async function main() {
   const transaction = await makeContractCall(txOptions);
   console.log(transaction);
   const broadcastResponse = await broadcastTransaction(transaction, network);
-  console.log("2: ", broadcastResponse);
+  console.log("broadcastResponse: ", broadcastResponse);
 }
 
 export const setupLoan: ScriptFunction = {
