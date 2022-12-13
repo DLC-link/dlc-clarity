@@ -70,8 +70,8 @@
 ;; @desc indicate that a DLC was funded on Bitcoin
 ;; Called by the DLC.Link Observer
 (define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
-  (begin 
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised) 
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
     (ok (try! (contract-call? callback-contract set-status-funded uuid)))
   )
 )
@@ -124,7 +124,7 @@
         creator: tx-sender,
         callback-contract: callback-contract,
         nonce: callback-nonce,
-        event-source: "dlclink:create-dlc:v0-1" 
+        event-source: "dlclink:create-dlc:v0-1"
       })
       (var-set local-nonce (+ (var-get local-nonce) u1))
       (ok true)
@@ -145,13 +145,13 @@
       emergency-refund-time: emergency-refund-time,
       creator: creator,
       callback-contract: (contract-of callback-contract),
-      status: status-open 
+      status: status-open
     })
     (print {
       uuid: uuid,
       emergency-refund-time: emergency-refund-time,
       creator: creator,
-      event-source: "dlclink:post-create-dlc:v0-1" 
+      event-source: "dlclink:post-create-dlc:v0-1"
     })
     (try! (contract-call? callback-contract post-create-dlc-handler callback-nonce uuid))
     (nft-mint? open-dlc uuid dlc-manager-contract)
@@ -163,17 +163,18 @@
 
 ;; @desc Initiaties closing of a DLC
 ;; @param uuid; the UUID of the DLC to be closed
-;; @param outcome; a value between 0-10000 (0-100.00% representing payout to the two parties)
+;; @param outcome; a value between 0-100000000 (0-100.00% representing payout to the two parties)
 (define-public (close-dlc (uuid (buff 32)) (outcome uint))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     )
     (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
     (asserts! (is-eq (get status dlc) status-open) err-already-closed)
-    (asserts! (and (>= outcome u0) (<= outcome u10000)) err-out-of-bounds-outcome)
-    (print { 
+    (asserts! (and (>= outcome u0) (<= outcome u100000000)) err-out-of-bounds-outcome)
+    (print {
       uuid: uuid,
       creator: (get creator dlc),
+      callback-contract: (get callback-contract dlc),
       outcome: outcome,
       caller: tx-sender,
       event-source: "dlclink:close-dlc:v0-1"
@@ -183,7 +184,7 @@
 )
 
 ;; @desc Admin only: Called to finalize DLC Closing
-(define-public (post-close-dlc (uuid (buff 32)) (callback-contract <cb-trait>) (outcome uint)) 
+(define-public (post-close-dlc (uuid (buff 32)) (callback-contract <cb-trait>) (outcome uint))
   (let (
     (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     (block-timestamp (get-last-block-timestamp))
@@ -195,7 +196,7 @@
       uuid: uuid,
       outcome: outcome,
       actual-closing-time: (/ block-timestamp u1000),
-      event-source: "dlclink:post-close-dlc:v0-1" 
+      event-source: "dlclink:post-close-dlc:v0-1"
     })
     (try! (contract-call? callback-contract post-close-dlc-handler uuid))
     (nft-burn? open-dlc uuid dlc-manager-contract)
@@ -210,11 +211,13 @@
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
       (creator (get creator dlc))
+      (callback-contract (get callback-contract dlc))
     )
-    (asserts! (or (is-eq contract-owner tx-sender) (is-eq creator tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
-    (print { 
+    (asserts! (or (is-eq contract-owner tx-sender) (is-eq creator tx-sender) (is-eq callback-contract tx-sender)) err-unauthorised)
+    (print {
       uuid: uuid,
       creator: creator,
+      callback-contract: callback-contract,
       caller: tx-sender,
       event-source: "dlclink:get-btc-price:v0-1"
     })
@@ -236,7 +239,7 @@
     (print {
       uuid: uuid,
       price: price,
-      event-source: "dlclink:validate-price-data:v0-1" 
+      event-source: "dlclink:validate-price-data:v0-1"
     })
     (try! (contract-call? callback-contract get-btc-price-callback price uuid))
     (ok true)
@@ -252,7 +255,7 @@
 (define-public (register-contract (contract-address <cb-trait>))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
-    (print { 
+    (print {
       contract-address: contract-address,
       event-source: "dlclink:register-contract:v0-1" })
     (nft-mint? registered-contract (contract-of contract-address) dlc-manager-contract)
@@ -262,7 +265,7 @@
 (define-public (unregister-contract (contract-address <cb-trait>))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
-    (print { 
+    (print {
       contract-address: contract-address,
       event-source: "dlclink:unregister-contract:v0-1" })
     (nft-burn? registered-contract (contract-of contract-address) dlc-manager-contract)
@@ -291,6 +294,6 @@
 )
 
 ;; Returns a random (buff 32)
-(define-read-only (get-random-uuid (n uint)) 
+(define-read-only (get-random-uuid (n uint))
   (ok (keccak256 (concat (uint256-to-buff-be n) (unwrap-panic (get-block-info? vrf-seed (- block-height u1))))))
 )
