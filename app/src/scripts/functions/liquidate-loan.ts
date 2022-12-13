@@ -4,13 +4,13 @@ import { ScriptFunction } from "../models/script-function.interface";
 
 const functionName = 'attempt-liquidate';
 
-function populateTxOptions() {
+function populateTxOptions(loanID?: number) {
   return {
     contractAddress: exampleContractAddress,
     contractName: exampleContractName,
     functionName: functionName,
     functionArgs: [
-      uintCV(process.argv.slice(2)[0] || 1)
+      uintCV(loanID || 0)
     ],
     senderKey: protocolPrivateKey,
     validateWithAbi: true,
@@ -20,8 +20,8 @@ function populateTxOptions() {
   }
 }
 
-async function main() {
-  const transaction = await makeContractCall(populateTxOptions());
+async function main(loanID?: number) {
+  const transaction = await makeContractCall(populateTxOptions(loanID));
   console.log(transaction);
   const broadcastResponse = await broadcastTransaction(transaction, network);
   console.log("broadcastResponse: ", broadcastResponse);

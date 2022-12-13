@@ -5,20 +5,20 @@ import { network, contractAddress, contractName, exampleContractAddress, example
 
 const functionName = "get-payout-ratio";
 
-const txOptions = {
+const txOptions = (loanID?: number) => ({
   contractAddress: exampleContractAddress,
   contractName: exampleContractName,
   functionName: functionName,
   functionArgs: [
-    uintCV(1),
+    uintCV(loanID || 0),
     uintCV(1793515510800)
   ],
   senderAddress: contractAddress,
   network,
-};
+});
 
-async function main() {
-  const transaction: any = await callReadOnlyFunction(txOptions);
+async function main(loanID?: number) {
+  const transaction: any = await callReadOnlyFunction(txOptions(loanID));
   console.log(cvToValue(transaction));
 }
 

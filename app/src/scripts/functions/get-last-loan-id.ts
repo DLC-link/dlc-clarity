@@ -3,26 +3,24 @@ import { ScriptFunction } from "../models/script-function.interface";
 
 import { network, contractAddress, contractName, exampleContractAddress, exampleContractName } from '../config/common'
 
-const functionName = "check-liquidation";
+const functionName = "get-last-loan-id";
 
-const txOptions = (loanID?: number) => ({
+const txOptions = () => ({
   contractAddress: exampleContractAddress,
   contractName: exampleContractName,
   functionName: functionName,
   functionArgs: [
-    uintCV(loanID || 0),
-    uintCV(1793515510800)
   ],
   senderAddress: contractAddress,
   network,
 });
 
-async function main(loanID?: number) {
-  const transaction: any = await callReadOnlyFunction(txOptions(loanID));
-  console.log(cvToValue(transaction));
+async function main() {
+  const transaction: any = await callReadOnlyFunction(txOptions());
+  return await cvToValue(transaction);
 }
 
-export const checkLiquidation: ScriptFunction = {
-  name: 'Check Liquidation',
+export const getLastLoanID: ScriptFunction = {
+  name: 'Get Last Loan ID',
   action: main
 }

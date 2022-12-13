@@ -1,4 +1,4 @@
 export interface ScriptFunction {
   name: string,
-  action: () => void
+  action: (loanID?: number) => any
 }

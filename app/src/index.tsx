@@ -10,18 +10,45 @@ import { getBalance } from './scripts/functions/get-coin-balance';
 import { getCreatorLoans } from './scripts/functions/get-creator-loans';
 import { checkLiquidation } from './scripts/functions/check-liquidation';
 import { getPayoutRatio } from './scripts/functions/get-payout-ratio';
+import { getLastLoanID } from './scripts/functions/get-last-loan-id';
 
 const App = () => {
 
   const fs = [ setOracle, setupLoan, getUUID, repayLoan, attemptLiquidate, getBalance, getCreatorLoans, checkLiquidation, getPayoutRatio ]
 
+  const [loanID, setLoanID] = React.useState(0);
+
+  React.useEffect(() => {
+    setLastLoanID();
+  }, []);
+
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const newValue = parseInt(event.target.value, 10)
+    console.log(newValue)
+    setLoanID(newValue);
+  }
+
+  async function setLastLoanID() {
+    const value = await getLastLoanID.action();
+    setLoanID(parseInt(value.value))
+  }
+
   return (
     <div>
       <h1>Stacks Contracts Scripts</h1>
-      {fs.map(func => (
-        <Button label={func.name} onClick={func.action} />
-      ))}
+      <label htmlFor="loanid">Loan ID</label>
+      <input id='loanid' type="number" value={loanID} onChange={handleChange} />
+      <Button label='Set last loan ID' onClick={setLastLoanID} />
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {fs.map(func => (
+          <Button label={func.name} onClick={() => func.action(loanID)} />
+        ))}
+      </div>
     </div>
+
   );
 };
 

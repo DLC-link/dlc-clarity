@@ -19,13 +19,13 @@ const contractFungiblePostCondition = makeStandardFungiblePostCondition(
   _fungibleAssetInfo
 );
 
-function populateTxOptions(): SignedContractCallOptions {
+function populateTxOptions(loanID?: number): SignedContractCallOptions {
   return {
     contractAddress: exampleContractAddress,
     contractName: exampleContractName,
     functionName: functionName,
     functionArgs: [
-      uintCV(process.argv.slice(2)[0] || 4)
+      uintCV(loanID || 0)
     ],
     postConditions: [contractFungiblePostCondition],
     senderKey: protocolPrivateKey,
@@ -36,8 +36,8 @@ function populateTxOptions(): SignedContractCallOptions {
   }
 }
 
-async function main() {
-  const transaction = await makeContractCall(populateTxOptions());
+async function main(loanID?: number) {
+  const transaction = await makeContractCall(populateTxOptions(loanID));
   console.log(transaction);
   const broadcastResponse = await broadcastTransaction(transaction, network);
   console.log("broadcastResponse: ", broadcastResponse);
