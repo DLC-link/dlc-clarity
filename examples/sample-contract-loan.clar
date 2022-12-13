@@ -135,7 +135,7 @@
             owner: tx-sender
           })
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))
-          (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 create-dlc emergency-refund-time target loan-id))) err-contract-call-failed)
+          (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 create-dlc emergency-refund-time target loan-id)) err-contract-call-failed)
       )
     )
 )
@@ -184,7 +184,7 @@
     (begin
       (map-set loans loan-id (merge loan { status: status-pre-repaid }))
       (print { uuid: uuid, status: status-pre-repaid })
-      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
+      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0)) err-contract-call-failed)
     )
   )
 )
@@ -216,7 +216,7 @@
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
     )
-    (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 get-btc-price uuid))) err-contract-call-failed)
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 get-btc-price uuid)) err-contract-call-failed)
   )
 )
 
@@ -260,7 +260,7 @@
     (begin
       (map-set loans loan-id (merge loan { status: status-pre-liquidated }))
       (print { uuid: uuid, status: status-pre-liquidated })
-      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid payout-ratio))) err-contract-call-failed)
+      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid payout-ratio)) err-contract-call-failed)
     )
   )
 )

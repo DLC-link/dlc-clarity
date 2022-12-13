@@ -70,7 +70,10 @@
 ;; @desc indicate that a DLC was funded on Bitcoin
 ;; Called by the DLC.Link Observer
 (define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
-  (ok (try! (contract-call? callback-contract set-status-funded uuid)))
+  (begin 
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised) 
+    (ok (try! (contract-call? callback-contract set-status-funded uuid)))
+  )
 )
 
 (define-private (shift-value (value uint) (shift uint))
@@ -165,7 +168,7 @@
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     )
-    (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender)) err-unauthorised)
+    (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
     (asserts! (is-eq (get status dlc) status-open) err-already-closed)
     (asserts! (and (>= outcome u0) (<= outcome u10000)) err-out-of-bounds-outcome)
     (print { 
@@ -206,11 +209,12 @@
 (define-public (get-btc-price (uuid (buff 32)))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
+      (creator (get creator dlc))
     )
-    (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender)) err-unauthorised)
+    (asserts! (or (is-eq contract-owner tx-sender) (is-eq creator tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
     (print { 
       uuid: uuid,
-      creator: (get creator dlc),
+      creator: creator,
       caller: tx-sender,
       event-source: "dlclink:get-btc-price:v0-1"
     })
