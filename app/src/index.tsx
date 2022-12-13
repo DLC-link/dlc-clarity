@@ -6,10 +6,14 @@ import { setOracle } from './scripts/functions/set-oracle'
 import { getUUID } from './scripts/functions/get-random-uuid';
 import { repayLoan } from './scripts/functions/repay-loan';
 import { attemptLiquidate } from './scripts/functions/liquidate-loan';
+import { getBalance } from './scripts/functions/get-coin-balance';
+import { getCreatorLoans } from './scripts/functions/get-creator-loans';
+import { checkLiquidation } from './scripts/functions/check-liquidation';
+import { getPayoutRatio } from './scripts/functions/get-payout-ratio';
 
 const App = () => {
 
-  const fs = [ setOracle, setupLoan, getUUID, repayLoan, attemptLiquidate ]
+  const fs = [ setOracle, setupLoan, getUUID, repayLoan, attemptLiquidate, getBalance, getCreatorLoans, checkLiquidation, getPayoutRatio ]
 
   return (
     <div>
