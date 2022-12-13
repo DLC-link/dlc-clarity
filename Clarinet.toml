@@ -7,6 +7,7 @@ boot_contracts = ["pox", "costs-v2", "bns"]
 
 [[project.requirements]]
 contract_id = "STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify"
+# contract_id = 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard'
 
 [project.cache_location]
 path = ".requirements"
@@ -49,6 +50,10 @@ path = "legacy-contracts/loan/dlc-link-callback-trait.clar"
 [contracts.dlc-link-callback-trait-v2]
 path = "contracts/dlc-link-callback-trait.clar"
 
+[contracts.dlc-stablecoin]
+path = 'contracts/dlc-stablecoin.clar'
+clarity_version = 1
+epoch = 2.0
 
 # Other settings
 [repl]

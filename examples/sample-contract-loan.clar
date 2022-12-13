@@ -65,7 +65,7 @@
 )
 
 ;; @desc get all loan IDs for given creator
-(define-read-only (get-creator-loan-ids (creator principal)) 
+(define-read-only (get-creator-loan-ids (creator principal))
   (default-to
     (list)
     (map-get? creator-loan-ids creator)
@@ -73,7 +73,7 @@
 )
 
 ;; @desc get all loans info for given creator
-(define-read-only (get-creator-loans (creator principal)) 
+(define-read-only (get-creator-loans (creator principal))
   (let (
     (loan-ids (get-creator-loan-ids creator))
   )
@@ -157,9 +157,9 @@
     )
 )
 
-;; @desc Externally set a given DLCs status to funded. 
+;; @desc Externally set a given DLCs status to funded.
 ;; Called by the dlc-manager contract after the necessary BTC events have happened.
-(define-public (set-status-funded (uuid (buff 32))) 
+(define-public (set-status-funded (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid ) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -167,6 +167,7 @@
     (asserts! (not (is-eq (get status loan) status-funded)) err-dlc-already-funded)
     (begin
       (map-set loans loan-id (merge loan { status: status-funded }))
+      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stabledcoin transfer (get vault-loan loan) 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1 (get vault-loan owner))) err-contract-call-failed)
       (print { uuid: uuid, status: status-funded })
     )
     (ok true)
@@ -183,6 +184,7 @@
     )
     (begin
       (map-set loans loan-id (merge loan { status: status-pre-repaid }))
+      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stabledcoin transfer (get vault-loan loan) (get vault-loan owner) 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1)) err-contract-call-failed)
       (print { uuid: uuid, status: status-pre-repaid })
       (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0)) err-contract-call-failed)
     )
@@ -211,7 +213,7 @@
 )
 
 ;; @desc Closing flow with price data.
-(define-public (attempt-liquidate (loan-id uint)) 
+(define-public (attempt-liquidate (loan-id uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
@@ -226,7 +228,7 @@
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
-    ) 
+    )
     (asserts! (unwrap! (check-liquidation loan-id btc-price) err-cant-unwrap) err-doesnt-need-liquidation)
     (ok (unwrap! (liquidate-loan loan-id btc-price) err-cant-unwrap))
   )
@@ -237,7 +239,7 @@
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (collateral-value (get-collateral-value (get vault-collateral loan) btc-price))
-    (strike-price (/ (* (get vault-collateral loan) (get liquidation-ratio loan)) u10000)) 
+    (strike-price (/ (* (get vault-collateral loan) (get liquidation-ratio loan)) u10000))
     )
     (ok (<= collateral-value strike-price))
   )
@@ -274,20 +276,20 @@
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (collateral-value (get-collateral-value (get vault-collateral loan) btc-price))
     ;; the ratio the protocol has to sell to liquidators:
-    (sell-to-liquidators-ratio (/ (shift-value (get vault-loan loan) ten-to-power-16) collateral-value)) 
+    (sell-to-liquidators-ratio (/ (shift-value (get vault-loan loan) ten-to-power-16) collateral-value))
     ;; the additional liquidation-fee percentage is calculated into the result. Since it is shifted by 10000, we divide:
     (payout-ratio-precise (+ sell-to-liquidators-ratio (* (/ sell-to-liquidators-ratio u10000) (get liquidation-fee loan))))
     ;; The final payout-ratio is a truncated version:
     (payout-ratio (unshift-value payout-ratio-precise ten-to-power-8))
     )
     ;; We cap result to be between the desired bounds
-    (begin 
+    (begin
       (if (unwrap! (check-liquidation loan-id btc-price) err-cant-unwrap)
-          (if (>= payout-ratio (shift-value u1 ten-to-power-8)) 
-            (ok (shift-value u1 ten-to-power-8)) 
+          (if (>= payout-ratio (shift-value u1 ten-to-power-8))
+            (ok (shift-value u1 ten-to-power-8))
             (ok payout-ratio))
         (ok u0)
-      )  
+      )
     )
   )
 )
