@@ -27,7 +27,7 @@ function populateTxOptions(loanID?: number): SignedContractCallOptions {
     functionArgs: [
       uintCV(loanID || 0)
     ],
-    postConditions: [contractFungiblePostCondition],
+    // postConditions: [contractFungiblePostCondition],
     senderKey: protocolPrivateKey,
     validateWithAbi: true,
     network,

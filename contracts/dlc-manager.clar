@@ -39,8 +39,6 @@
   (buff 32)
   {
     uuid: (buff 32),
-    ;; closing-time: uint,  ;;seconds because stacks block has the timestamp in seconds
-    ;; closing-price: (optional uint),
     actual-closing-time: uint,
     outcome: (optional uint),
     emergency-refund-time: uint,
@@ -72,6 +70,11 @@
 (define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (print {
+      uuid: uuid,
+      callback-contract: callback-contract,
+      event-source: "dlclink:set-status-funded:v0-1"
+    })
     (ok (try! (contract-call? callback-contract set-status-funded uuid)))
   )
 )
@@ -168,7 +171,7 @@
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     )
-    (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
+    (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
     (asserts! (is-eq (get status dlc) status-open) err-already-closed)
     (asserts! (and (>= outcome u0) (<= outcome u100000000)) err-out-of-bounds-outcome)
     (print {
@@ -213,7 +216,7 @@
       (creator (get creator dlc))
       (callback-contract (get callback-contract dlc))
     )
-    (asserts! (or (is-eq contract-owner tx-sender) (is-eq creator tx-sender) (is-eq callback-contract tx-sender)) err-unauthorised)
+    (asserts! (or (is-eq contract-owner tx-sender) (is-eq callback-contract tx-sender)) err-unauthorised)
     (print {
       uuid: uuid,
       creator: creator,

@@ -171,8 +171,9 @@
     (begin
       (print { uuid: uuid, status: status-funded })
       (map-set loans loan-id (merge loan { status: status-funded }))
-      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) sample-protocol-contract (get owner loan) none)) err-contract-call-failed)
+      ;; (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) sample-protocol-contract (get owner loan) none)) err-contract-call-failed)
     )
+    (ok true)
   )
 )
 
@@ -186,9 +187,9 @@
     )
     (begin
       (map-set loans loan-id (merge loan { status: status-pre-repaid }))
-      (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) (get owner loan) sample-protocol-contract none) err-contract-call-failed)
+      ;; (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) (get owner loan) sample-protocol-contract none) err-contract-call-failed)
       (print { uuid: uuid, status: status-pre-repaid })
-      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0)) err-contract-call-failed)
+      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
     )
   )
 )
@@ -220,7 +221,7 @@
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
     )
-    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 get-btc-price uuid)) err-contract-call-failed)
+    (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 get-btc-price uuid))) err-contract-call-failed)
   )
 )
 

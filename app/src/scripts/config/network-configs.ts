@@ -1,8 +1,8 @@
 // import path from 'path';
-// import dotenv from 'dotenv';
-// dotenv.config({ path: require('find-config')('.env') });
+import dotenv from 'dotenv';
+dotenv.config();
 
-// console.log(process.env)
+console.log(process.env)
 
 import { StacksMainnet, StacksMocknet, StacksTestnet } from "@stacks/network";
 
