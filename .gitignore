@@ -1,7 +1,5 @@
 .cache
 
-.requirements
-
 .DS_Store
 
 app/node_modules
