@@ -11,10 +11,21 @@ import { getCreatorLoans } from './scripts/functions/get-creator-loans';
 import { checkLiquidation } from './scripts/functions/check-liquidation';
 import { getPayoutRatio } from './scripts/functions/get-payout-ratio';
 import { getLastLoanID } from './scripts/functions/get-last-loan-id';
+import { registerContract } from './scripts/functions/register-contract';
+import { Option } from './scripts/models/network-option.interface';
+import Dropdown from './dropdown';
+import { borrow } from './scripts/functions/borrow';
+
+const networkOptions: Option[] = [
+  { value: 'option1', label: 'Mocknet' },
+  { value: 'option2', label: 'Mocknet Cloud' },
+  { value: 'option3', label: 'Testnet' },
+  { value: 'option4', label: 'Mainnet' },
+];
 
 const App = () => {
 
-  const fs = [ setOracle, setupLoan, getUUID, repayLoan, attemptLiquidate, getBalance, getCreatorLoans, checkLiquidation, getPayoutRatio ]
+  const fs = [ setOracle, setupLoan, getUUID, borrow, repayLoan, attemptLiquidate, getBalance, getCreatorLoans, checkLiquidation, getPayoutRatio, registerContract ]
 
   const [loanID, setLoanID] = React.useState(0);
 
@@ -39,6 +50,7 @@ const App = () => {
       <label htmlFor="loanid">Loan ID</label>
       <input id='loanid' type="number" value={loanID} onChange={handleChange} />
       <Button label='Set last loan ID' onClick={setLastLoanID} />
+      <Dropdown options={ networkOptions } />
       <div style={{
         display: 'flex',
         flexDirection: 'column',

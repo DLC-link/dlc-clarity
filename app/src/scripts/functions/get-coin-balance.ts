@@ -1,4 +1,4 @@
-import { callReadOnlyFunction, contractPrincipalCV, cvToValue, uintCV } from "@stacks/transactions";
+import { callReadOnlyFunction, contractPrincipalCV, cvToValue, standardPrincipalCV, uintCV } from "@stacks/transactions";
 import { ScriptFunction } from "../models/script-function.interface";
 
 import { network, contractAddress, contractName } from '../config/common'
@@ -10,7 +10,8 @@ const txOptions = {
   contractName: 'dlc-stablecoin',
   functionName: functionName,
   functionArgs: [
-    contractPrincipalCV('STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6', 'sample-contract-loan-v0-1')
+    // contractPrincipalCV('STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6', 'sample-contract-loan-v0-1')
+    standardPrincipalCV('STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6')
   ],
   senderAddress: contractAddress,
   network,

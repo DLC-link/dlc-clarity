@@ -2,7 +2,7 @@ import { broadcastTransaction, createAssetInfo, FungibleConditionCode, makeContr
 import { exampleContractAddress, exampleContractName, protocolPrivateKey, network, contractAddress } from "../config/common";
 import { ScriptFunction } from "../models/script-function.interface";
 
-const functionName = 'repay-loan';
+const functionName = 'borrow';
 
 const _contractAddress = exampleContractAddress; // NOTE: this shoudl be the creator
 const _postConditionCode = FungibleConditionCode.GreaterEqual;
@@ -12,8 +12,9 @@ const _assetContractName = 'dlc-stablecoin';
 const _assetName = 'dlc-stablecoin';
 const _fungibleAssetInfo = createAssetInfo(_assetAddress, _assetContractName, _assetName);
 
-const contractFungiblePostCondition = makeStandardFungiblePostCondition(
+const contractFungiblePostCondition = makeContractFungiblePostCondition(
   _contractAddress,
+  exampleContractName,
   _postConditionCode,
   _postConditionAmount,
   _fungibleAssetInfo
@@ -43,7 +44,7 @@ async function main(loanID?: number) {
   console.log("broadcastResponse: ", broadcastResponse);
 }
 
-export const repayLoan: ScriptFunction = {
-  name: 'Repay Loan',
+export const borrow: ScriptFunction = {
+  name: 'Borrow',
   action: main
 }

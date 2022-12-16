@@ -11,12 +11,9 @@ import {
   broadcastTransaction,
   uintCV,
 } from "@stacks/transactions";
-import { StacksMocknet } from "@stacks/network";
 import { ScriptFunction } from "../models/script-function.interface";
 
 const functionName = "setup-loan";
-
-// const network = new StacksMocknet({url: "http://stx-btc1.dlc.link:3999"});
 
 const txOptions = {
   contractAddress: exampleContractAddress,
@@ -28,6 +25,7 @@ const txOptions = {
     uintCV(14000),         // liquidation-ratio, two decimals precison
     uintCV(1000),          // liquidation-fee, two decimals precision
     uintCV(unixTimeStamp), // emergency-refund-time
+    // uintCV(10000000000000000000000), // emergency-refund-time
   ],
   senderKey: protocolPrivateKey,
   validateWithAbi: true,
