@@ -11,6 +11,7 @@
 (define-constant err-not-the-same-assets (err u2008))
 (define-constant err-no-price-data (err u2009))
 (define-constant err-out-of-bounds-outcome (err u2010))
+(define-constant err-different-outcomes (err u2011))
 
 ;; Status enums
 (define-constant status-open u0)
@@ -174,6 +175,7 @@
     (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
     (asserts! (is-eq (get status dlc) status-open) err-already-closed)
     (asserts! (and (>= outcome u0) (<= outcome u100000000)) err-out-of-bounds-outcome)
+    (map-set dlcs uuid (merge dlc { outcome: (some outcome) }))
     (print {
       uuid: uuid,
       creator: (get creator dlc),
@@ -187,17 +189,18 @@
 )
 
 ;; @desc Admin only: Called to finalize DLC Closing
-(define-public (post-close-dlc (uuid (buff 32)) (callback-contract <cb-trait>) (outcome uint))
+(define-public (post-close-dlc (uuid (buff 32)) (callback-contract <cb-trait>) (oracle-outcome uint))
   (let (
     (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     (block-timestamp (get-last-block-timestamp))
     )
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
     (asserts! (is-eq (get status dlc) status-open) err-already-closed)
-    (map-set dlcs uuid (merge dlc { status: status-closed, outcome: (some outcome), actual-closing-time: (/ block-timestamp u1000) }))
+    (asserts! (is-eq (some oracle-outcome) (get outcome dlc)) err-different-outcomes)
+    (map-set dlcs uuid (merge dlc { status: status-closed, outcome: (some oracle-outcome), actual-closing-time: (/ block-timestamp u1000) }))
     (print {
       uuid: uuid,
-      outcome: outcome,
+      outcome: oracle-outcome,
       actual-closing-time: (/ block-timestamp u1000),
       event-source: "dlclink:post-close-dlc:v0-1"
     })

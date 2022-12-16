@@ -12,6 +12,8 @@
 (define-constant err-unknown-loan-contract (err u2003))
 (define-constant err-doesnt-need-liquidation (err u2004))
 (define-constant err-dlc-already-funded (err u2005))
+(define-constant err-stablecoin-issue-failed (err u3000))
+(define-constant err-stablecoin-repay-failed (err u3001))
 
 ;; Status Enum
 (define-constant status-not-ready "not-ready")
@@ -171,9 +173,18 @@
     (begin
       (print { uuid: uuid, status: status-funded })
       (map-set loans loan-id (merge loan { status: status-funded }))
-      ;; (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) sample-protocol-contract (get owner loan) none)) err-contract-call-failed)
     )
     (ok true)
+  )
+)
+
+;; TODO: user shoulnd't be able to borrow twice, and only after the dlc has been funded
+(define-public (borrow (loan-id uint))
+  (let (
+    (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
+    )
+    (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
   )
 )
 
@@ -187,7 +198,7 @@
     )
     (begin
       (map-set loans loan-id (merge loan { status: status-pre-repaid }))
-      ;; (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) (get owner loan) sample-protocol-contract none) err-contract-call-failed)
+      (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) (get owner loan) sample-protocol-contract none) err-stablecoin-repay-failed)
       (print { uuid: uuid, status: status-pre-repaid })
       (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
     )
