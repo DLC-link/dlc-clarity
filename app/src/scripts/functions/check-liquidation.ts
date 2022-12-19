@@ -10,7 +10,7 @@ const txOptions = (loanID?: number) => ({
   contractName: exampleContractName,
   functionName: functionName,
   functionArgs: [
-    uintCV(loanID || 0),
+    uintCV(loanID || 1),
     uintCV(1793515510800)
   ],
   senderAddress: contractAddress,

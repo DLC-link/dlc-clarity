@@ -5,15 +5,18 @@
 ;; Error constants
 (define-constant err-cant-unwrap (err u1000))
 (define-constant err-contract-call-failed (err u1001))
-(define-constant err-cant-get-loan-id-by-uuid (err u1003))
-(define-constant err-cant-unwrap-check-liquidation (err u1004))
-(define-constant err-cant-unwrap-liquidate-loan (err u1005))
-(define-constant err-unauthorised (err u2001))
-(define-constant err-unknown-loan-contract (err u2003))
-(define-constant err-doesnt-need-liquidation (err u2004))
-(define-constant err-dlc-already-funded (err u2005))
-(define-constant err-stablecoin-issue-failed (err u3000))
-(define-constant err-stablecoin-repay-failed (err u3001))
+(define-constant err-cant-get-loan-id-by-uuid (err u1002))
+(define-constant err-cant-unwrap-check-liquidation (err u1003))
+(define-constant err-cant-unwrap-liquidate-loan (err u1004))
+(define-constant err-unauthorised (err u1005))
+(define-constant err-unknown-loan-contract (err u1006))
+(define-constant err-doesnt-need-liquidation (err u1007))
+(define-constant err-dlc-already-funded (err u1008))
+(define-constant err-dlc-not-funded (err u1009))
+(define-constant err-stablecoin-issue-failed (err u1010))
+(define-constant err-stablecoin-repay-failed (err u1011))
+(define-constant err-balance-negative (err u1012))
+(define-constant err-not-repaid (err u1013))
 
 ;; Status Enum
 (define-constant status-not-ready "not-ready")
@@ -120,7 +123,7 @@
 ;; The DLC Contract will call back into the provided 'target' contract with the resulting UUID (and the provided loan-id).
 ;; Currently this 'target' must be the same contract as the one initiating the process, for authentication purposes.
 ;; See scripts/setup-loan.ts for an example of calling it.
-(define-public (setup-loan (vault-loan-amount uint) (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
+(define-public (setup-loan (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
     (let
       (
         (loan-id (+ (var-get last-loan-id) u1))
@@ -132,7 +135,7 @@
           (map-set loans loan-id {
             dlc_uuid: none,
             status: status-not-ready,
-            vault-loan: vault-loan-amount,
+            vault-loan: u0,
             vault-collateral: btc-deposit,
             liquidation-ratio: liquidation-ratio,
             liquidation-fee: liquidation-fee,
@@ -178,27 +181,43 @@
   )
 )
 
-;; TODO: user shoulnd't be able to borrow twice, and only after the dlc has been funded
-(define-public (borrow (loan-id uint))
+;; amount in pennies
+(define-public (borrow (loan-id uint) (amount uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
+    (vault-loan-amount (get vault-loan loan))
     )
     (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
-    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
+    (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
+    ;; TODO: We shouldn't let the user overborrow. But for that, we would need BTC price in this step too.
+    (map-set loans loan-id (merge loan { vault-loan: (+ vault-loan-amount amount) }))
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer amount sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
+  )
+)
+
+(define-public (repay (loan-id uint) (amount uint))
+  (let (
+    (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
+    (vault-loan-amount (get vault-loan loan))
+    (new-balance (- vault-loan-amount amount))
+    )
+    (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
+    (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
+    (asserts! (>= new-balance u0) err-balance-negative)
+    (map-set loans loan-id (merge loan { vault-loan: new-balance }))
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer amount (get owner loan) sample-protocol-contract none)) err-stablecoin-repay-failed)
   )
 )
 
 ;; @desc An example function for closing the loan and initiating the closing of a DLC.
-;; Very similar to the creation process
-;; See scripts/close-dlc-protocol.ts for an example of calling it.
-(define-public (repay-loan (loan-id uint))
+(define-public (close-loan (loan-id uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
     )
     (begin
+      (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
       (map-set loans loan-id (merge loan { status: status-pre-repaid }))
-      (unwrap! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer (get vault-loan loan) (get owner loan) sample-protocol-contract none) err-stablecoin-repay-failed)
       (print { uuid: uuid, status: status-pre-repaid })
       (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
     )

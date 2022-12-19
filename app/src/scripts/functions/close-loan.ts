@@ -2,22 +2,7 @@ import { broadcastTransaction, createAssetInfo, FungibleConditionCode, makeContr
 import { exampleContractAddress, exampleContractName, protocolPrivateKey, network, contractAddress } from "../config/common";
 import { ScriptFunction } from "../models/script-function.interface";
 
-const functionName = 'repay-loan';
-
-const _contractAddress = exampleContractAddress; // NOTE: this shoudl be the creator
-const _postConditionCode = FungibleConditionCode.GreaterEqual;
-const _postConditionAmount = 1;
-const _assetAddress = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
-const _assetContractName = 'dlc-stablecoin';
-const _assetName = 'dlc-stablecoin';
-const _fungibleAssetInfo = createAssetInfo(_assetAddress, _assetContractName, _assetName);
-
-const contractFungiblePostCondition = makeStandardFungiblePostCondition(
-  _contractAddress,
-  _postConditionCode,
-  _postConditionAmount,
-  _fungibleAssetInfo
-);
+const functionName = 'close-loan';
 
 function populateTxOptions(loanID?: number): SignedContractCallOptions {
   return {
@@ -25,9 +10,8 @@ function populateTxOptions(loanID?: number): SignedContractCallOptions {
     contractName: exampleContractName,
     functionName: functionName,
     functionArgs: [
-      uintCV(loanID || 0)
+      uintCV(loanID || 1),
     ],
-    postConditions: [contractFungiblePostCondition],
     senderKey: protocolPrivateKey,
     validateWithAbi: true,
     network,
@@ -43,7 +27,7 @@ async function main(loanID?: number) {
   console.log("broadcastResponse: ", broadcastResponse);
 }
 
-export const repayLoan: ScriptFunction = {
-  name: 'Repay Loan',
+export const closeLoan: ScriptFunction = {
+  name: 'Close Loan',
   action: main
 }

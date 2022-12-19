@@ -2,7 +2,7 @@ import { broadcastTransaction, createAssetInfo, FungibleConditionCode, makeContr
 import { exampleContractAddress, exampleContractName, protocolPrivateKey, network, contractAddress } from "../config/common";
 import { ScriptFunction } from "../models/script-function.interface";
 
-const functionName = 'borrow';
+const functionName = 'repay';
 
 const _contractAddress = exampleContractAddress; // NOTE: this shoudl be the creator
 const _postConditionCode = FungibleConditionCode.GreaterEqual;
@@ -12,9 +12,8 @@ const _assetContractName = 'dlc-stablecoin';
 const _assetName = 'dlc-stablecoin';
 const _fungibleAssetInfo = createAssetInfo(_assetAddress, _assetContractName, _assetName);
 
-const contractFungiblePostCondition = makeContractFungiblePostCondition(
+const contractFungiblePostCondition = makeStandardFungiblePostCondition(
   _contractAddress,
-  exampleContractName,
   _postConditionCode,
   _postConditionAmount,
   _fungibleAssetInfo
@@ -26,8 +25,8 @@ function populateTxOptions(loanID?: number): SignedContractCallOptions {
     contractName: exampleContractName,
     functionName: functionName,
     functionArgs: [
-      uintCV(loanID || 0),
-      uintCV(120000) // pennies
+      uintCV(loanID || 1),
+      uintCV(120000) // amount in pennies
     ],
     postConditions: [contractFungiblePostCondition],
     senderKey: protocolPrivateKey,
@@ -45,7 +44,7 @@ async function main(loanID?: number) {
   console.log("broadcastResponse: ", broadcastResponse);
 }
 
-export const borrow: ScriptFunction = {
-  name: 'Borrow',
+export const repay: ScriptFunction = {
+  name: 'Repay',
   action: main
 }

@@ -20,7 +20,7 @@ const txOptions = {
   contractName: exampleContractName,
   functionName: functionName,
   functionArgs: [
-    uintCV(150000),       // loan amount in pennies
+    // uintCV(150000),       // loan amount in pennies
     uintCV(10000000),     // btc-deposit in Sats
     uintCV(14000),         // liquidation-ratio, two decimals precison
     uintCV(1000),          // liquidation-fee, two decimals precision

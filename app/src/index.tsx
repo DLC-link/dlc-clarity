@@ -4,7 +4,7 @@ import Button from './button';
 import { setupLoan } from './scripts/functions/setup-loan';
 import { setOracle } from './scripts/functions/set-oracle'
 import { getUUID } from './scripts/functions/get-random-uuid';
-import { repayLoan } from './scripts/functions/repay-loan';
+import { repay } from './scripts/functions/repay';
 import { attemptLiquidate } from './scripts/functions/liquidate-loan';
 import { getBalance } from './scripts/functions/get-coin-balance';
 import { getCreatorLoans } from './scripts/functions/get-creator-loans';
@@ -15,6 +15,7 @@ import { registerContract } from './scripts/functions/register-contract';
 import { Option } from './scripts/models/network-option.interface';
 import Dropdown from './dropdown';
 import { borrow } from './scripts/functions/borrow';
+import { closeLoan } from './scripts/functions/close-loan';
 
 const networkOptions: Option[] = [
   { value: 'option1', label: 'Mocknet' },
@@ -25,7 +26,7 @@ const networkOptions: Option[] = [
 
 const App = () => {
 
-  const fs = [ setOracle, setupLoan, getUUID, borrow, repayLoan, attemptLiquidate, getBalance, getCreatorLoans, checkLiquidation, getPayoutRatio, registerContract ]
+  const fs = [ setOracle, setupLoan, getUUID, borrow, repay, attemptLiquidate, getBalance, getCreatorLoans, checkLiquidation, getPayoutRatio, closeLoan, registerContract ]
 
   const [loanID, setLoanID] = React.useState(0);
 

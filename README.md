@@ -6,7 +6,7 @@ Learn more about [DLCs](https://github.com/DLC-link/stacks-contracts-all/#what-a
 
 # Overview
 
-A DLC requires an oracle to attest to a specific outcome among the predefined set of outcomes. That means trust.
+A DLC requires an oracle to attest to a specific outcome among the predefined set of outcomes.
 
 This contract acts to feed the outcome of the DLC. By using a smart contract for this task, the implementation of the logic, as well as the data being used, is stamped on the chain, and is visible and reviewable by everyone.
 
@@ -15,7 +15,7 @@ This contract acts to feed the outcome of the DLC. By using a smart contract for
 ## Clarity Traits
 The following Clarity Traits must be implemented to interact with this contract. See `/contracts/dlc-link-callback-trait.clar`
 ### `post-create-dlc-handler`
-Used to callback into the calling/protocol contract to provide the uuid of the created DCL, which will be used to reference the DLC going forward.
+Used to callback into the calling/protocol contract to provide the uuid of the created DLC, which will be used to reference the DLC going forward.
 
 Parameters:
 
@@ -68,7 +68,7 @@ See the comments in the contract for further information about using this functi
 Parameters:
 
 * `emergency-refund-time`:uint - UNIX timestamp after which the DLC can be reclaimed by either party
-* `callback-contract`:principal - The contract that sends the request, and will accept the callback. 
+* `callback-contract`:principal - The contract that sends the request, and will accept the callback.
 * `nonce`:uint - the protocol/user provided ID to associate with the UUID
 
 ### Closing the DLC
@@ -77,7 +77,7 @@ The `close-dlc` function initiates the DLC closing flow. The supplied outcome wi
 
 **_NOTE:_** To close a DLC successfully you have to set a trusted oracle first (the oracle used in the deployed contract and scripts is already set on Testnet)
 
-Parameters: 
+Parameters:
 
 * `uuid`:string
 * `outcome`:number - a value between 0-10000 inclusive
@@ -98,7 +98,7 @@ Flow of the Redstone oracle requests:
 1. submit trusted oracle (node public keys can be found [here](https://github.com/redstone-finance/redstone-node/blob/main/src/config/nodes.json), this repo uses `redstone`)
 2. when trying to close a DLC, submit a `timestamp`, `data package` and a `signature` as well with the UUID, which can be obtained from the [redstone-api-extended](https://www.npmjs.com/package/redstone-api-extended) module. For reference check the `close-dlc-internal.ts` script.
 
-The Redstone data-package verification contract is included in the `.requirements/` folder for the purposes of deploying it during Mocknet testing. In production and testnet, the on-chain contracts are used, which can be found here: 
+The Redstone data-package verification contract is included in the `.requirements/` folder for the purposes of deploying it during Mocknet testing. In production and testnet, the on-chain contracts are used, which can be found here:
 
 [redstone-verify on Testnet](https://explorer.stacks.co/txid/0x35952be366691c79243cc0fc43cfcf90ae71ed66a9b6d9578b167c28965bbf7e?chain=testnet)
 
@@ -133,13 +133,13 @@ open index.html
 
 ### Small App for scripts
 This repo contains a small react app to help running small scripts & showcasing some interactions with our contracts. It is a work in progress. Can be found [here](app/).
-### Mocknet deployment 
+### Mocknet deployment
 
 This repo temporarily contains the older versions of our contracts in the `legacy-contracts` folder.
 The following command deploys all our contracts and maked the necessary setups for testing.
 
 ```bash
-$ clarinet integrate -p deployments/custom.devnet-plan.yaml 
+$ clarinet integrate -p deployments/custom.devnet-plan.yaml
 ```
 
 # What Are DLCs

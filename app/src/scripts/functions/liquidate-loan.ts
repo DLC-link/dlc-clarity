@@ -10,7 +10,7 @@ function populateTxOptions(loanID?: number) {
     contractName: exampleContractName,
     functionName: functionName,
     functionArgs: [
-      uintCV(loanID || 0)
+      uintCV(loanID || 1)
     ],
     senderKey: protocolPrivateKey,
     validateWithAbi: true,
