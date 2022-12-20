@@ -23,10 +23,15 @@
 )
 
 (define-public (set-status-funded (uuid (buff 32)))
-
-  (ok true)
+  (begin
+    (print { uuid: uuid, event-source: "callback-set-status-funded" })
+    (ok true)
+  )
 )
 
-(define-public (get-btc-price-callback (price uint) (uuid (buff 32)) )
-  (ok true)
+(define-public (get-btc-price-callback (price uint) (uuid (buff 32)))
+  (begin
+    (print { price: price, uuid: uuid, event-source: "callback-mock-btc-price" })
+    (ok true)
+  )
 )

@@ -365,15 +365,39 @@ Clarinet.test({
     const deployer = accounts.get('deployer')!;
     const deployer_2 = accounts.get('deployer_2')!;
 
-    let block0 = setTrustedOracle(chain, deployer.address);
-    block0.receipts[0].result.expectOk().expectBool(true);
+    setTrustedOracle(chain, deployer.address);
 
     let block = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "validate-price-data", [types.buff(UUID), packageCV.timestamp, packageCV.prices, signature, types.principal(contractPrincipal(deployer_2, callbackContract))], deployer.address),
     ]);
 
     block.receipts[0].result.expectOk().expectBool(true);
-    const event = block.receipts[0].events[0];
+    const event = block.receipts[0].events[1];
+
+    assertEquals(typeof event, 'object');
+    assertEquals(event.type, 'contract_event');
+    assertEquals(event.contract_event.topic, "print");
+    assertStringIncludes(event.contract_event.value, 'event-source: "callback-mock-btc-price", price: u1358866993200, uuid: 0x66616b6575756964');
+  },
+});
+
+Clarinet.test({
+  name: "set-status-funded calls callback",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const deployer_2 = accounts.get('deployer_2')!;
+
+    let block = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [types.buff(UUID), types.principal(contractPrincipal(deployer_2, callbackContract))], deployer.address),
+    ]);
+
+    block.receipts[0].result.expectOk().expectBool(true);
+    const event = block.receipts[0].events[1];
+
+    assertEquals(typeof event, 'object');
+    assertEquals(event.type, 'contract_event');
+    assertEquals(event.contract_event.topic, "print");
+    assertStringIncludes(event.contract_event.value, 'event-source: "callback-set-status-funded", uuid: 0x66616b6575756964');
   },
 });
 
