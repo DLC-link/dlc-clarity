@@ -49,7 +49,6 @@
     vault-collateral: uint, ;; btc deposit in sats
     liquidation-ratio: uint, ;; the collateral/loan ratio below which liquidation can happen, with two decimals precision (140% = u14000)
     liquidation-fee: uint,  ;; additional fee taken during liquidation, two decimals precision (10% = u1000)
-    closing-price: (optional uint),  ;; In case of liquidation, the closing BTC price will be stored here
     owner: principal ;; the stacks account owning this loan
   }
 )
@@ -121,7 +120,6 @@
 ;; - Increments the loan-id
 ;; - Calls the dlc-manager-contract's create-dlc function to initiate the creation
 ;; The DLC Contract will call back into the provided 'target' contract with the resulting UUID (and the provided loan-id).
-;; Currently this 'target' must be the same contract as the one initiating the process, for authentication purposes.
 ;; See scripts/setup-loan.ts for an example of calling it.
 (define-public (setup-loan (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
     (let
@@ -139,7 +137,6 @@
             vault-collateral: btc-deposit,
             liquidation-ratio: liquidation-ratio,
             liquidation-fee: liquidation-fee,
-            closing-price: none,
             owner: tx-sender
           })
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))

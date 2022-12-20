@@ -114,7 +114,7 @@
 ;; Creation flow
 
 ;; @desc Initiates the DLC creation flow. See readme for more details.
-;; @param emergency-refund-time; the time at which the DLC will be available for refund
+;; @param emergency-refund-time; the UNIX timestamp [seconds] at which the DLC will be available for refund
 ;; @param callback-contract; the contract-principal where the post-create-dlc will call back to
 ;; @param callback-nonce; provided for the dlc by the protocol-contract to connect it to the resulting uuid
 (define-public (create-dlc (emergency-refund-time uint) (callback-contract principal) (callback-nonce uint))

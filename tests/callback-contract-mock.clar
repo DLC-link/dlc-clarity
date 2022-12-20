@@ -9,7 +9,7 @@
     )
 )
 
-(define-public (post-close-dlc-handler (uuid (buff 32))) 
+(define-public (post-close-dlc-handler (uuid (buff 32)))
     (begin
         (print { uuid: uuid, event-source: "callback-mock-post-close" })
         (ok true)
@@ -17,12 +17,12 @@
 )
 
 (define-public (create-dlc-request (vault-loan-amount uint) (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
-  (let ((target .callback-contract)) 
-    (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 create-dlc emergency-refund-time target u1))) err-cant-unwrap)
+  (let ((target .callback-contract))
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 create-dlc emergency-refund-time target u1)) err-cant-unwrap)
   )
 )
 
-(define-public (set-status-funded (uuid (buff 32))) 
+(define-public (set-status-funded (uuid (buff 32)))
 
   (ok true)
 )
