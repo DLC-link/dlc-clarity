@@ -1,5 +1,8 @@
 .cache
 
-.requirements
-
 .DS_Store
+
+app/node_modules
+app/build
+
+history.txt
