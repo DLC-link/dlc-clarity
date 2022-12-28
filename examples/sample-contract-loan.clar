@@ -112,6 +112,18 @@
   (/ value shift)
 )
 
+(define-private (set-status (loan-id uint) (new-status (string-ascii 14)))
+  (let (
+    (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
+    )
+    (begin
+      (print { loan-id: loan-id, uuid: (get dlc_uuid loan), status: new-status })
+      (map-set loans loan-id (merge loan { status: new-status }))
+    )
+    (ok true)
+  )
+)
+
 ;; ---------------------------------------------------------
 ;; Main Functions
 ;; ---------------------------------------------------------
@@ -139,6 +151,7 @@
             liquidation-fee: liquidation-fee,
             owner: tx-sender
           })
+          (try! (set-status loan-id status-not-ready))
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))
           (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 create-dlc emergency-refund-time target loan-id)) err-contract-call-failed)
       )
@@ -151,12 +164,12 @@
 (define-public (post-create-dlc-handler (loan-id uint) (uuid (buff 32)))
     (begin
       ;; If creation was successful, we save the results in the local maps
-        (print { uuid: uuid, loan-id: loan-id, status: status-ready })
+        ;; (print { uuid: uuid, loan-id: loan-id, status: status-ready })
         (map-set loans loan-id (
             merge (unwrap! (map-get? loans loan-id) err-unknown-loan-contract ) {
-            dlc_uuid: (some uuid),
-            status: status-ready
+            dlc_uuid: (some uuid)
         }))
+        (try! (set-status loan-id status-ready))
         (map-set uuid-loan-id uuid loan-id)
         (ok true)
     )
@@ -171,7 +184,7 @@
     )
     (asserts! (not (is-eq (get status loan) status-funded)) err-dlc-already-funded)
     (begin
-      (print { uuid: uuid, status: status-funded })
+      (try! (set-status loan-id status-funded))
       (map-set loans loan-id (merge loan { status: status-funded }))
     )
     (ok true)
@@ -214,8 +227,7 @@
     )
     (begin
       (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
-      (map-set loans loan-id (merge loan { status: status-pre-repaid }))
-      (print { uuid: uuid, status: status-pre-repaid })
+      (try! (set-status loan-id status-pre-repaid))
       (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
     )
   )
@@ -235,8 +247,7 @@
             ) err-cant-unwrap)
     ))
     (begin
-      (map-set loans loan-id (merge loan { status: newstatus }))
-      (print { uuid: uuid, status: newstatus })
+      (try! (set-status loan-id newstatus))
     )
     (ok true)
   )
@@ -290,8 +301,7 @@
     (payout-ratio (unwrap! (get-payout-ratio loan-id btc-price) err-cant-unwrap))
     )
     (begin
-      (map-set loans loan-id (merge loan { status: status-pre-liquidated }))
-      (print { uuid: uuid, status: status-pre-liquidated })
+      (try! (set-status loan-id status-pre-liquidated))
       (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid payout-ratio)) err-contract-call-failed)
     )
   )

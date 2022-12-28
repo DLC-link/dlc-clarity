@@ -9,6 +9,13 @@ import { PricePackage, Block, getIntValueFromPrintOutput, getStringValueFromPrin
 // found in the ./scripts directory. The parameters used to generate the data
 // is provided in comments.
 
+// TODO: Tests to write:
+// - user tries to close without repaying borrowed amount
+// - user can close if he hasnt borrowed
+// - borrow without collateral/funded state fails
+// - repay more then borrowed amount
+// - repay fails with proper error message on negative balance
+
 const BTChex = "BTC";
 const UUID = "fakeuuid";
 const nftAssetContract = "open-dlc";
@@ -49,15 +56,22 @@ function openLoan(chain: Chain, deployer: Account, callbackContract: string, loa
   ]);
 
   block.receipts[0].result.expectOk().expectBool(true);
-  const createDLCPrintEvent = block.receipts[0].events[0];
+
+  const setupLoanPrintEvent = block.receipts[0].events[0];
+
+  assertEquals(typeof setupLoanPrintEvent, 'object');
+  assertEquals(setupLoanPrintEvent.type, 'contract_event');
+  assertEquals(setupLoanPrintEvent.contract_event.topic, "print");
+  assertStringIncludes(setupLoanPrintEvent.contract_event.value, 'loan-id: u1, status: "not-ready", uuid: none')
+
+  const createDLCPrintEvent = block.receipts[0].events[1];
 
   assertEquals(typeof createDLCPrintEvent, 'object');
   assertEquals(createDLCPrintEvent.type, 'contract_event');
   assertEquals(createDLCPrintEvent.contract_event.topic, "print");
   assertStringIncludes(createDLCPrintEvent.contract_event.value, 'callback-contract: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, creator: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM, emergency-refund-time: u10, event-source: "dlclink:create-dlc:v0-1", nonce: u1, uuid: (ok 0xad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5)')
 
-
-  let loanBlock = chain.mineBlock([
+  const loanBlock = chain.mineBlock([
     Tx.contractCall(callbackContract, "get-loan", [types.uint(1)], deployer.address)
   ]);
 
@@ -86,7 +100,7 @@ function openLoan(chain: Chain, deployer: Account, callbackContract: string, loa
   assertEquals(typeof callbackPrintEvent, 'object');
   assertEquals(callbackPrintEvent.type, 'contract_event');
   assertEquals(callbackPrintEvent.contract_event.topic, "print");
-  assertStringIncludes(callbackPrintEvent.contract_event.value, 'loan-id: u1, status: "ready", uuid: 0x66616b6575756964')
+  assertStringIncludes(callbackPrintEvent.contract_event.value, 'loan-id: u1, status: "ready", uuid: (some 0x66616b6575756964)')
 
   assertEquals(typeof mintEvent, 'object');
   assertEquals(mintEvent.type, 'nft_mint_event');
