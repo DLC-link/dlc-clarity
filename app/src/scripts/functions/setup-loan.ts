@@ -3,7 +3,8 @@ import {
   protocolPrivateKey,
   exampleContractAddress,
   exampleContractName,
-  network
+  network,
+  senderKey
 } from "../config/common";
 
 import {
@@ -27,7 +28,7 @@ const txOptions = {
     uintCV(unixTimeStamp), // emergency-refund-time
     // uintCV(10000000000000000000000), // emergency-refund-time
   ],
-  senderKey: protocolPrivateKey,
+  senderKey: senderKey,
   validateWithAbi: true,
   network,
   fee: 100000,
