@@ -164,7 +164,6 @@
 (define-public (post-create-dlc-handler (loan-id uint) (uuid (buff 32)))
     (begin
       ;; If creation was successful, we save the results in the local maps
-        ;; (print { uuid: uuid, loan-id: loan-id, status: status-ready })
         (map-set loans loan-id (
             merge (unwrap! (map-get? loans loan-id) err-unknown-loan-contract ) {
             dlc_uuid: (some uuid)
