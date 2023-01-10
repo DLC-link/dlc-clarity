@@ -30,6 +30,7 @@
 (define-constant ten-to-power-2 u100)
 (define-constant ten-to-power-6 u1000000)
 (define-constant ten-to-power-8 u100000000)
+(define-constant ten-to-power-12 u1000000000000)
 (define-constant ten-to-power-16 u10000000000000000)
 
 ;; Contract owner
@@ -190,7 +191,7 @@
   )
 )
 
-;; amount in pennies
+;; amount has 6 decimals e.g. $100 = u100000000
 (define-public (borrow (loan-id uint) (amount uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -198,7 +199,6 @@
     )
     (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
     (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
-    ;; TODO: We shouldn't let the user overborrow. But for that, we would need BTC price in this step too.
     (map-set loans loan-id (merge loan { vault-loan: (+ vault-loan-amount amount) }))
     (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer amount sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
   )
@@ -279,7 +279,7 @@
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (collateral-value (get-collateral-value (get vault-collateral loan) btc-price))
-    (strike-price (/ (* (get vault-loan loan) (get liquidation-ratio loan)) u10000))
+    (strike-price (/ (* (get vault-loan loan) (get liquidation-ratio loan)) u100000000))
     )
     (ok (<= collateral-value strike-price))
   )
@@ -315,7 +315,7 @@
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (collateral-value (get-collateral-value (get vault-collateral loan) btc-price))
     ;; the ratio the protocol has to sell to liquidators:
-    (sell-to-liquidators-ratio (/ (shift-value (get vault-loan loan) ten-to-power-16) collateral-value))
+    (sell-to-liquidators-ratio (/ (shift-value (get vault-loan loan) ten-to-power-12) collateral-value))
     ;; the additional liquidation-fee percentage is calculated into the result. Since it is shifted by 10000, we divide:
     (payout-ratio-precise (+ sell-to-liquidators-ratio (* (/ sell-to-liquidators-ratio u10000) (get liquidation-fee loan))))
     ;; The final payout-ratio is a truncated version:

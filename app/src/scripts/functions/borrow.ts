@@ -1,12 +1,13 @@
 import { broadcastTransaction, createAssetInfo, FungibleConditionCode, makeContractCall, makeContractFungiblePostCondition, makeStandardFungiblePostCondition, SignedContractCallOptions, uintCV } from "@stacks/transactions";
-import { exampleContractAddress, exampleContractName, protocolPrivateKey, network, contractAddress } from "../config/common";
+import { exampleContractAddress, exampleContractName, protocolPrivateKey, network, contractAddress, senderKey } from "../config/common";
 import { ScriptFunction } from "../models/script-function.interface";
 
 const functionName = 'borrow';
+const amount = 13000000000;
 
-const _contractAddress = exampleContractAddress; // NOTE: this shoudl be the creator
+const _contractAddress = exampleContractAddress;
 const _postConditionCode = FungibleConditionCode.GreaterEqual;
-const _postConditionAmount = 1;
+const _postConditionAmount = amount;
 const _assetAddress = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
 const _assetContractName = 'dlc-stablecoin';
 const _assetName = 'dlc-stablecoin';
@@ -27,10 +28,10 @@ function populateTxOptions(loanID?: number): SignedContractCallOptions {
     functionName: functionName,
     functionArgs: [
       uintCV(loanID || 0),
-      uintCV(120000) // pennies
+      uintCV(amount)
     ],
     postConditions: [contractFungiblePostCondition],
-    senderKey: protocolPrivateKey,
+    senderKey: senderKey,
     validateWithAbi: true,
     network,
     fee: 100000, //0.1STX

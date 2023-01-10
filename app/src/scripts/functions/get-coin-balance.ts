@@ -11,7 +11,7 @@ const txOptions = {
   functionName: functionName,
   functionArgs: [
     // contractPrincipalCV('STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6', 'sample-contract-loan-v0-1')
-    standardPrincipalCV('STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6')
+    standardPrincipalCV('ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM')
   ],
   senderAddress: contractAddress,
   network,
