@@ -152,3 +152,86 @@ plan:
               - 0x03009dd87eb41d96ce8ad94aa22ea8b0ba4ac20c45e42f71726d6b180f93c3f298
               - true
             cost: 6000
+    - id: 4
+      transactions:
+
+      # Arkadiko Contracts
+        # Requirements
+        - requirement-publish:
+            contract-id: SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-dao-token-trait-v1
+            remap-sender: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+            remap-principals:
+              SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+            cost: 2860
+            path: ".requirements/SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-dao-token-trait-v1.clar"
+
+        # ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+        - contract-publish:
+            contract-name: usda-token
+            expected-sender: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+            cost: 25470
+            path: examples/arkadiko/usda-token.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: arkadiko-diko-guardian-v1-1
+            expected-sender: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+            cost: 1720
+            path: examples/arkadiko/arkadiko-diko-guardian-v1-1.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: arkadiko-dao
+            expected-sender: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+            cost: 11220
+            path: examples/arkadiko/arkadiko-dao.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: arkadiko-token
+            expected-sender: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+            cost: 24650
+            path: examples/arkadiko/arkadiko-token.clar
+            anchor-block-only: true
+            clarity-version: 1
+
+        # App contracts
+        # ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
+        - contract-publish:
+            contract-name: main
+            expected-sender: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
+            cost: 18600
+            path: examples/arkadiko/main.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: usda-pool-trait-v1-1
+            expected-sender: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
+            cost: 1350
+            path: examples/arkadiko/usda-pool-trait-v1-1.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: usda-loans-v1-1
+            expected-sender: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
+            cost: 176860
+            path: examples/arkadiko/usda-loans-v1-1.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: usda-pool-v1-1
+            expected-sender: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
+            cost: 107150
+            path: examples/arkadiko/usda-pool-v1-1.clar
+            anchor-block-only: true
+            clarity-version: 1
+    - id: 5
+      transactions:
+        #  Registering Arkadiko contract
+        - contract-call:
+            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            method: register-contract
+            parameters:
+              - "'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5.usda-loans-v1-1"
+            cost: 6000
