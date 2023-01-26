@@ -1,0 +1,50 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: "https://stacks-node-api.testnet.stacks.co"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+
+        # - contract-publish:
+        #     contract-name: dlc-link-callback-trait-v2
+        #     expected-sender: ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ
+        #     cost: 18039
+        #     path: contracts/dlc-link-callback-trait.clar
+        #     anchor-block-only: true
+        #     clarity-version: 1
+        # - contract-publish:
+        #     contract-name: dlc-manager-priced-v0-1
+        #     expected-sender: ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ
+        #     cost: 15572
+        #     path: contracts/dlc-manager.clar
+        #     anchor-block-only: true
+        #     clarity-version: 1
+        - contract-publish:
+            contract-name: dlc-stablecoin
+            expected-sender: ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ
+            cost: 17792
+            path: contracts/dlc-stablecoin.clar
+            anchor-block-only: true
+            clarity-version: 1
+        - contract-publish:
+            contract-name: sample-contract-loan-v0-1
+            expected-sender: ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ
+            cost: 16626
+            path: examples/sample-contract-loan.clar
+            anchor-block-only: true
+            clarity-version: 1
+    - id: 1
+      transactions:
+        - contract-call:
+            contract-id: ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ.dlc-manager-priced-v0-1
+            expected-sender: ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ
+            method: register-contract
+            parameters:
+              - "'ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ.sample-contract-loan-v0-1"
+            cost: 6000
+
+      # epoch: "2.0"

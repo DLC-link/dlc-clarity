@@ -40,6 +40,7 @@ genesis:
     - pox-2
     - lockup
     - costs-2
+    - costs-3
     - cost-voting
     - bns
 plan:
@@ -47,29 +48,14 @@ plan:
     - id: 0
       transactions:
         - emulated-contract-publish:
-            contract-name: redstone-verify
-            emulated-sender: STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB
-            path: ".cache/requirements/STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify.clar"
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: sip-010-trait-ft-standard
             emulated-sender: SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE
             path: ".cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar"
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: dlc-link-callback-trait-v2
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dlc-link-callback-trait.clar
-            clarity-version: 1
-        - emulated-contract-publish:
-            contract-name: dlc-manager-priced-v0-1
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dlc-manager.clar
-            clarity-version: 1
-        - emulated-contract-publish:
-            contract-name: dlc-link-callback-trait
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: legacy-contracts/loan/dlc-link-callback-trait.clar
+            contract-name: redstone-verify
+            emulated-sender: STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB
+            path: ".cache/requirements/STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify.clar"
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: dlc-create-callback-trait
@@ -77,19 +63,34 @@ plan:
             path: legacy-contracts/basic/dlc-create-callback-trait.clar
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: dlc-manager-loan-v0
+            contract-name: dlc-link-callback-trait
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: legacy-contracts/loan/dlc-manager-loan.clar
+            path: legacy-contracts/loan/dlc-link-callback-trait.clar
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: sample-contract-loan-v0
+            contract-name: dlc-link-callback-trait-v2
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: legacy-contracts/loan/sample-protocol-contract.clar
+            path: contracts/dlc-link-callback-trait.clar
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: dlc-manager-basic-v0-1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: legacy-contracts/basic/dlc-manager-basic.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-loan-v0
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: legacy-contracts/loan/dlc-manager-loan.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-priced-v0
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: legacy-contracts/priced/dlc-manager-priced.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-priced-v0-1
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-manager.clar
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: dlc-stablecoin
@@ -102,13 +103,13 @@ plan:
             path: legacy-contracts/basic/sample-protocol-contract.clar
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: dlc-manager-priced-v0
+            contract-name: sample-contract-loan-v0
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: legacy-contracts/priced/dlc-manager-priced.clar
+            path: legacy-contracts/loan/sample-protocol-contract.clar
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: sample-contract-loan-v0-1
-            emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: examples/sample-contract-loan.clar
             clarity-version: 1
         - emulated-contract-publish:
@@ -116,8 +117,4 @@ plan:
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: legacy-contracts/priced/sample-protocol-contract.clar
             clarity-version: 1
-        - emulated-contract-publish:
-            contract-name: callback-contract
-            emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
-            path: tests/callback-contract-mock.clar
-            clarity-version: 1
+      epoch: "2.0"

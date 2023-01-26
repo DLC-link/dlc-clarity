@@ -1,6 +1,6 @@
 
-(use-trait cb-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-link-callback-trait-v2.dlc-link-callback-trait)
-(impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-link-callback-trait-v2.dlc-link-callback-trait)
+(use-trait cb-trait .dlc-link-callback-trait-v2.dlc-link-callback-trait)
+(impl-trait .dlc-link-callback-trait-v2.dlc-link-callback-trait)
 
 ;; Error constants
 (define-constant err-cant-unwrap (err u1000))
@@ -154,7 +154,7 @@
           })
           (try! (set-status loan-id status-not-ready))
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))
-          (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 create-dlc emergency-refund-time target loan-id)) err-contract-call-failed)
+          (unwrap! (ok (contract-call? .dlc-manager-priced-v0-1 create-dlc emergency-refund-time target loan-id)) err-contract-call-failed)
       )
     )
 )
@@ -200,7 +200,7 @@
     (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
     (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
     (map-set loans loan-id (merge loan { vault-loan: (+ vault-loan-amount amount) }))
-    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer amount sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
+    (unwrap! (ok (contract-call? .dlc-stablecoin transfer amount sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
   )
 )
 
@@ -214,7 +214,7 @@
     (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
     (asserts! (>= new-balance u0) err-balance-negative)
     (map-set loans loan-id (merge loan { vault-loan: new-balance }))
-    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer amount (get owner loan) sample-protocol-contract none)) err-stablecoin-repay-failed)
+    (unwrap! (ok (contract-call? .dlc-stablecoin transfer amount (get owner loan) sample-protocol-contract none)) err-stablecoin-repay-failed)
   )
 )
 
@@ -227,7 +227,7 @@
     (begin
       (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
       (try! (set-status loan-id status-pre-repaid))
-      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
+      (unwrap! (ok (as-contract (contract-call? .dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
     )
   )
 )
@@ -258,7 +258,7 @@
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
     )
-    (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 get-btc-price uuid))) err-contract-call-failed)
+    (unwrap! (ok (as-contract (contract-call? .dlc-manager-priced-v0-1 get-btc-price uuid))) err-contract-call-failed)
   )
 )
 
@@ -301,7 +301,7 @@
     )
     (begin
       (try! (set-status loan-id status-pre-liquidated))
-      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid payout-ratio)) err-contract-call-failed)
+      (unwrap! (ok (contract-call? .dlc-manager-priced-v0-1 close-dlc uuid payout-ratio)) err-contract-call-failed)
     )
   )
 )

@@ -6,3 +6,5 @@ app/node_modules
 app/build
 
 history.txt
+
+settings/Testnet.toml

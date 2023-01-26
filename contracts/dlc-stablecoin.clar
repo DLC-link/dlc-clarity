@@ -1,5 +1,5 @@
 ;; dlc-stablecoin
-(impl-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
+(impl-trait 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard.sip-010-trait)
 
 (define-constant contract-owner tx-sender)
 (define-constant err-owner-only (err u100))
@@ -13,7 +13,7 @@
 )
 
 (define-read-only (get-symbol)
-    (ok "USDC")
+    (ok "USDLC")
 )
 
 (define-read-only (get-decimals)
@@ -57,6 +57,6 @@
 )
 
 ;; Initialize the contract
-(begin
-  (try! (ft-mint? dlc-stablecoin u1000000000000 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1)) ;; 1 million DLC USDC
-)
+;; (begin
+;;   (try! (ft-mint? dlc-stablecoin u1000000000000 'ST3KR92B989RXX4327MPPJKMJ0HHDCT01FJ9DF5QZ.sample-contract-loan-v0-1)) ;; 1 million DLC USDC
+;; )
