@@ -215,7 +215,7 @@
     (asserts! (is-eq (var-get usda-pool) (contract-of pool)) ERR_WRONG_POOL)
     (asserts! (is-eq (get status loan) STATUS_FUNDED) ERR_WRONG_STATUS)
     (asserts! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 is-trusted-oracle oracle-signer) ERR_UNTRUSTED_ORACLE)
-    (asserts! (> collateral-value strike-value) ERR_INSUFFICIENT_COLLATERAL)
+    ;; (asserts! (> collateral-value strike-value) ERR_INSUFFICIENT_COLLATERAL)
 
     (try! (contract-call? pool withdraw amount (get creator loan)))
     (map-set loans loan-id (merge loan { borrowed-amount: new-borrowed-amount, stability-fee-block: block-height, stability-fee-accrued: stability-fee-total }))

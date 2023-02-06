@@ -130,7 +130,7 @@ plan:
             contract-name: usda-loans-v1-1
             expected-sender: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
             cost: 176860
-            path: examples/arkadiko/usda-loans-v1-1.clar
+            path: examples/arkadiko/usda-loans-v1-1-test.clar
             anchor-block-only: true
             clarity-version: 1
         - contract-publish:
