@@ -2,23 +2,23 @@ import { callReadOnlyFunction, cvToValue, standardPrincipalCV, uintCV } from "@s
 import { ScriptFunction } from "../models/script-function.interface";
 
 import { network, contractAddress, contractName, exampleContractAddress, exampleContractName } from '../config/common'
+import { FunctionArgs } from "../models/function-args.interface";
 
 const functionName = "check-liquidation";
 
-const txOptions = (loanID?: number) => ({
-  contractAddress: exampleContractAddress,
-  contractName: exampleContractName,
-  functionName: functionName,
-  functionArgs: [
-    uintCV(loanID || 1),
-    uintCV(1793515510800)
-  ],
-  senderAddress: contractAddress,
-  network,
-});
-
-async function main(loanID?: number) {
-  const transaction: any = await callReadOnlyFunction(txOptions(loanID));
+async function main(args: FunctionArgs) {
+  const txOptions = () => ({
+    contractAddress: exampleContractAddress,
+    contractName: exampleContractName,
+    functionName: functionName,
+    functionArgs: [
+      uintCV(args.loanID || 1),
+      uintCV(1793515510800)
+    ],
+    senderAddress: contractAddress,
+    network,
+  });
+  const transaction: any = await callReadOnlyFunction(txOptions());
   console.log(cvToValue(transaction));
 }
 

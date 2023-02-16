@@ -1,4 +1,6 @@
+import { FunctionArgs } from "./function-args.interface";
+
 export interface ScriptFunction {
   name: string,
-  action: (loanID?: number) => any
+  action: (args: FunctionArgs) => any
 }

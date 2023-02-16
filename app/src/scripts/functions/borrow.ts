@@ -1,5 +1,6 @@
 import { broadcastTransaction, createAssetInfo, FungibleConditionCode, makeContractCall, makeContractFungiblePostCondition, makeStandardFungiblePostCondition, SignedContractCallOptions, uintCV } from "@stacks/transactions";
 import { exampleContractAddress, exampleContractName, protocolPrivateKey, network, contractAddress, senderKey } from "../config/common";
+import { FunctionArgs } from "../models/function-args.interface";
 import { ScriptFunction } from "../models/script-function.interface";
 
 const functionName = 'borrow';
@@ -39,8 +40,8 @@ function populateTxOptions(loanID?: number): SignedContractCallOptions {
   }
 }
 
-async function main(loanID?: number) {
-  const transaction = await makeContractCall(populateTxOptions(loanID));
+async function main(args: FunctionArgs) {
+  const transaction = await makeContractCall(populateTxOptions(args.loanID));
   console.log(transaction);
   const broadcastResponse = await broadcastTransaction(transaction, network);
   console.log("broadcastResponse: ", broadcastResponse);
