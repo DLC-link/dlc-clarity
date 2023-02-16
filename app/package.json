@@ -1,6 +1,6 @@
 {
   "name": "stacks-contracts-app",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A simple app to run scripts on the DLC.Link Stacks Contracts",
   "main": "index.js",
   "scripts": {
