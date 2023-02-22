@@ -19,10 +19,17 @@ const txOptions = {
 
 async function main() {
   const transaction: any = await callReadOnlyFunction(txOptions);
-  console.log(cvToValue(transaction));
+  console.log(cvToValue(transaction).value);
 }
 
 export const getBalance: ScriptFunction = {
   name: 'Get Balance',
   action: main
+}
+
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  console.log(args)
+  main()
 }
