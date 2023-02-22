@@ -242,7 +242,7 @@ Clarinet.test({
     const deployer_2 = accounts.get('deployer_2')!;
     const user = accounts.get('wallet_1')!;
 
-    const outcome = 90000000;
+    const outcome = 9000;
 
     createNewDLC(chain, deployer, user.address, contractPrincipal(deployer_2, callbackContract));
 
@@ -258,7 +258,7 @@ Clarinet.test({
     assertEquals(typeof printEvent2, 'object');
     assertEquals(printEvent2.type, 'contract_event');
     assertEquals(printEvent2.contract_event.topic, "print");
-    assertStringIncludes(printEvent2.contract_event.value, 'actual-closing-time: u1, event-source: "dlclink:post-close-dlc:v0-1", outcome: u90000000, uuid: 0x66616b6575756964')
+    assertStringIncludes(printEvent2.contract_event.value, 'actual-closing-time: u1, event-source: "dlclink:post-close-dlc:v0-1", outcome: u9000, uuid: 0x66616b6575756964')
 
     const contractEvent = block.receipts[1].events[1];
 
@@ -286,8 +286,8 @@ Clarinet.test({
     const deployer_2 = accounts.get('deployer_2')!;
     const user = accounts.get('wallet_1')!;
 
-    const outcome = 90000000;
-    const oracleOutcome = 97000000;
+    const outcome = 9000;
+    const oracleOutcome = 9700;
 
     createNewDLC(chain, deployer, user.address, contractPrincipal(deployer_2, callbackContract));
 

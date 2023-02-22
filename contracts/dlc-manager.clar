@@ -167,14 +167,14 @@
 
 ;; @desc Initiaties closing of a DLC
 ;; @param uuid; the UUID of the DLC to be closed
-;; @param outcome; a value between 0-100000000 (0-100.00% representing payout to the two parties)
+;; @param outcome; a value between 0-10000 (0-100.00% representing payout to the two parties)
 (define-public (close-dlc (uuid (buff 32)) (outcome uint))
   (let (
       (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     )
     (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get callback-contract dlc) tx-sender)) err-unauthorised)
     (asserts! (is-eq (get status dlc) status-open) err-already-closed)
-    (asserts! (and (>= outcome u0) (<= outcome u100000000)) err-out-of-bounds-outcome)
+    (asserts! (and (>= outcome u0) (<= outcome u10000)) err-out-of-bounds-outcome)
     (map-set dlcs uuid (merge dlc { outcome: (some outcome) }))
     (print {
       uuid: uuid,

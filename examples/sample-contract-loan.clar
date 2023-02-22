@@ -28,6 +28,7 @@
 (define-constant status-liquidated "liquidated")
 
 (define-constant ten-to-power-2 u100)
+(define-constant ten-to-power-4 u10000)
 (define-constant ten-to-power-6 u1000000)
 (define-constant ten-to-power-8 u100000000)
 (define-constant ten-to-power-12 u1000000000000)
@@ -308,7 +309,7 @@
 
 ;; @desc Returns the resulting payout-ratio at the given btc-price (shifted by 10**8).
 ;; This value is sent to the Oracle system for signing a point on the linear payout curve.
-;; using uints, this means return values between 0-100000000 (0.00-100.00 with room for extra precision in the future)
+;; using uints, this means return values between 0-10000 (0.00-100.00)
 ;; 0.00 means the borrower gets back its deposit, 100.00 means the entire collateral gets taken by the protocol.
 (define-read-only (get-payout-ratio (loan-id uint) (btc-price uint))
   (let (
@@ -319,13 +320,13 @@
     ;; the additional liquidation-fee percentage is calculated into the result. Since it is shifted by 10000, we divide:
     (payout-ratio-precise (+ sell-to-liquidators-ratio (* (/ sell-to-liquidators-ratio u10000) (get liquidation-fee loan))))
     ;; The final payout-ratio is a truncated version:
-    (payout-ratio (unshift-value payout-ratio-precise ten-to-power-8))
+    (payout-ratio (unshift-value payout-ratio-precise ten-to-power-12))
     )
     ;; We cap result to be between the desired bounds
     (begin
       (if (unwrap! (check-liquidation loan-id btc-price) err-cant-unwrap)
-          (if (>= payout-ratio (shift-value u1 ten-to-power-8))
-            (ok (shift-value u1 ten-to-power-8))
+          (if (>= payout-ratio (shift-value u1 ten-to-power-4))
+            (ok (shift-value u1 ten-to-power-4))
             (ok payout-ratio))
         (ok u0)
       )
