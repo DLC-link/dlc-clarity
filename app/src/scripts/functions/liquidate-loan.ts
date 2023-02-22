@@ -12,7 +12,7 @@ async function main(args: FunctionArgs) {
       contractName: exampleContractName,
       functionName: functionName,
       functionArgs: [
-        uintCV(args.loanID || 1)
+        uintCV(args.loanID || 2)
       ],
       senderKey: protocolPrivateKey,
       validateWithAbi: true,
@@ -30,4 +30,10 @@ async function main(args: FunctionArgs) {
 export const attemptLiquidate: ScriptFunction = {
   name: 'Attempt Liquidate',
   action: main
+}
+
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  main({fname: args[0], contractAddress: args[1], contractName: args[2], loanID: parseInt(args[3]), amount: parseInt(args[4])})
 }

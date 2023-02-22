@@ -25,10 +25,10 @@ async function main(args: FunctionArgs) {
     functionName: functionName,
     // NOTE: arkadiko contract also takes different args so this is weird
     functionArgs: [
-      uintCV(120000000),     // btc-deposit in Sats
-      // uintCV(14000),         // liquidation-ratio, two decimals precison
-      // uintCV(1000),          // liquidation-fee, two decimals precision
-      // uintCV(unixTimeStamp), // emergency-refund-time
+      uintCV(100000000),     // btc-deposit in Sats
+      uintCV(14000),         // liquidation-ratio, two decimals precison
+      uintCV(1000),          // liquidation-fee, two decimals precision
+      uintCV(unixTimeStamp), // emergency-refund-time
     ],
     senderKey: senderKey,
     validateWithAbi: true,

@@ -12,8 +12,8 @@ async function main(args: FunctionArgs) {
     contractName: exampleContractName,
     functionName: functionName,
     functionArgs: [
-      uintCV(args.loanID || 1),
-      uintCV(1793515510800)
+      uintCV(args.loanID || 2),
+      uintCV(2381168816970)
     ],
     senderAddress: contractAddress,
     network,
@@ -25,4 +25,10 @@ async function main(args: FunctionArgs) {
 export const getPayoutRatio: ScriptFunction = {
   name: 'Get Payout Ratio',
   action: main
+}
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  console.log(args)
+  main({fname: args[0], contractAddress: args[1], contractName: args[2], loanID: parseInt(args[3]), amount: parseInt(args[4])})
 }
