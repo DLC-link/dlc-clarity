@@ -21,42 +21,57 @@ path = "contracts/dlc-manager.clar"
 [contracts.sample-contract-loan-v0-1]
 path = "examples/sample-contract-loan.clar"
 
+[contracts.dlc-link-callback-trait-v2]
+path = "contracts/dlc-link-callback-trait.clar"
+
+# USDLC for testing
 [contracts.dlc-stablecoin]
 path = 'contracts/dlc-stablecoin.clar'
 clarity_version = 1
 epoch = 2.0
 
-# Basic
-[contracts.dlc-manager-basic-v0-1]
-path = "legacy-contracts/basic/dlc-manager-basic.clar"
+[contracts.callback-contract]
+path = "tests/callback-contract-mock.clar"
 
-[contracts.sample-contract-basic-v0-1]
-path = "legacy-contracts/basic/sample-protocol-contract.clar"
+# Arkadiko requirements
+[[project.requirements]]
+contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-diko-trait-v1"
+[[project.requirements]]
+contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-trait-v1"
+[[project.requirements]]
+contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-trait-v1"
+[[project.requirements]]
+contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-diko-v1-2"
+[[project.requirements]]
+contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1"
 
-# Priced
-[contracts.dlc-manager-priced-v0]
-path = "legacy-contracts/priced/dlc-manager-priced.clar"
+# Arkadiko contracts
+[contracts.arkadiko-dao]
+path = "examples/arkadiko/arkadiko-dao.clar"
 
-[contracts.sample-contract-priced-v0]
-path = "legacy-contracts/priced/sample-protocol-contract.clar"
+[contracts.usda-token]
+path = "examples/arkadiko/usda-token.clar"
 
-# Loan
-[contracts.dlc-manager-loan-v0]
-path = "legacy-contracts/loan/dlc-manager-loan.clar"
+[contracts.arkadiko-token]
+path = "examples/arkadiko/arkadiko-token.clar"
 
-[contracts.sample-contract-loan-v0]
-path = "legacy-contracts/loan/sample-protocol-contract.clar"
+[contracts.arkadiko-diko-guardian-v1-1]
+path = "examples/arkadiko/arkadiko-diko-guardian-v1-1.clar"
 
-# Traits
-[contracts.dlc-create-callback-trait]
-path = "legacy-contracts/basic/dlc-create-callback-trait.clar"
+[contracts.usda-pool-trait-v1-1]
+path = "examples/arkadiko/usda-pool-trait-v1-1.clar"
 
-[contracts.dlc-link-callback-trait]
-path = "legacy-contracts/loan/dlc-link-callback-trait.clar"
+[contracts.usda-loans-trait-v1-1]
+path = "examples/arkadiko/usda-loans-trait-v1-1.clar"
 
-[contracts.dlc-link-callback-trait-v2]
-path = "contracts/dlc-link-callback-trait.clar"
+[contracts.main]
+path = "examples/arkadiko/main.clar"
 
+[contracts.usda-pool-v1-1]
+path = "examples/arkadiko/usda-pool-v1-1.clar"
+
+[contracts.usda-loans-v1-1]
+path = "examples/arkadiko/usda-loans-v1-1.clar"
 
 # Other settings
 [repl]
