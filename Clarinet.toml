@@ -33,44 +33,6 @@ epoch = 2.0
 [contracts.callback-contract]
 path = "tests/callback-contract-mock.clar"
 
-# Arkadiko requirements
-# [[project.requirements]]
-# contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-diko-trait-v1"
-# [[project.requirements]]
-# contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-trait-v1"
-# [[project.requirements]]
-# contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-trait-v1"
-[[project.requirements]]
-contract_id = "SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-dao-token-trait-v1"
-
-# # Arkadiko contracts
-# [contracts.arkadiko-dao]
-# path = "examples/arkadiko/arkadiko-dao.clar"
-
-# [contracts.usda-token]
-# path = "examples/arkadiko/usda-token.clar"
-
-# [contracts.arkadiko-token]
-# path = "examples/arkadiko/arkadiko-token.clar"
-
-# [contracts.arkadiko-diko-guardian-v1-1]
-# path = "examples/arkadiko/arkadiko-diko-guardian-v1-1.clar"
-
-# [contracts.usda-pool-trait-v1-1]
-# path = "examples/arkadiko/usda-pool-trait-v1-1.clar"
-
-# [contracts.usda-loans-trait-v1-1]
-# path = "examples/arkadiko/usda-loans-trait-v1-1.clar"
-
-# [contracts.main]
-# path = "examples/arkadiko/main.clar"
-
-# [contracts.usda-pool-v1-1]
-# path = "examples/arkadiko/usda-pool-v1-1.clar"
-
-# [contracts.usda-loans-v1-1]
-# path = "examples/arkadiko/usda-loans-v1-1.clar"
-
 # Other settings
 [repl]
 costs_version = 2
