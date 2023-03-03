@@ -25,9 +25,9 @@ jobs:
     - name: Compress source code
       run: |
         cd ..
-        tar --exclude .git --exclude .github --exclude .gitignore --exclude .gitmodules -zcvf dlc-stacks.tar.gz dlc-stacks
-        cd dlc-stacks
-        cp ../dlc-stacks.tar.gz .
+        tar --exclude .git --exclude .github --exclude .gitignore --exclude .gitmodules -zcvf dlc-clarity.tar.gz dlc-clarity
+        cd dlc-clarity
+        cp ../dlc-clarity.tar.gz .
     - name: Upload artifact to S3
       run: |
-        aws s3 cp dlc-stacks.tar.gz "s3://dlc-public-assets/snapshots/dlc-stacks.tar.gz"
+        aws s3 cp dlc-clarity.tar.gz "s3://dlc-public-assets/snapshots/dlc-clarity.tar.gz"

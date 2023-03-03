@@ -5,12 +5,14 @@
 
 ;; Traits
 (impl-trait .usda-pool-trait-v1-1.usda-pool-trait)
+(use-trait usda-loans-trait .usda-loans-trait-v1-1.usda-loans-trait)
 
 ;; Errors
 (define-constant ERR_DISABLED (err u220000))
-(define-constant ERR-NOT-MANAGER (err u220001))
-(define-constant ERR-REWARDS-CALC (err u220002))
-(define-constant ERR-INSUFFICIENT-STAKE (err u220003))
+(define-constant ERR_NOT_MANAGER (err u220001))
+(define-constant ERR_REWARDS_CALC (err u220002))
+(define-constant ERR_INSUFFICIENT_STAKE (err u220003))
+(define-constant ERR_WRONG_LOANS_CONTRACT (err u220004))
 
 ;; Variables
 (define-data-var contract-enabled bool true)
@@ -18,6 +20,7 @@
 (define-data-var cumm-reward-per-stake uint u0)
 (define-data-var last-reward-increase-block uint u0)
 (define-data-var rewards-rate uint u100000) ;; 10% - TODO: set for mainnet
+(define-data-var usda-loans principal .usda-loans-v1-1)
 
 ;; Track ammount and cummulative reward for staker
 (define-map stakes
@@ -71,9 +74,38 @@
   (var-get last-reward-increase-block)
 )
 
+;; @desc get rewards rate
+(define-read-only (get-rewards-rate)
+  (var-get rewards-rate)
+)
+
 ;; @desc get available funds to borrow
 (define-read-only (get-total-available)
   (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender)))
+)
+
+;; @desc get used funds
+(define-read-only (get-total-used)
+  (let (
+    (staked (var-get total-staked))
+    (available (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender))))
+  )
+    (- staked available)
+  )
+)
+
+;; @desc get pool balances
+(define-read-only (get-pool-balances)
+  (let (
+    (staked (var-get total-staked))
+    (available (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender))))
+  )
+    (ok {
+      staked: staked,
+      available: available,
+      used: (- staked available)
+    })
+  )
 )
 
 ;; ---------------------------------------------------------
@@ -82,14 +114,16 @@
 
 ;; @desc stake tokens in the pool
 ;; @param amount; amount to stake
+;; @param loans-trait; the loans contract to notify
 ;; @post uint; returns amount of tokens staked
-(define-public (stake (amount uint))
+(define-public (stake (amount uint) (loans-trait <usda-loans-trait>))
   (let (
     (staker tx-sender)
     (current-stake-amount (get amount (get-stake-of staker)))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
+    (asserts! (is-eq (var-get usda-loans) (contract-of loans-trait)) ERR_WRONG_LOANS_CONTRACT)
 
     ;; This method will increase the cumm-rewards-per-stake, and set it for the staker
     (try! (claim-pending-rewards))
@@ -102,21 +136,26 @@
     (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount staker (as-contract tx-sender) none))
     (map-set stakes { staker: staker } { amount: (+ current-stake-amount amount), cumm-reward-per-stake: (var-get cumm-reward-per-stake) })
 
+    ;; Update loans contract
+    (try! (contract-call? loans-trait pool-changed (get-total-staked) (get-total-used)))
+
     (ok amount)
   )
 )
 
 ;; @desc unstake tokens in the pool
 ;; @param amount; amount to unstake
+;; @param loans-trait; the loans contract to notify
 ;; @post uint; returns amount of tokens unstaked
-(define-public (unstake (amount uint))
+(define-public (unstake (amount uint) (loans-trait <usda-loans-trait>))
   (let (
     (staker tx-sender)
     (current-stake-amount (get amount (get-stake-of staker)))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
-    (asserts! (>= current-stake-amount amount) ERR-INSUFFICIENT-STAKE)
+    (asserts! (>= current-stake-amount amount) ERR_INSUFFICIENT_STAKE)
+    (asserts! (is-eq (var-get usda-loans) (contract-of loans-trait)) ERR_WRONG_LOANS_CONTRACT)
 
     ;; This method will increase the cumm-rewards-per-stake, and set it for the staker
     (try! (claim-pending-rewards))
@@ -129,20 +168,26 @@
     (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender staker none)))
     (map-set stakes { staker: staker } { amount: (- current-stake-amount amount), cumm-reward-per-stake: (var-get cumm-reward-per-stake) })
 
+    ;; Update loans contract
+    (try! (contract-call? loans-trait pool-changed (get-total-staked) (get-total-used)))
+
     (ok amount)
   )
 )
 
 ;; @desc unstake tokens without claiming rewards
+;; @param amount; amount to unstake
+;; @param loans-trait; the loans contract to notify
 ;; @post uint; returns unstaked amount
-(define-public (emergency-unstake (amount uint))
+(define-public (emergency-unstake (amount uint) (loans-trait <usda-loans-trait>))
   (let (
     (staker tx-sender)
     (current-stake-amount (get amount (get-stake-of staker)))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
-    (asserts! (>= current-stake-amount amount) ERR-INSUFFICIENT-STAKE)
+    (asserts! (>= current-stake-amount amount) ERR_INSUFFICIENT_STAKE)
+    (asserts! (is-eq (var-get usda-loans) (contract-of loans-trait)) ERR_WRONG_LOANS_CONTRACT)
 
     ;; Update total stake and increase cummulative rewards
     (var-set total-staked (- (var-get total-staked) amount))
@@ -151,6 +196,9 @@
     ;; Transfer tokens and update map
     (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender staker none)))
     (map-set stakes { staker: staker } { amount: (- current-stake-amount amount), cumm-reward-per-stake: (var-get cumm-reward-per-stake) })
+
+    ;; Update loans contract
+    (try! (contract-call? loans-trait pool-changed (get-total-staked) (get-total-used)))
 
     (ok amount)
   )
@@ -182,7 +230,7 @@
   (let (
     (staker tx-sender)
     (increase-result (unwrap-panic (increase-cumm-reward-per-stake)))
-    (pending-rewards (unwrap! (get-pending-rewards staker) ERR-REWARDS-CALC))
+    (pending-rewards (unwrap! (get-pending-rewards staker) ERR_REWARDS_CALC))
     (stake-of (get-stake-of staker))
   )
     (try! (contract-call? .main check-is-enabled))
@@ -194,6 +242,23 @@
     (ok pending-rewards)
   )
 )
+
+;; @desc claim pending rewards and stake
+;; @post uint; returns claimed rewards
+;; TODO: enable for mainnet
+;; (define-public (stake-pending-rewards)
+;;   (let (
+;;     (claimed-rewards (unwrap-panic (claim-pending-rewards)))
+;;   )
+;;     (try! (contract-call? 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1 stake
+;;       'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1
+;;       'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-diko-v1-2
+;;       'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.arkadiko-token
+;;       claimed-rewards
+;;     ))
+;;     (ok claimed-rewards)
+;;   )
+;; )
 
 ;; ---------------------------------------------------------
 ;; Cummulative rewards
@@ -252,7 +317,7 @@
 ;; @post uint; the amount transfered
 (define-public (deposit (amount uint))
   (begin
-    (asserts! (get-is-manager contract-caller) ERR-NOT-MANAGER)
+    (asserts! (get-is-manager contract-caller) ERR_NOT_MANAGER)
 
     (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender (as-contract tx-sender) none))
     (ok amount)
@@ -264,7 +329,7 @@
 ;; @post uint; the amount transfered
 (define-public (withdraw (amount uint) (recipient principal))
   (begin
-    (asserts! (get-is-manager contract-caller) ERR-NOT-MANAGER)
+    (asserts! (get-is-manager contract-caller) ERR_NOT_MANAGER)
 
     (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender recipient none)))
     (ok amount)
@@ -294,6 +359,17 @@
   (begin
     (try! (contract-call? .main check-is-owner tx-sender))
     (map-set is-manager manager enabled)
+    (ok true)
+  )
+)
+
+;; @desc set USDA loans contract
+;; @param pool; new loans contract
+;; @post bool; true if successful
+(define-public (set-usda-loans (loans <usda-loans-trait>))
+  (begin
+    (try! (contract-call? .main check-is-owner tx-sender))
+    (var-set usda-loans (contract-of loans))
     (ok true)
   )
 )

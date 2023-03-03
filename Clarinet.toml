@@ -21,42 +21,17 @@ path = "contracts/dlc-manager.clar"
 [contracts.sample-contract-loan-v0-1]
 path = "examples/sample-contract-loan.clar"
 
+[contracts.dlc-link-callback-trait-v2]
+path = "contracts/dlc-link-callback-trait.clar"
+
+# USDLC for testing
 [contracts.dlc-stablecoin]
 path = 'contracts/dlc-stablecoin.clar'
 clarity_version = 1
 epoch = 2.0
 
-# Basic
-[contracts.dlc-manager-basic-v0-1]
-path = "legacy-contracts/basic/dlc-manager-basic.clar"
-
-[contracts.sample-contract-basic-v0-1]
-path = "legacy-contracts/basic/sample-protocol-contract.clar"
-
-# Priced
-[contracts.dlc-manager-priced-v0]
-path = "legacy-contracts/priced/dlc-manager-priced.clar"
-
-[contracts.sample-contract-priced-v0]
-path = "legacy-contracts/priced/sample-protocol-contract.clar"
-
-# Loan
-[contracts.dlc-manager-loan-v0]
-path = "legacy-contracts/loan/dlc-manager-loan.clar"
-
-[contracts.sample-contract-loan-v0]
-path = "legacy-contracts/loan/sample-protocol-contract.clar"
-
-# Traits
-[contracts.dlc-create-callback-trait]
-path = "legacy-contracts/basic/dlc-create-callback-trait.clar"
-
-[contracts.dlc-link-callback-trait]
-path = "legacy-contracts/loan/dlc-link-callback-trait.clar"
-
-[contracts.dlc-link-callback-trait-v2]
-path = "contracts/dlc-link-callback-trait.clar"
-
+[contracts.callback-contract]
+path = "tests/callback-contract-mock.clar"
 
 # Other settings
 [repl]
