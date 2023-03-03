@@ -265,7 +265,7 @@
 
     (if (is-eq stability-fee-left u0)
       true
-      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer stability-fee-left tx-sender (as-contract tx-sender) none))
+      (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer stability-fee-left tx-sender (as-contract tx-sender) none))
     )
 
     (try! (pool-changed-internal pool))
@@ -309,7 +309,7 @@
 
     (if (is-eq stability-fee-left u0)
       true
-      (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer stability-fee-left tx-sender (as-contract tx-sender) none))
+      (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer stability-fee-left tx-sender (as-contract tx-sender) none))
     )
 
     (try! (pool-changed-internal pool))
@@ -624,10 +624,10 @@
 (define-public (claim-stability-fees)
   (let (
     (owner tx-sender)
-    (fees (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token get-balance (as-contract tx-sender))))
+    (fees (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender))))
   )
     (try! (contract-call? .main check-is-owner tx-sender))
-    (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer fees tx-sender owner none)))
+    (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer fees tx-sender owner none)))
     (ok fees)
   )
 )

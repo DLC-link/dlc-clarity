@@ -81,14 +81,14 @@
 
 ;; @desc get available funds to borrow
 (define-read-only (get-total-available)
-  (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token get-balance (as-contract tx-sender)))
+  (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender)))
 )
 
 ;; @desc get used funds
 (define-read-only (get-total-used)
   (let (
     (staked (var-get total-staked))
-    (available (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token get-balance (as-contract tx-sender))))
+    (available (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender))))
   )
     (- staked available)
   )
@@ -98,7 +98,7 @@
 (define-read-only (get-pool-balances)
   (let (
     (staked (var-get total-staked))
-    (available (unwrap-panic (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token get-balance (as-contract tx-sender))))
+    (available (unwrap-panic (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token get-balance (as-contract tx-sender))))
   )
     (ok {
       staked: staked,
@@ -133,7 +133,7 @@
     (unwrap-panic (increase-cumm-reward-per-stake))
 
     ;; Transfer tokens and update map
-    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer amount staker (as-contract tx-sender) none))
+    (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount staker (as-contract tx-sender) none))
     (map-set stakes { staker: staker } { amount: (+ current-stake-amount amount), cumm-reward-per-stake: (var-get cumm-reward-per-stake) })
 
     ;; Update loans contract
@@ -165,7 +165,7 @@
     (unwrap-panic (increase-cumm-reward-per-stake))
 
     ;; Transfer tokens and update map
-    (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer amount tx-sender staker none)))
+    (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender staker none)))
     (map-set stakes { staker: staker } { amount: (- current-stake-amount amount), cumm-reward-per-stake: (var-get cumm-reward-per-stake) })
 
     ;; Update loans contract
@@ -194,7 +194,7 @@
     (unwrap-panic (increase-cumm-reward-per-stake))
 
     ;; Transfer tokens and update map
-    (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer amount tx-sender staker none)))
+    (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender staker none)))
     (map-set stakes { staker: staker } { amount: (- current-stake-amount amount), cumm-reward-per-stake: (var-get cumm-reward-per-stake) })
 
     ;; Update loans contract
@@ -237,7 +237,7 @@
     (asserts! (get-contract-enabled) ERR_DISABLED)
     (asserts! (>= pending-rewards u1) (ok u0))
 
-    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.arkadiko-dao mint-token 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.arkadiko-token pending-rewards staker))
+    (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.arkadiko-dao mint-token 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.arkadiko-token pending-rewards staker))
     (map-set stakes { staker: staker } (merge stake-of { cumm-reward-per-stake: (var-get cumm-reward-per-stake) }))
     (ok pending-rewards)
   )
@@ -245,19 +245,20 @@
 
 ;; @desc claim pending rewards and stake
 ;; @post uint; returns claimed rewards
-(define-public (stake-pending-rewards)
-  (let (
-    (claimed-rewards (unwrap-panic (claim-pending-rewards)))
-  )
-    (try! (contract-call? 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1 stake
-      'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1
-      'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-diko-v1-2
-      'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.arkadiko-token
-      claimed-rewards
-    ))
-    (ok claimed-rewards)
-  )
-)
+;; TODO: enable for mainnet
+;; (define-public (stake-pending-rewards)
+;;   (let (
+;;     (claimed-rewards (unwrap-panic (claim-pending-rewards)))
+;;   )
+;;     (try! (contract-call? 'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1 stake
+;;       'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-registry-v1-1
+;;       'SP2C2YFP12AJZB4MABJBAJ55XECVS7E4PMMZ89YZR.arkadiko-stake-pool-diko-v1-2
+;;       'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.arkadiko-token
+;;       claimed-rewards
+;;     ))
+;;     (ok claimed-rewards)
+;;   )
+;; )
 
 ;; ---------------------------------------------------------
 ;; Cummulative rewards
@@ -286,7 +287,7 @@
     (asserts! (> current-total-staked u0) (ok current-cumm-reward-per-stake))
 
     (let (
-      (total-block-rewards (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.arkadiko-diko-guardian-v1-1 get-staking-rewards-per-block))
+      (total-block-rewards (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.arkadiko-diko-guardian-v1-1 get-staking-rewards-per-block))
       (block-diff (- block-height (var-get last-reward-increase-block)))
       (total-rewards-to-distribute (/ (* (var-get rewards-rate) block-diff total-block-rewards) u1000000))
       (reward-added-per-token (/ (* total-rewards-to-distribute u1000000) current-total-staked))
@@ -301,7 +302,7 @@
 ;; @post uint; the rewards per block
 (define-read-only (get-rewards-per-block)
   (let (
-    (total-block-rewards (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.arkadiko-diko-guardian-v1-1 get-staking-rewards-per-block))
+    (total-block-rewards (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.arkadiko-diko-guardian-v1-1 get-staking-rewards-per-block))
   )
     (/ (* (var-get rewards-rate) total-block-rewards) u1000000)
   )
@@ -318,7 +319,7 @@
   (begin
     (asserts! (get-is-manager contract-caller) ERR_NOT_MANAGER)
 
-    (try! (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer amount tx-sender (as-contract tx-sender) none))
+    (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender (as-contract tx-sender) none))
     (ok amount)
   )
 )
@@ -330,7 +331,7 @@
   (begin
     (asserts! (get-is-manager contract-caller) ERR_NOT_MANAGER)
 
-    (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.usda-token transfer amount tx-sender recipient none)))
+    (try! (as-contract (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer amount tx-sender recipient none)))
     (ok amount)
   )
 )
