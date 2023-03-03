@@ -1,3 +1,7 @@
+Join our Discord server for news and support!
+
+[![Discord Banner](https://discordapp.com/api/guilds/887360470955208745/widget.png?style=banner2)](https://discord.gg/JAkbs92N5H)
+
 # DLC.Link Stacks Smart Contracts
 
 This smart contract is the interface for creating, closing and otherwise managing DLCs via the DLC.Link infrastructure.
