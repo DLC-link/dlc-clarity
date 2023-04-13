@@ -41,7 +41,7 @@ const App = () => {
   }
 
   async function setLastLoanID() {
-    const value = await getLastLoanID.action();
+    const value = await getLastLoanID.action({});
     setLoanID(parseInt(value.value))
   }
 
@@ -57,7 +57,7 @@ const App = () => {
         flexDirection: 'column',
       }}>
         {fs.map(func => (
-          <Button label={func.name} onClick={() => func.action(loanID)} />
+          <Button label={func.name} onClick={() => func.action({loanID})} />
         ))}
       </div>
     </div>
