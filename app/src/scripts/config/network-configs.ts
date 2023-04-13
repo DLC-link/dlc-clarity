@@ -1,33 +1,39 @@
 // import path from 'path';
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
-console.log(process.env)
+console.log(process.env);
 
 import { StacksMainnet, StacksMocknet, StacksTestnet } from "@stacks/network";
 
 // const env = process.env.NODE_ENV as 'mocknet' | 'testnet' | 'mainnet';
 // const env = 'mocknet_cloud';
-const env = 'mocknet';
+const env = "mocknet_cloud";
 
 const mocknet = {
   network: new StacksMocknet(),
   contractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
   exampleContractAddress: "STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6",
-  privateKey: '753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601',
-  protocolPrivateKey: 'de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801',
-  mnemonic: 'twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw',
-  api_base: 'http://localhost:3999'
+  privateKey:
+    "753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601",
+  protocolPrivateKey:
+    "de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801",
+  mnemonic:
+    "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw",
+  api_base: "http://localhost:3999",
 };
 
 const mocknet_cloud = {
-  network: new StacksMocknet({url: 'http://stx-btc1.dlc.link:3999'}),
+  network: new StacksMocknet({ url: "https://dev-oracle.dlc.link" }),
   contractAddress: "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM",
   exampleContractAddress: "STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6",
-  privateKey: '753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601',
-  protocolPrivateKey: 'de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801',
-  mnemonic: 'twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw',
-  api_base: 'http://stx-btc1.dlc.link:3999'
+  privateKey:
+    "753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601",
+  protocolPrivateKey:
+    "de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801",
+  mnemonic:
+    "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw",
+  api_base: "https://dev-oracle.dlc.link",
 };
 
 const testnet = {
@@ -37,8 +43,8 @@ const testnet = {
   privateKey: process.env.PRIVATE_KEY as string,
   protocolPrivateKey: process.env.PROTOCOL_PRIVATE_KEY as string,
   mnemonic: process.env.MNEMONIC as string,
-  api_base: 'https://stacks-node-api.testnet.stacks.co'
-}
+  api_base: "https://stacks-node-api.testnet.stacks.co",
+};
 
 const mainnet = {
   network: new StacksMainnet(),
@@ -47,14 +53,14 @@ const mainnet = {
   privateKey: process.env.PRIVATE_KEY as string,
   protocolPrivateKey: process.env.PROTOCOL_PRIVATE_KEY as string,
   mnemonic: process.env.MNEMONIC as string,
-  api_base: 'https://stacks-node-api.stacks.co'
-}
+  api_base: "https://stacks-node-api.stacks.co",
+};
 
 const environments = {
   mocknet,
   mocknet_cloud,
   testnet,
-  mainnet
-}
+  mainnet,
+};
 
 export const config = environments[env];
