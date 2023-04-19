@@ -2,6 +2,7 @@
 
 ;; Traits
 (impl-trait 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-link-callback-trait-v2.dlc-link-callback-trait)
+(impl-trait .usda-loans-trait-v1-1.usda-loans-trait)
 (use-trait usda-pool-trait .usda-pool-trait-v1-1.usda-pool-trait)
 
 ;; Errors
@@ -34,7 +35,12 @@
 (define-data-var usda-pool principal .usda-pool-v1-1)
 (define-data-var liquidation-ratio uint u14000)
 (define-data-var liquidation-fee uint u1000)
-(define-data-var stability-fee uint u400)
+(define-data-var stability-fee uint u4000000) ;; 4%
+(define-data-var stability-fee-min uint u4000000) ;; 4%
+(define-data-var stability-fee-max uint u20000000) ;; 20%
+(define-data-var stability-fee-breakpoint uint u70000000) ;; 70%
+(define-data-var cumm-fee-per-borrow uint u0)
+(define-data-var last-fee-change-block uint u0)
 
 ;; Maps
 (define-map loans
@@ -47,7 +53,7 @@
     open-block: uint,               ;; block on which loan was created
     stability-fee-paid: uint,       ;; stability fee already paid
     stability-fee-accrued: uint,    ;; accrued stability fee
-    stability-fee-block: uint,      ;; last block on which stability fee was accrued
+    cumm-fee-per-borrow: uint,      ;; cummulative fee, used to calculate outstanding fees
     borrowed-amount: uint,          ;; the amount that is borrowed
     collateral: uint,               ;; BTC collateral in sats
     liquidation-ratio: uint,        ;; the collateral/loan ratio below which liquidation can happen
@@ -106,7 +112,12 @@
     usda-pool: (var-get usda-pool),
     liquidation-ratio: (var-get liquidation-ratio),
     liquidation-fee: (var-get liquidation-fee),
-    stability-fee: (var-get stability-fee)
+    stability-fee: (var-get stability-fee),
+    stability-fee-min: (var-get stability-fee-min),
+    stability-fee-max: (var-get stability-fee-max),
+    stability-fee-breakpoint: (var-get stability-fee-breakpoint),
+    cumm-fee-per-borrow: (var-get cumm-fee-per-borrow),
+    last-fee-change-block: (var-get last-fee-change-block)
   }
 )
 
@@ -121,6 +132,7 @@
   (let (
     (loan-id (var-get next-loan-id))
     (current-loan-ids (get-creator-loan-ids tx-sender))
+    (new-cumm-fee-per-borrow (unwrap-panic (increase-cumm-fee-per-borrow)))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
@@ -140,7 +152,9 @@
       open-block: block-height,
       stability-fee-paid: u0,
       stability-fee-accrued: u0,
-      stability-fee-block: block-height,
+
+      cumm-fee-per-borrow: new-cumm-fee-per-borrow,
+
       borrowed-amount: u0,
       collateral: btc-deposit,
       liquidation-ratio: (var-get liquidation-ratio),
@@ -206,8 +220,8 @@
     (collateral-value (/ (* (get collateral loan) oracle-value) u100000000))
     (strike-value (/ (* new-borrowed-amount (var-get liquidation-ratio)) u100))
 
-    (stability-fee-new (calculate-stability-fee (get stability-fee-block loan) (get borrowed-amount loan)))
-    (stability-fee-total (+ stability-fee-new (get stability-fee-accrued loan)))
+    (new-cumm-fee-per-borrow (unwrap-panic (increase-cumm-fee-per-borrow)))
+    (new-fee-accrued (get-outstanding-stability-fee loan-id))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
@@ -218,7 +232,9 @@
     ;; (asserts! (> collateral-value strike-value) ERR_INSUFFICIENT_COLLATERAL)
 
     (try! (contract-call? pool withdraw amount (get creator loan)))
-    (map-set loans loan-id (merge loan { borrowed-amount: new-borrowed-amount, stability-fee-block: block-height, stability-fee-accrued: stability-fee-total }))
+    (try! (pool-changed-internal pool))
+
+    (map-set loans loan-id (merge loan { borrowed-amount: new-borrowed-amount, cumm-fee-per-borrow: new-cumm-fee-per-borrow, stability-fee-accrued: new-fee-accrued }))
     (ok amount)
   )
 )
@@ -234,6 +250,7 @@
     (stability-fee-left (get-outstanding-stability-fee loan-id))
     (repay-amount (- amount stability-fee-left))
     (new-borrowed-amount (- (get borrowed-amount loan) repay-amount))
+    (new-cumm-fee-per-borrow (unwrap-panic (increase-cumm-fee-per-borrow)))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
@@ -251,10 +268,13 @@
       (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer stability-fee-left tx-sender (as-contract tx-sender) none))
     )
 
+    (try! (pool-changed-internal pool))
+
     (map-set loans loan-id (merge loan {
       borrowed-amount: new-borrowed-amount,
-      stability-fee-block: block-height,
+      cumm-fee-per-borrow: new-cumm-fee-per-borrow,
       stability-fee-paid: (+ (get stability-fee-paid loan) stability-fee-left),
+      stability-fee-accrued: (+ (get stability-fee-accrued loan) stability-fee-left),
     }))
 
     (ok repay-amount)
@@ -274,6 +294,7 @@
     (dlc-uuid (unwrap! (get dlc-uuid loan) ERR_NO_DLC))
     (borrowed-amount (get borrowed-amount loan))
     (stability-fee-left (get-outstanding-stability-fee loan-id))
+    (new-cumm-fee-per-borrow (unwrap-panic (increase-cumm-fee-per-borrow)))
   )
     (try! (contract-call? .main check-is-enabled))
     (asserts! (get-contract-enabled) ERR_DISABLED)
@@ -291,10 +312,13 @@
       (try! (contract-call? 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG.usda-token transfer stability-fee-left tx-sender (as-contract tx-sender) none))
     )
 
+    (try! (pool-changed-internal pool))
+
     (map-set loans loan-id (merge loan {
       borrowed-amount: u0,
-      stability-fee-block: block-height,
+      cumm-fee-per-borrow: new-cumm-fee-per-borrow,
       stability-fee-paid: (+ (get stability-fee-paid loan) stability-fee-left),
+      stability-fee-accrued: (+ (get stability-fee-accrued loan) stability-fee-left),
       status: STATUS_START_CLOSE
     }))
     (try! (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc dlc-uuid u0)))
@@ -424,24 +448,100 @@
   (let (
     (loan (unwrap! (map-get? loans loan-id) u0))
     (stability-fee-paid (get stability-fee-paid loan))
-    (stability-fee-new (calculate-stability-fee (get stability-fee-block loan) (get borrowed-amount loan)))
+
+    (next-cumm-fee-per-borrow (unwrap-panic (calculate-cumm-fee-per-borrow)))
+    (stability-fee-new (/ (* (- next-cumm-fee-per-borrow (get cumm-fee-per-borrow loan)) (get borrowed-amount loan)) u10000000000))
     (stability-fee-total (+ stability-fee-new (get stability-fee-accrued loan)))
   )
     (- stability-fee-total stability-fee-paid)
   )
 )
 
-;; @desc calculate owed stability fee
-;; @param open-block; block at which loan was created
-;; @param amount; total amount that can be borrowed
-;; @post uint; the owed stability fee
-(define-read-only (calculate-stability-fee (open-block uint) (amount uint))
+;; @desc calculate new cummulative fee per 1 USDA borrowed and save
+;; @post uint; the cummulative fee
+(define-public (increase-cumm-fee-per-borrow)
   (let (
-    (yearly-fee (* (var-get stability-fee) amount))
-    (yearly-blocks (* u144 u365))
-    (blocks-passed (- block-height open-block))
+    (new-cumm-fee-per-borrow (unwrap-panic (calculate-cumm-fee-per-borrow)))
   )
-    (/ (* (/ (* blocks-passed u100000000) yearly-blocks) yearly-fee) u1000000000000)
+    (var-set cumm-fee-per-borrow new-cumm-fee-per-borrow)
+    (var-set last-fee-change-block block-height)
+    (ok new-cumm-fee-per-borrow)
+  )
+)
+
+;; @desc calculate new cummulative fee per 1 USDA borrowed
+;; @post uint; the cummulative fee
+(define-read-only (calculate-cumm-fee-per-borrow)
+  (let (
+    (yearly-fee (var-get stability-fee))
+    (yearly-blocks (* u144 u365))
+    (blocks-passed (- block-height (var-get last-fee-change-block)))
+  )
+    (asserts! (> block-height (var-get last-fee-change-block)) (ok (var-get cumm-fee-per-borrow)))
+    (let (
+      (next-cumm-fee-per-borrow (/ (* (/ (* blocks-passed u100000000) yearly-blocks) yearly-fee) u1000000))
+    )
+      (ok (+ (var-get cumm-fee-per-borrow) next-cumm-fee-per-borrow))
+    )
+  )
+)
+
+;; ---------------------------------------------------------
+;; Pool changed
+;; ---------------------------------------------------------
+
+;; @desc signal that the pool has changed because of withdraw/deposit
+;; @post uint; the new stability fee
+(define-public (pool-changed-internal (pool <usda-pool-trait>))
+  (let (
+    (pool-balances (unwrap-panic (contract-call? pool get-pool-balances)))
+  )
+    (asserts! (is-eq (var-get usda-pool) (contract-of pool)) ERR_WRONG_POOL)
+    (pool-changed-helper (get staked pool-balances) (get used pool-balances))
+  )
+)
+
+;; @desc signal that the pool has changed because of stake/unstake
+;; @post uint; the new stability fee
+(define-public (pool-changed (amount-staked uint) (amount-used uint))
+  (begin
+    (asserts! (is-eq (var-get usda-pool) contract-caller) ERR_UNAUTHORIZED)
+
+    (pool-changed-helper amount-staked amount-used)
+  )
+)
+
+;; @desc helper to set new stability fee based on pool usage
+;; @post uint; the new stability fee
+(define-private (pool-changed-helper (amount-staked uint) (amount-used uint))
+  (let (
+    (new-stability-fee (calculate-stability-fee amount-staked amount-used))
+  )
+    (var-set stability-fee new-stability-fee)
+    (ok new-stability-fee)
+  )
+)
+
+;; @desc calculate new stability fee based on pool usage
+;; @post uint; the new stability fee
+(define-read-only (calculate-stability-fee (amount-staked uint) (amount-used uint))
+  (if (is-eq amount-staked u0)
+    (var-get stability-fee-min)
+    (let (
+      (usage-percentage (/ (* amount-used u100000000) amount-staked))
+    )
+      (if (< usage-percentage (var-get stability-fee-breakpoint))
+        (var-get stability-fee-min)
+        (let (
+          (fee-range (- (var-get stability-fee-max) (var-get stability-fee-min)))
+          (breakpoint-range (- u100000000 (var-get stability-fee-breakpoint)))
+          (breakpoint-over (- usage-percentage (var-get stability-fee-breakpoint)))
+          (fee-extra (/ (* (/ (* breakpoint-over u1000000) breakpoint-range) fee-range) u1000000))
+        )
+          (+ (var-get stability-fee-min) fee-extra)
+        )
+      )
+    )
   )
 )
 
@@ -480,6 +580,30 @@
   (begin
     (try! (contract-call? .main check-is-owner tx-sender))
     (var-set stability-fee fee)
+    (ok true)
+  )
+)
+
+;; @desc set stability fee min and max
+;; @param fee-min; new min stability fee
+;; @param fee-max; new max stability fee
+;; @post bool; true if successful
+(define-public (set-stability-fee-min-max (fee-min uint) (fee-max uint))
+  (begin
+    (try! (contract-call? .main check-is-owner tx-sender))
+    (var-set stability-fee-min fee-min)
+    (var-set stability-fee-max fee-max)
+    (ok true)
+  )
+)
+
+;; @desc set stability fee breakpoint
+;; @param fee; new stability fee breakpoint
+;; @post bool; true if successful
+(define-public (set-stability-fee-breakpoint (breakpoint uint))
+  (begin
+    (try! (contract-call? .main check-is-owner tx-sender))
+    (var-set stability-fee-breakpoint breakpoint)
     (ok true)
   )
 )
