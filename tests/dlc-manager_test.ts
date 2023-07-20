@@ -1,6 +1,6 @@
 // deno-lint-ignore-file require-await no-explicit-any prefer-const
 // @ts-ignore
-import { Clarinet, Tx, Chain, Account, types, assertEquals, assertNotEquals , pricePackageToCV, assertStringIncludes, hex2ascii, shiftPriceValue } from "./deps.ts";
+import { Clarinet, Tx, Chain, Account, types, assertEquals, assertNotEquals, pricePackageToCV, assertStringIncludes, hex2ascii, shiftPriceValue } from "./deps.ts";
 // @ts-ignore
 import type { PricePackage, Block } from "./deps.ts";
 
@@ -258,7 +258,7 @@ Clarinet.test({
     assertEquals(typeof printEvent2, 'object');
     assertEquals(printEvent2.type, 'contract_event');
     assertEquals(printEvent2.contract_event.topic, "print");
-    assertStringIncludes(printEvent2.contract_event.value, 'actual-closing-time: u1, event-source: "dlclink:post-close-dlc:v0-1", outcome: u9000, uuid: 0x66616b6575756964')
+    assertStringIncludes(printEvent2.contract_event.value, 'actual-closing-time: u3, event-source: "dlclink:post-close-dlc:v0-1", outcome: u9000, uuid: 0x66616b6575756964')
 
     const contractEvent = block.receipts[1].events[1];
 

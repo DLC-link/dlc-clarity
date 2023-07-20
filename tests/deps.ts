@@ -1,6 +1,6 @@
 export { Clarinet, Tx, Chain, types } from 'https://deno.land/x/clarinet@v1.2.0/index.ts';
 export type { Account, Block } from 'https://deno.land/x/clarinet@v1.2.0/index.ts';
-export { assertEquals, assertStringIncludes, assertNotEquals } from 'https://deno.land/std@0.164.0/testing/asserts.ts';
+export { assertEquals, assertStringIncludes, assertNotEquals, assertMatch } from 'https://deno.land/std@0.164.0/testing/asserts.ts';
 
 import { types } from 'https://deno.land/x/clarinet@v1.2.0/index.ts';
 

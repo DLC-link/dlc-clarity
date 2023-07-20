@@ -1,6 +1,6 @@
 // deno-lint-ignore-file require-await no-explicit-any prefer-const
 // @ts-ignore
-import { Clarinet, Tx, Chain, Account, types, assertEquals, pricePackageToCV, assertStringIncludes, hex2ascii, shiftPriceValue } from "./deps.ts";
+import { Clarinet, Tx, Chain, Account, types, assertEquals, pricePackageToCV, assertStringIncludes, assertMatch, hex2ascii, shiftPriceValue } from "./deps.ts";
 // @ts-ignore
 import { PricePackage, Block, getIntValueFromPrintOutput, getStringValueFromPrintOutput } from "./deps.ts";
 
@@ -69,7 +69,8 @@ function openLoan(chain: Chain, deployer: Account, callbackContract: string, loa
   assertEquals(typeof createDLCPrintEvent, 'object');
   assertEquals(createDLCPrintEvent.type, 'contract_event');
   assertEquals(createDLCPrintEvent.contract_event.topic, "print");
-  assertStringIncludes(createDLCPrintEvent.contract_event.value, 'callback-contract: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, creator: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM, emergency-refund-time: u10, event-source: "dlclink:create-dlc:v0-1", nonce: u1, uuid: (ok 0xad3228b676f7d3cd4284a5443f17f1962b36e491b30a40b2405849e597ba5fb5)')
+  let matchRegex =
+    assertMatch(createDLCPrintEvent.contract_event.value, new RegExp(/^{callback-contract: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, creator: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM, emergency-refund-time: u10, event-source: "dlclink:create-dlc:v0-1", nonce: u1, uuid: \(ok 0x[a-fA-F0-9]{64}\)\}$/))
 
   const loanBlock = chain.mineBlock([
     Tx.contractCall(callbackContract, "get-loan", [types.uint(1)], deployer.address)

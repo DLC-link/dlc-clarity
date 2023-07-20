@@ -53,6 +53,14 @@ plan:
             path: ".cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar"
             clarity-version: 1
         - emulated-contract-publish:
+            contract-name: dlc-stablecoin
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-stablecoin.clar
+            clarity-version: 1
+      epoch: "2.0"
+    - id: 1
+      transactions:
+        - emulated-contract-publish:
             contract-name: redstone-verify
             emulated-sender: STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB
             path: ".cache/requirements/STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify.clar"
@@ -69,17 +77,12 @@ plan:
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: callback-contract
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             path: tests/callback-contract-mock.clar
             clarity-version: 1
         - emulated-contract-publish:
-            contract-name: dlc-stablecoin
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dlc-stablecoin.clar
-            clarity-version: 1
-        - emulated-contract-publish:
             contract-name: sample-contract-loan-v0-1
-            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             path: examples/sample-contract-loan.clar
             clarity-version: 1
-      epoch: "2.0"
+      epoch: "2.05"
