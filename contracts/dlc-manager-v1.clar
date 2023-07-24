@@ -17,7 +17,7 @@
 (define-constant err-out-of-bounds-outcome (err u110))
 (define-constant err-different-outcomes (err u111))
 (define-constant err-stale-data (err u112))
-(define-constant err-untrusted-oracle (err u113))
+(define-constant err-unknown-attestor (err u113))
 (define-constant err-failed-building-uuid (err u114))
 (define-constant err-cant-mint-nft (err u115))
 (define-constant err-get-attestors (err u116))
@@ -71,6 +71,7 @@
 (define-non-fungible-token open-dlc (buff 32))
 
 ;; NFT to keep track of registered attestors
+;; currently only supports up to 255 attestors
 (define-non-fungible-token dlc-attestors uint)
 
 ;; A map of all registered attestors,
@@ -79,7 +80,7 @@
 (define-map attestors
   uint
   {
-    dns: (buff 32)
+    dns: (string-ascii 32)
   }
 )
 
@@ -93,6 +94,7 @@
     creator: principal,
     callback-contract: principal,
     protocol-wallet: principal,
+    attestors: (buff 32),
     status: uint
   }
 )
@@ -100,14 +102,6 @@
 ;; ---------------------------------------------------------
 ;; Helper functions
 ;; ---------------------------------------------------------
-
-(define-read-only (get-dlc (uuid (buff 32)))
-  (map-get? dlcs uuid)
-)
-
-(define-read-only (get-attestor-list (num_attestors uint))
-  (ok (list "test" "test"))
-)
 
 ;; ---------------------------------------------------------
 ;; Main functions
@@ -118,9 +112,10 @@
 
 ;; @desc Initiates the DLC creation flow. See readme for more details.
 ;; @param callback-contract; the contract-principal where the create-dlc will call back to
-(define-public (create-dlc (callback-contract principal) (protocol-wallet principal) (num_attestors uint))
+(define-public (create-dlc (callback-contract principal) (protocol-wallet principal) (attestor-ids (buff 32)))
   (let (
     (uuid (unwrap! (get-random-uuid (var-get attestor-id)) err-failed-building-uuid))
+    (attestor-urls-list (get-url-list-from-buff attestor-ids))
     )
     (asserts! (is-none (map-get? dlcs uuid)) err-dlc-already-added)
     (map-set dlcs uuid {
@@ -130,6 +125,7 @@
       creator: tx-sender,
       callback-contract: callback-contract,
       protocol-wallet: protocol-wallet,
+      attestors: attestor-ids,
       status: status-created
     })
     (print {
@@ -137,10 +133,11 @@
       creator: tx-sender,
       callback-contract: callback-contract,
       protocol-wallet: protocol-wallet,
+      attestors: attestor-urls-list,
       event-source: "dlclink:create-dlc:v1"
     })
     (unwrap! (nft-mint? open-dlc uuid dlc-manager-contract) err-cant-mint-nft)
-    (ok {uuid: uuid, attestors: (unwrap! (get-attestor-list num_attestors) err-get-attestors) })
+    (ok {uuid: uuid, attestors: attestor-urls-list })
   )
 )
 
@@ -150,29 +147,69 @@
 ;; and hand into the createDLC function all those ids mashed together in a buff
 ;; and we would parse it in contract, make sure they're all valid NFTs, and then
 ;; print the corresponding DNS values into the createDLC create function
-(define-public (register-attestor (dns (buff 32)))
-  (begin
+(define-public (register-attestor (dns (string-ascii 32)))
+  (let (
+      (id (var-get attestor-id))
+    )
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
-    (unwrap! (nft-mint? dlc-attestors (var-get attestor-id) dlc-manager-contract) err-mint-nft)
-    (map-set attestors (var-get attestor-id) {
+    (unwrap! (nft-mint? dlc-attestors id dlc-manager-contract) err-mint-nft)
+    (map-set attestors id {
       dns: dns,
     })
-    (var-set attestor-id (+ (var-get attestor-id) u1))
-    (ok true)
+    (var-set attestor-id (+ id u1))
+    (ok id)
   )
 )
 
-(define-public (deregister-attestor (nft-id uint))
+(define-public (get-registered-attestor (id uint))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
-    (unwrap! (nft-burn? dlc-attestors nft-id dlc-manager-contract) err-burn-nft)
-    (ok true)
+    (ok (unwrap! (map-get? attestors id) err-unknown-attestor))
   )
 )
+
+(define-public (deregister-attestor (id uint))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (unwrap! (nft-burn? dlc-attestors id dlc-manager-contract) err-burn-nft)
+    (map-delete attestors id)
+    (ok id)
+  )
+)
+
+;; get the URIs from the map of attestors
 
 ;; ---------------------------------------------------------
 ;; Utilities
 ;; ---------------------------------------------------------
+
+;; Pass in a buff of nft ids which map to the attestor nfts, and we'll return a list of the ids as uints
+;; input format is like 0x01020304 -> (list 1 2 3 4)
+;; (define-private (get-int-list-from-buff (id_buff (buff 32)))
+;;   (begin
+;;     (ok (map buff-to-int-be id_buff))
+;;   )
+;; )
+
+;; Take a buff of attestor nft ids and return a list of the attestor urls
+;; input: 0x010203 (nfts with ids 1, 2, 3)
+;; returns: (list 1.2.3.4 5.6.7.8 1.3.4.5)
+(define-private (get-url-list-from-buff (id_buff (buff 32)))
+  (begin
+    (map get-attestor-url-from-id (map buff-to-uint-be id_buff))
+  )
+)
+
+;; (define-private (get-attestor-urls-from-ids-list (list ids))
+;;   (begin
+;;     (ok (map get-attestor-url-from-id ids))
+;;   )
+;; )
+
+(define-private (get-attestor-url-from-id (id uint))
+  (begin
+      (unwrap-panic (map-get? attestors id))
+  )
+)
 
 (define-constant byte-list 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)
 
