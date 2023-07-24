@@ -16,7 +16,7 @@ balance = 100_000_000_000_000
 # stx_address: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
 # btc_address: mr1iPkD9N3RJZZxXRk7xF9d36gffa6exNC
 
-[accounts.wallet_2]
+[accounts.protocol_contract_user]
 mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
 balance = 100_000_000_000_000
 # secret_key: 530d9f61984c888536871c6573073bdfc0058896dc1adfe9a6a10dfacadc209101
@@ -58,14 +58,14 @@ balance = 100_000_000_000_000
 # stx_address: ST3PF13W7Z0RRM42A8VZRVFQ75SV1K26RXEP8YGKJ
 # btc_address: n37mwmru2oaVosgfuvzBwgV2ysCQRrLko7
 
-[accounts.wallet_8]
+[accounts.protocol_wallet]
 mnemonic = "female adjust gallery certain visit token during great side clown fitness like hurt clip knife warm bench start reunion globe detail dream depend fortune"
 balance = 100_000_000_000_000
 # secret_key: 6a1a754ba863d7bab14adbbc3f8ebb090af9e871ace621d3e5ab634e1422885e01
 # stx_address: ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP
 # btc_address: n2v875jbJ4RjBnTjgbfikDfnwsDV5iUByw
 
-[accounts.deployer_2]
+[accounts.protocol_contract_deployer]
 mnemonic = "shadow private easily thought say logic fault paddle word top book during ignore notable orange flight clock image wealth health outside kitten belt reform"
 balance = 100_000_000_000_000
 # secret_key: de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801
@@ -116,7 +116,7 @@ btc_address = "mr1iPkD9N3RJZZxXRk7xF9d36gffa6exNC"
 [[devnet.pox_stacking_orders]]
 start_at_cycle = 3
 duration = 12
-wallet = "wallet_2"
+wallet = "protocol_contract_user"
 slots = 1
 btc_address = "muYdXKmX9bByAueDe6KFfHd5Ff1gdN9ErG"
 

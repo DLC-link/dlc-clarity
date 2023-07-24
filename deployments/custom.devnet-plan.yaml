@@ -34,6 +34,13 @@ plan:
             cost: 93700
             path: contracts/dlc-manager.clar
             anchor-block-only: true
+        - contract-publish:
+            contract-name: dlc-manager-v1
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 112610
+            path: contracts/dlc-manager-v1.clar
+            anchor-block-only: true
+            clarity-version: 2
     - id: 1
       transactions:
         - contract-publish:

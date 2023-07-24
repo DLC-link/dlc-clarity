@@ -22,6 +22,12 @@
   )
 )
 
+(define-public (create-dlc-request-v1 (vault-loan-amount uint) (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
+  (let ((target .callback-contract))
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP u2)) err-cant-unwrap)
+  )
+)
+
 (define-public (set-status-funded (uuid (buff 32)))
   (begin
     (print { uuid: uuid, event-source: "callback-set-status-funded" })

@@ -7,14 +7,17 @@ genesis:
     - name: deployer
       address: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
       balance: "100000000000000"
-    - name: deployer_2
+    - name: protocol_contract_deployer
       address: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
+      balance: "100000000000000"
+    - name: protocol_contract_user
+      address: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
+      balance: "100000000000000"
+    - name: protocol_wallet
+      address: ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP
       balance: "100000000000000"
     - name: wallet_1
       address: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
-      balance: "100000000000000"
-    - name: wallet_2
-      address: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG
       balance: "100000000000000"
     - name: wallet_3
       address: ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC
@@ -31,13 +34,11 @@ genesis:
     - name: wallet_7
       address: ST3PF13W7Z0RRM42A8VZRVFQ75SV1K26RXEP8YGKJ
       balance: "100000000000000"
-    - name: wallet_8
-      address: ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP
-      balance: "100000000000000"
   contracts:
     - costs
     - pox
     - pox-2
+    - pox-3
     - lockup
     - costs-2
     - costs-3
@@ -74,6 +75,11 @@ plan:
             contract-name: dlc-manager-priced-v0-1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/dlc-manager.clar
+            clarity-version: 1
+        - emulated-contract-publish:
+            contract-name: dlc-manager-v1
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-manager-v1.clar
             clarity-version: 1
         - emulated-contract-publish:
             contract-name: callback-contract
