@@ -212,6 +212,14 @@
   )
 )
 
+(define-public (get-dlc-from-map (uuid (buff 32)))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    ;; (ok (try! (map-get? dlcs uuid)))
+    (ok (map-get? dlcs uuid))
+  )
+)
+
 ;; ---------------------------------------------------------
 ;; Utilities
 ;; ---------------------------------------------------------

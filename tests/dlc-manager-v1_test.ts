@@ -139,21 +139,9 @@ Clarinet.test({
   },
 });
 
-// CreateDLC
-// Should already have a list of registered contracts
-// Should already have a list of whitelisted protocol wallets
-
-// (protocolWallet address, numAttestors int)
-
-// create the map
-// create the NFT
-// done - emit the event in the created state
-// UUID should be randomly generated
-
-// Fails if not called from a registered contract
-// Fails if the wallet is not also whitelisted
-
-// This test uses the
+//////////////////////////////
+// Creating the dlcs
+//////////////////////////////
 Clarinet.test({
   name: "create-dlc fails if called from a non whitelisted contract, but works when whitelisted",
   async fn(chain: Chain, accounts: Map<string, Account>) {
@@ -191,7 +179,7 @@ Clarinet.test({
 });
 
 Clarinet.test({
-  name: "create-dlc called from a protocol-contract emits a dlclink event, and mints an NFT",
+  name: "create-dlc called from a protocol-contract, emits a dlclink event, and mints an NFT",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
     const creator = accounts.get('wallet_1');
@@ -238,6 +226,47 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "create-dlc creates a dlc in the map with the right status",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const creator = accounts.get('wallet_1');
+    const deployer = accounts.get('deployer')!;
+
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    assertEquals(whitelist_event.receipts[0].result, "(ok true)");
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("1.2.3.4")], deployer.address),
+    ]);
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("5.6.7.8")], deployer.address),
+    ]);
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("9.10.11.12")], deployer.address),
+    ]);
+
+    let createDlcBlock = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    // Get the UUID back from the create request!
+    const regex = new RegExp(/uuid: (0x[a-fA-F0-9]{64})/);
+    const result = regex.exec(createDlcBlock.receipts[0].result);
+    let uuid = result && result[1];
+
+    let block = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "get-dlc-from-map", [uuid], deployer.address)
+    ]);
+
+    block.receipts[0].result.expectOk();
+    assertMatch(block.receipts[0].result, /status: u0/);
+  },
+});
+
+Clarinet.test({
   name: "create-dlc called from a protocol-contract returns a list of attestors and a uuid",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
@@ -274,6 +303,10 @@ Clarinet.test({
     assertStringIncludes(block.receipts[0].result, 'attestors: [{dns: "1.2.3.4"}, {dns: "9.10.11.12"}]');
   },
 });
+
+//////////////////////////////
+// Set status funded
+//////////////////////////////
 
 // SetStatusFunded
 // Update status to Funded
