@@ -84,6 +84,13 @@
   }
 )
 
+(define-map whitelisted-contracts
+  principal
+  {
+    status: bool
+  }
+)
+
 ;; A map storing DLC data
 (define-map dlcs
   (buff 32)
@@ -173,6 +180,33 @@
     (unwrap! (nft-burn? dlc-attestors id dlc-manager-contract) err-burn-nft)
     (map-delete attestors id)
     (ok id)
+  )
+)
+
+(define-public (whitelist-contract (contract-address principal))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (map-set whitelisted-contracts contract-address {
+      status: true,
+    })
+    (ok true)
+  )
+)
+
+(define-public (de-whitelist-contract (contract-address principal))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (map-delete whitelisted-contracts contract-address)
+    (ok true)
+  )
+)
+
+(define-public (is-contract-whitelisted (contract-address principal))
+  (begin
+    (if (is-eq (map-get? whitelisted-contracts contract-address) none)
+      (ok false)
+      (ok true)
+    )
   )
 )
 

@@ -21,6 +21,10 @@ Clarinet.test({
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
 
+    let checkStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "get-registered-attestor", [types.uint(0)], deployer.address),
+    ]);
+    checkStatus.receipts[0].result.expectErr();
 
     let block = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("1.1.1.1")], deployer.address),
@@ -33,12 +37,12 @@ Clarinet.test({
     assertEquals(mintEvent.nft_mint_event.asset_identifier.split("::")[1], nftRegisterContract);
     assertEquals(mintEvent.nft_mint_event.recipient.split(".")[1], dlcManagerContract);
 
-    let block2 = chain.mineBlock([
+    checkStatus = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "get-registered-attestor", [types.uint(0)], deployer.address),
     ]);
 
-    block2.receipts[0].result.expectOk();
-    assertMatch(block2.receipts[0].result, /1.1.1.1/);
+    checkStatus.receipts[0].result.expectOk();
+    assertMatch(checkStatus.receipts[0].result, /1.1.1.1/);
   },
 });
 
@@ -72,11 +76,78 @@ Clarinet.test({
   },
 });
 
+Clarinet.test({
+  name: "Whitelist Contract function",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+
+    let checkStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "is-contract-whitelisted", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    checkStatus.receipts[0].result.expectOk();
+    assertEquals(checkStatus.receipts[0].result, '(ok false)');
+
+    let block = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+
+    console.log(block.receipts);
+    assertEquals(block.receipts[0].result, "(ok true)");
+
+    checkStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "is-contract-whitelisted", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    checkStatus.receipts[0].result.expectOk();
+    assertEquals(checkStatus.receipts[0].result, '(ok true)');
+  },
+});
+
+Clarinet.test({
+  name: "De-whitelist Contract function",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+
+    let checkStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "is-contract-whitelisted", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    checkStatus.receipts[0].result.expectOk();
+    assertEquals(checkStatus.receipts[0].result, '(ok false)');
+
+
+    let block = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    console.log(block.receipts);
+    assertEquals(block.receipts[0].result, "(ok true)");
+
+    checkStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "is-contract-whitelisted", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    checkStatus.receipts[0].result.expectOk();
+    assertEquals(checkStatus.receipts[0].result, '(ok true)');
+
+    block = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "de-whitelist-contract", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    console.log(block.receipts);
+    assertEquals(block.receipts[0].result, "(ok true)");
+
+    checkStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "is-contract-whitelisted", [types.principal(protocol_contract_deployer.address)], deployer.address),
+    ]);
+    checkStatus.receipts[0].result.expectOk();
+    assertEquals(checkStatus.receipts[0].result, '(ok false)');
+  },
+});
+
 // CreateDLC
-// Have a list of registered contracts
-// Have a list of whitelisted protocol wallets
+// Should already have a list of registered contracts
+// Should already have a list of whitelisted protocol wallets
 
 // (protocolWallet address, numAttestors int)
+
 // create the map
 // create the NFT
 // done - emit the event in the created state
@@ -105,7 +176,6 @@ Clarinet.test({
       Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], creator.address)
     ]);
 
-
     const event = block.receipts[0].events[0];
 
     assertEquals(typeof event, 'object');
@@ -114,6 +184,7 @@ Clarinet.test({
     assertStringIncludes(event.contract_event.value, "creator: " + 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5');
     assertStringIncludes(event.contract_event.value, "protocol-wallet: " + 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP');
     assertStringIncludes(event.contract_event.value, `event-source: "dlclink:create-dlc:v${eventSourceVersion}"`);
+    // Expects the IPs of the attestors to be elements 0 and 2, as per the call in callback-contract-mock.clar
     assertStringIncludes(event.contract_event.value, `attestors: [{dns: "1.2.3.4"}, {dns: "9.10.11.12"}]`);
 
     const mintEvent = block.receipts[0].events[1];
@@ -152,6 +223,7 @@ Clarinet.test({
 
     block.receipts[0].result.expectOk();
     assertMatch(block.receipts[0].result, /uuid: 0x[a-fA-F0-9]{64}/);
+    // Expects the IPs of the attestors to be elements 0 and 2, as per the call in callback-contract-mock.clar
     assertStringIncludes(block.receipts[0].result, 'attestors: [{dns: "1.2.3.4"}, {dns: "9.10.11.12"}]');
   },
 });
