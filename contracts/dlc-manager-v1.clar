@@ -23,6 +23,7 @@
 (define-constant err-get-attestors (err u116))
 (define-constant err-mint-nft (err u117))
 (define-constant err-burn-nft (err u118))
+(define-constant err-unknown-contract (err u119))
 
 ;; traits
 ;;
@@ -124,6 +125,7 @@
     (uuid (unwrap! (get-random-uuid (var-get attestor-id)) err-failed-building-uuid))
     (attestor-urls-list (get-url-list-from-buff attestor-ids))
     )
+    (asserts! (unwrap-panic (is-contract-whitelisted contract-caller)) err-unknown-contract)
     (asserts! (is-none (map-get? dlcs uuid)) err-dlc-already-added)
     (map-set dlcs uuid {
       uuid: uuid,
@@ -210,19 +212,9 @@
   )
 )
 
-;; get the URIs from the map of attestors
-
 ;; ---------------------------------------------------------
 ;; Utilities
 ;; ---------------------------------------------------------
-
-;; Pass in a buff of nft ids which map to the attestor nfts, and we'll return a list of the ids as uints
-;; input format is like 0x01020304 -> (list 1 2 3 4)
-;; (define-private (get-int-list-from-buff (id_buff (buff 32)))
-;;   (begin
-;;     (ok (map buff-to-int-be id_buff))
-;;   )
-;; )
 
 ;; Take a buff of attestor nft ids and return a list of the attestor urls
 ;; input: 0x010203 (nfts with ids 1, 2, 3)
@@ -232,12 +224,6 @@
     (map get-attestor-url-from-id (map buff-to-uint-be id_buff))
   )
 )
-
-;; (define-private (get-attestor-urls-from-ids-list (list ids))
-;;   (begin
-;;     (ok (map get-attestor-url-from-id ids))
-;;   )
-;; )
 
 (define-private (get-attestor-url-from-id (id uint))
   (begin

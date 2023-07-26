@@ -92,7 +92,6 @@ Clarinet.test({
       Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(protocol_contract_deployer.address)], deployer.address),
     ]);
 
-    console.log(block.receipts);
     assertEquals(block.receipts[0].result, "(ok true)");
 
     checkStatus = chain.mineBlock([
@@ -119,7 +118,6 @@ Clarinet.test({
     let block = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(protocol_contract_deployer.address)], deployer.address),
     ]);
-    console.log(block.receipts);
     assertEquals(block.receipts[0].result, "(ok true)");
 
     checkStatus = chain.mineBlock([
@@ -131,7 +129,6 @@ Clarinet.test({
     block = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "de-whitelist-contract", [types.principal(protocol_contract_deployer.address)], deployer.address),
     ]);
-    console.log(block.receipts);
     assertEquals(block.receipts[0].result, "(ok true)");
 
     checkStatus = chain.mineBlock([
@@ -155,8 +152,10 @@ Clarinet.test({
 
 // Fails if not called from a registered contract
 // Fails if the wallet is not also whitelisted
+
+// This test uses the
 Clarinet.test({
-  name: "create-dlc called from a protocol-contract emits a dlclink event, and mints an NFT",
+  name: "create-dlc fails if called from a non whitelisted contract, but works when whitelisted",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
     const creator = accounts.get('wallet_1');
@@ -173,7 +172,49 @@ Clarinet.test({
     ]);
 
     let block = chain.mineBlock([
-      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], creator.address)
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    block.receipts[0].result.expectErr();
+    assertEquals(block.receipts[0].result, "(err u119)");
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    block = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    block.receipts[0].result.expectOk();
+  },
+});
+
+Clarinet.test({
+  name: "create-dlc called from a protocol-contract emits a dlclink event, and mints an NFT",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const creator = accounts.get('wallet_1');
+    const deployer = accounts.get('deployer')!;
+
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    assertEquals(whitelist_event.receipts[0].result, "(ok true)");
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("1.2.3.4")], deployer.address),
+    ]);
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("5.6.7.8")], deployer.address),
+    ]);
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("9.10.11.12")], deployer.address),
+    ]);
+
+    let block = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
     ]);
 
     const event = block.receipts[0].events[0];
@@ -181,7 +222,7 @@ Clarinet.test({
     assertEquals(typeof event, 'object');
     assertEquals(event.type, 'contract_event');
     assertEquals(event.contract_event.topic, "print");
-    assertStringIncludes(event.contract_event.value, "creator: " + 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5');
+    assertStringIncludes(event.contract_event.value, "creator: " + 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6');
     assertStringIncludes(event.contract_event.value, "protocol-wallet: " + 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP');
     assertStringIncludes(event.contract_event.value, `event-source: "dlclink:create-dlc:v${eventSourceVersion}"`);
     // Expects the IPs of the attestors to be elements 0 and 2, as per the call in callback-contract-mock.clar
@@ -203,6 +244,12 @@ Clarinet.test({
     const creator = accounts.get('wallet_1')
     const deployer = accounts.get('deployer')!;
 
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    assertEquals(whitelist_event.receipts[0].result, "(ok true)");
+
     let register_1 = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("1.2.3.4")], deployer.address),
     ]);
@@ -218,7 +265,7 @@ Clarinet.test({
     assertEquals(register_3.receipts[0].result, "(ok u2)");
 
     let block = chain.mineBlock([
-      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], creator.address)
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
     ]);
 
     block.receipts[0].result.expectOk();
