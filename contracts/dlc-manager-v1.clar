@@ -5,7 +5,7 @@
 ;; description:
 
 ;; Error codes
-(define-constant err-unauthorised (err u101))
+(define-constant err-unauthorized (err u101))
 (define-constant err-dlc-already-added (err u102))
 (define-constant err-unknown-dlc (err u103))
 (define-constant err-not-reached-closing-time (err u104))
@@ -150,6 +150,31 @@
   )
 )
 
+;; @desc indicate that a DLC was funded on Bitcoin
+(define-public (set-status-funded (uuid (buff 32)))
+  (let (
+      (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
+      (protocol-wallet (get protocol-wallet dlc))
+      (callback-contract (get callback-contract dlc))
+      (status (get status dlc))
+    )
+    (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (map-set dlcs uuid
+      (merge
+        dlc
+        { status: status-funded }
+      )
+    )
+    (print {
+      uuid: uuid,
+      callback-contract: callback-contract,
+      event-source: "dlclink:set-status-funded:v1"
+    })
+    (ok true)
+    ;; (ok (try! (contract-call? callback-contract set-status-funded uuid)))
+  )
+)
+
 
 ;; The idea here is that we would mint an nft with a unique id for each attestor
 ;; then a JS app would query all the NFTs and choose n at random
@@ -160,7 +185,7 @@
   (let (
       (id (var-get attestor-id))
     )
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     (unwrap! (nft-mint? dlc-attestors id dlc-manager-contract) err-mint-nft)
     (map-set attestors id {
       dns: dns,
@@ -178,7 +203,7 @@
 
 (define-public (deregister-attestor (id uint))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     (unwrap! (nft-burn? dlc-attestors id dlc-manager-contract) err-burn-nft)
     (map-delete attestors id)
     (ok id)
@@ -187,7 +212,7 @@
 
 (define-public (whitelist-contract (contract-address principal))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     (map-set whitelisted-contracts contract-address {
       status: true,
     })
@@ -197,7 +222,7 @@
 
 (define-public (de-whitelist-contract (contract-address principal))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     (map-delete whitelisted-contracts contract-address)
     (ok true)
   )
@@ -214,7 +239,7 @@
 
 (define-public (get-dlc-from-map (uuid (buff 32)))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     ;; (ok (try! (map-get? dlcs uuid)))
     (ok (map-get? dlcs uuid))
   )
