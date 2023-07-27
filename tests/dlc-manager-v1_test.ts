@@ -341,8 +341,8 @@ Clarinet.test({
     const result = regex.exec(createDlcBlock.receipts[0].result);
     let uuid = result && result[1];
 
-    let setStatusFundedBlock = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid], protocol_wallet.address)
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
     ]);
 
     let statusCheck = chain.mineBlock([
@@ -387,7 +387,7 @@ Clarinet.test({
     let uuid = result && result[1];
 
     let setStatusFundedBlock = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid], deployer.address)
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address)
     ]);
     setStatusFundedBlock.receipts[0].result.expectErr().expectUint(101);
   },
@@ -427,9 +427,15 @@ Clarinet.test({
     let uuid = result && result[1];
 
     let setStatusFundedBlock = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid], protocol_wallet.address)
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
     ]);
 
-    assertEquals("true", "false");
+    setStatusFundedBlock.receipts[0].result.expectOk().expectBool(true);
+    const event = setStatusFundedBlock.receipts[0].events[1];
+
+    assertEquals(typeof event, 'object');
+    assertEquals(event.type, 'contract_event');
+    assertEquals(event.contract_event.topic, "print");
+    assertStringIncludes(event.contract_event.value, `event-source: "callback-set-status-funded", uuid: ${uuid}`);
   },
 });

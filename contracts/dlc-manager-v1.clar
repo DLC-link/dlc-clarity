@@ -64,6 +64,8 @@
 ;; private functions
 ;;
 
+;; Importing the trait to use it as a type
+(use-trait cb-trait .dlc-link-callback-trait-v2.dlc-link-callback-trait)
 
 ;; NFT to keep track of registered contracts
 (define-non-fungible-token registered-contract principal)
@@ -151,11 +153,10 @@
 )
 
 ;; @desc indicate that a DLC was funded on Bitcoin
-(define-public (set-status-funded (uuid (buff 32)))
+(define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
   (let (
       (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
       (protocol-wallet (get protocol-wallet dlc))
-      (callback-contract (get callback-contract dlc))
       (status (get status dlc))
     )
     (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
@@ -170,8 +171,7 @@
       callback-contract: callback-contract,
       event-source: "dlclink:set-status-funded:v1"
     })
-    (ok true)
-    ;; (ok (try! (contract-call? callback-contract set-status-funded uuid)))
+    (ok (try! (contract-call? callback-contract set-status-funded uuid)))
   )
 )
 
