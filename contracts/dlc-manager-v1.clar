@@ -66,7 +66,7 @@
 ;;
 
 ;; Importing the trait to use it as a type
-(use-trait cb-trait .dlc-link-callback-trait-v2.dlc-link-callback-trait)
+(use-trait cb-trait .dlc-link-callback-trait-v1.dlc-link-callback-trait-v1)
 
 ;; NFT to keep track of registered contracts
 (define-non-fungible-token registered-contract principal)
@@ -202,6 +202,30 @@
   )
 )
 
+
+;; @desc indicate that a DLC was funded on Bitcoin
+(define-public (post-close (uuid (buff 32)) (btc-tx-id (string-ascii 64)) (callback-contract <cb-trait>))
+  (let (
+      (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
+      (protocol-wallet (get protocol-wallet dlc))
+      (status (get status dlc))
+    )
+    (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (asserts! (is-eq status status-closing) err-dlc-in-invalid-state-for-request)
+    (map-set dlcs uuid
+      (merge
+        dlc
+        { status: status-closed }
+      )
+    )
+    (print {
+      uuid: uuid,
+      btcTxId: btc-tx-id,
+      event-source: "dlclink:post-close-dlc:v1"
+    })
+    (ok (try! (contract-call? callback-contract post-close-dlc-handler uuid btc-tx-id)))
+  )
+)
 
 ;; The idea here is that we would mint an nft with a unique id for each attestor
 ;; then a JS app would query all the NFTs and choose n at random
