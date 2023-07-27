@@ -24,6 +24,7 @@
 (define-constant err-mint-nft (err u117))
 (define-constant err-burn-nft (err u118))
 (define-constant err-unknown-contract (err u119))
+(define-constant err-dlc-in-invalid-state-for-request (err u120))
 
 ;; traits
 ;;
@@ -160,6 +161,7 @@
       (status (get status dlc))
     )
     (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (asserts! (is-eq status status-created) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
       (merge
         dlc
@@ -172,6 +174,31 @@
       event-source: "dlclink:set-status-funded:v1"
     })
     (ok (try! (contract-call? callback-contract set-status-funded uuid)))
+  )
+)
+
+;; @desc close the DLC
+(define-public (close-dlc (uuid (buff 32)) (outcome uint))
+  (let (
+      (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
+      (creator (get creator dlc))
+      (status (get status dlc))
+    )
+    (asserts! (is-eq creator tx-sender) err-unauthorized)
+    (asserts! (is-eq status status-funded) err-dlc-in-invalid-state-for-request)
+    (map-set dlcs uuid
+      (merge
+        dlc
+        { status: status-closing, outcome: (some outcome) }
+      )
+    )
+    (print {
+      uuid: uuid,
+      outcome: outcome,
+      creator: creator,
+      event-source: "dlclink:close-dlc:v1"
+    })
+    (nft-burn? open-dlc uuid dlc-manager-contract)
   )
 )
 

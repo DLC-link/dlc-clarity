@@ -366,6 +366,45 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "set-status-funded fails if the dlc is not in the right state",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const creator = accounts.get('wallet_1');
+    const deployer = accounts.get('deployer')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    whitelist_event.receipts[0].result.expectOk().expectBool(true);
+
+    registerAttestors(chain, deployer);
+
+    let createDlcBlock = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    let uuid = getUUIDFromResponse(createDlcBlock);
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
+    ]);
+
+    let statusCheck = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "get-dlc-from-map", [uuid], deployer.address)
+    ]);
+    statusCheck.receipts[0].result.expectOk();
+    assertMatch(statusCheck.receipts[0].result, /status: u1/);
+
+    let setStatus = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
+    ]);
+    setStatus.receipts[0].result.expectErr().expectUint(120);
+  },
+});
+
+Clarinet.test({
   name: "set-status-funded should call back to the calling contract",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
@@ -398,5 +437,130 @@ Clarinet.test({
     assertEquals(event.type, 'contract_event');
     assertEquals(event.contract_event.topic, "print");
     assertStringIncludes(event.contract_event.value, `event-source: "callback-set-status-funded", uuid: ${uuid}`);
+  },
+});
+
+//////////////////////////////
+// Close DLC
+//////////////////////////////
+
+Clarinet.test({
+  name: "closeDLC reverts if called from a contract that isn't the DLC owner/creator",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const creator = accounts.get('wallet_1');
+    const deployer = accounts.get('deployer')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const some_wallet = accounts.get('wallet_3')!;
+
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    whitelist_event.receipts[0].result.expectOk().expectBool(true);
+
+    registerAttestors(chain, deployer);
+
+    let createDlcBlock = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    let uuid = getUUIDFromResponse(createDlcBlock);
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
+    ]);
+
+    let closeCall = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "close-dlc-request", [uuid, types.uint(5)], protocol_wallet.address)
+    ]);
+
+    closeCall.receipts[0].result.expectErr().expectUint(101);
+  },
+});
+
+Clarinet.test({
+  name: "closeDLC reverts if called when in the wrong state",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const creator = accounts.get('wallet_1');
+    const deployer = accounts.get('deployer')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    whitelist_event.receipts[0].result.expectOk().expectBool(true);
+
+    registerAttestors(chain, deployer);
+
+    let createDlcBlock = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    let uuid = getUUIDFromResponse(createDlcBlock);
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
+    ]);
+
+    let closeCall = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "close-dlc-request", [uuid, types.uint(5)], protocol_contract_deployer.address)
+    ]);
+    closeCall.receipts[0].result.expectOk();
+
+    closeCall = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "close-dlc-request", [uuid, types.uint(5)], protocol_contract_deployer.address)
+    ]);
+    closeCall.receipts[0].result.expectErr().expectUint(120);
+  },
+});
+
+Clarinet.test({
+  name: "closeDLC emits a CloseDLC event with the correct data and burn the NFT",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const creator = accounts.get('wallet_1');
+    const deployer = accounts.get('deployer')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+
+    let whitelist_event = chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], deployer.address),
+    ]);
+
+    whitelist_event.receipts[0].result.expectOk().expectBool(true);
+
+    registerAttestors(chain, deployer);
+
+    let createDlcBlock = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "create-dlc-request-v1", [types.uint(1000000), types.uint(shiftPriceValue(1)), types.uint(14000), types.uint(1000), types.uint(10)], protocol_contract_deployer.address)
+    ]);
+
+    let uuid = getUUIDFromResponse(createDlcBlock);
+
+    chain.mineBlock([
+      Tx.contractCall(dlcManagerContract, "set-status-funded", [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))], protocol_wallet.address)
+    ]);
+
+    let closeCall = chain.mineBlock([
+      Tx.contractCall(contractPrincipal(protocol_contract_deployer, callbackContract), "close-dlc-request", [uuid, types.uint(5)], protocol_contract_deployer.address)
+    ]);
+    closeCall.receipts[0].result.expectOk();
+
+    const event = closeCall.receipts[0].events[0];
+
+    assertEquals(typeof event, 'object');
+    assertEquals(event.type, 'contract_event');
+    assertEquals(event.contract_event.topic, "print");
+    assertStringIncludes(event.contract_event.value, "creator: " + 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6');    // assertStringIncludes(event.contract_event.value, "protocol-wallet: " + protocol_wallet.address);
+    assertStringIncludes(event.contract_event.value, `event-source: "dlclink:close-dlc:v${eventSourceVersion}"`);
+
+    const burnEvent = closeCall.receipts[0].events[1];
+
+    assertEquals(typeof burnEvent, 'object');
+    assertEquals(burnEvent.type, 'nft_burn_event');
+    assertEquals(burnEvent.nft_burn_event.asset_identifier.split("::")[1], nftAssetContract);
+    assertEquals(burnEvent.nft_burn_event.sender.split(".")[1], dlcManagerContract);
   },
 });

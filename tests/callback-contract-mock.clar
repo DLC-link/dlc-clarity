@@ -41,3 +41,9 @@
     (ok true)
   )
 )
+
+(define-public (close-dlc-request (uuid (buff 32)) (outcome uint))
+  (begin
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid outcome )) err-cant-unwrap)
+  )
+)
