@@ -157,8 +157,8 @@
       creator: creator,
       event-source: "dlclink:post-create-dlc:v0-1"
     })
+    (try! (contract-call? callback-contract post-create-dlc-handler callback-nonce uuid))
     (nft-mint? open-dlc uuid dlc-manager-contract)
-    ;; (ok uuid)
   )
 )
 

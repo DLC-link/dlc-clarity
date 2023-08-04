@@ -19,38 +19,32 @@ import { PricePackage, Block, getIntValueFromPrintOutput, getStringValueFromPrin
 const BTChex = "BTC";
 const UUID = "fakeuuid";
 const nftAssetContract = "open-dlc";
-const dlcManagerContract = "dlc-manager-priced-v0-1";
-const sampleProtocolContract = "sample-contract-loan-v0-1";
+const dlcManagerContract = "dlc-manager-v1";
+const sampleProtocolContract = "sample-contract-loan-v1";
 
 const contractPrincipal = (deployer: Account, contract: string) => `${deployer.address}.${contract}`;
 
-const trustedOraclePubkey = "0x035ca791fed34bf9e9d54c0ce4b9626e1382cf13daa46aa58b657389c24a751cc6";
-const untrustedOraclePubkey = "0x03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9";
-
-const pricePackage: PricePackage = {
-  timestamp: 1647332581,
-  prices: [{ symbol: "BTC", value: 23501.669932 }]
-}
-
-const pricePackageForLiquidation: PricePackage = {
-  timestamp: 1647332581,
-  prices: [{ symbol: "BTC", value: 13588.669932 }]
-}
-
-const packageCV = pricePackageToCV(pricePackage);
-const packageCVForLiquidation = pricePackageToCV(pricePackageForLiquidation);
-
-const signature = "0x4ee83f2bdc6d67619e13c5786c42aa66a899cc63229310400247bac0dd22e99454cec834a98b56a5042bcec5e709a76e90d072569e5db855e58e4381d0adb0c201";
-
-const signatureForLiquidation = "0x3256910f5d0788ee308baecd3787a36ab2e3a8ff3fb4d0fc4638c84ba48957b82876b71eb58751366dd7a8a6ae1f2040120706742676ddc2187170932bb344e901";
-
-function setTrustedOracle(chain: Chain, senderAddress: string): Block {
-  return chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, "set-trusted-oracle", [trustedOraclePubkey, types.bool(true)], senderAddress),
+function registerAttestors(chain: Chain, deployer: Account) {
+  let register_1 = chain.mineBlock([
+    Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("1.2.3.4")], deployer.address),
   ]);
+  let register_2 = chain.mineBlock([
+    Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("5.6.7.8")], deployer.address),
+  ]);
+  let register_3 = chain.mineBlock([
+    Tx.contractCall(dlcManagerContract, "register-attestor", [types.ascii("9.10.11.12")], deployer.address),
+  ]);
+
+  return { register_1, register_2, register_3 };
 }
 
-function openLoan(chain: Chain, protocol_contract_user: Account, deployer: Account, callbackContract: string, loanParams: { vaultAmount: number, btcDeposit: number, liquidationRatio: number, liquidationFee: number } = { vaultAmount: 1000000, btcDeposit: 1, liquidationRatio: 14000, liquidationFee: 1000 }) {
+function openLoan(chain: Chain, protocol_contract_user: Account, protocol_contract_deployer: Account, deployer: Account, callbackContract: string, loanParams: { vaultAmount: number, btcDeposit: number, liquidationRatio: number, liquidationFee: number } = { vaultAmount: 1000000, btcDeposit: 1, liquidationRatio: 14000, liquidationFee: 1000 }) {
+  registerAttestors(chain, deployer);
+
+  chain.mineBlock([
+    Tx.contractCall(dlcManagerContract, "whitelist-contract", [types.principal(contractPrincipal(protocol_contract_deployer, sampleProtocolContract))], deployer.address),
+  ]);
+
   const block = chain.mineBlock([
     Tx.contractCall(callbackContract, "setup-loan", [types.uint(shiftPriceValue(loanParams.btcDeposit)), types.uint(loanParams.liquidationRatio), types.uint(loanParams.liquidationFee), types.uint(10)], protocol_contract_user.address)
   ]);
@@ -116,7 +110,7 @@ Clarinet.test({
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
-    openLoan(chain, protocol_contract_user, deployer, contractPrincipal(protocol_contract_deployer, sampleProtocolContract));
+    openLoan(chain, protocol_contract_user, protocol_contract_deployer, deployer, contractPrincipal(protocol_contract_deployer, sampleProtocolContract));
 
     let block = chain.mineBlock([
       Tx.contractCall(dlcManagerContract, "get-dlc", [types.buff(UUID)], deployer.address)
@@ -149,7 +143,7 @@ Clarinet.test({
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
-    openLoan(chain, protocol_contract_user, deployer, contractPrincipal(protocol_contract_deployer, sampleProtocolContract));
+    openLoan(chain, protocol_contract_user, protocol_contract_deployer, deployer, contractPrincipal(protocol_contract_deployer, sampleProtocolContract));
 
     let block = chain.mineBlock([
       Tx.contractCall(contractPrincipal(protocol_contract_deployer, sampleProtocolContract), "get-loan-by-uuid", [types.buff(UUID)], protocol_contract_user.address)
