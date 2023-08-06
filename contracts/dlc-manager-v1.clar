@@ -114,6 +114,19 @@
 ;; Helper functions
 ;; ---------------------------------------------------------
 
+(define-read-only (get-dlc (uuid (buff 32)))
+  (map-get? dlcs uuid)
+)
+
+(define-read-only (get-callback-contract (uuid (buff 32)))
+  (let (
+    (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
+    (callback-contract (get callback-contract dlc))
+    )
+    (ok callback-contract)
+  )
+)
+
 ;; ---------------------------------------------------------
 ;; Main functions
 ;; ---------------------------------------------------------
