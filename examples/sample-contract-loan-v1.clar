@@ -19,7 +19,6 @@
 (define-constant err-not-repaid (err u1013))
 
 ;; Status Enum
-(define-constant status-not-ready "not-ready")
 (define-constant status-ready "ready")
 (define-constant status-funded "funded")
 (define-constant status-pre-repaid "pre-repaid")
@@ -126,6 +125,8 @@
   )
 )
 
+
+
 ;; ---------------------------------------------------------
 ;; Main Functions
 ;; ---------------------------------------------------------
@@ -141,23 +142,24 @@
         (loan-id (+ (var-get last-loan-id) u1))
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
+          ;; Call to create-dlc returns the list of attestors, as well as the uuid of the dlc
+        (uuid (get uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP 0x0002)) err-contract-call-failed))))
       )
       (var-set last-loan-id loan-id)
       (begin
           (map-set loans loan-id {
-            dlc_uuid: none,
-            status: status-not-ready,
+            dlc_uuid: (some uuid),
+            status: status-ready,
             vault-loan: u0,
             vault-collateral: btc-deposit,
             liquidation-ratio: liquidation-ratio,
             liquidation-fee: liquidation-fee,
             owner: tx-sender
           })
-          (try! (set-status loan-id status-not-ready))
+          (try! (set-status loan-id status-ready))
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))
-
-          ;; Call to create-dlc returns the list of attestors, as well as the uuid of the dlc
-          (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP 0x0002)) err-contract-call-failed)
+          (map-set uuid-loan-id uuid loan-id)
+          (ok uuid)
       )
     )
 )
@@ -230,7 +232,7 @@
     (begin
       (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
       (try! (set-status loan-id status-pre-repaid))
-      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid u0))) err-contract-call-failed)
+      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid u0))) err-contract-call-failed)
     )
   )
 )
@@ -256,18 +258,18 @@
 )
 
 ;; @desc Closing flow with price data.
-(define-public (attempt-liquidate (loan-id uint))
-  (let (
-    (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
-    (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
-    )
-    (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 get-btc-price uuid))) err-contract-call-failed)
-  )
-)
+;; (define-public (attempt-liquidate (loan-id uint))
+;;   (let (
+;;     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
+;;     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
+;;     )
+;;     (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 get-btc-price uuid))) err-contract-call-failed)
+;;   )
+;; )
 
 ;; @desc Called by the dlc-manager contract with the validated BTC price.
 ;; Liquidates loan if necessary at given level
-(define-public (get-btc-price-callback (btc-price uint) (uuid (buff 32)))
+(define-public (attempt-liquidate (btc-price uint) (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
@@ -304,7 +306,7 @@
     )
     (begin
       (try! (set-status loan-id status-pre-liquidated))
-      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-priced-v0-1 close-dlc uuid payout-ratio)) err-contract-call-failed)
+      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid payout-ratio)) err-contract-call-failed)
     )
   )
 )
