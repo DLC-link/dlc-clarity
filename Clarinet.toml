@@ -11,7 +11,7 @@ contract_id = 'STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify'
 [[project.requirements]]
 contract_id = 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard'
 
-[contracts.callback-contract]
+[contracts.callback-contract-v1]
 path = 'tests/callback-contract-mock-v1.clar'
 clarity_version = 2
 epoch = 2.3

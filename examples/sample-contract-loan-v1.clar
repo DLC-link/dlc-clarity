@@ -213,12 +213,11 @@
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     (vault-loan-amount (get vault-loan loan))
-    (new-balance (- vault-loan-amount amount))
     )
     (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
     (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
-    (asserts! (>= new-balance u0) err-balance-negative)
-    (map-set loans loan-id (merge loan { vault-loan: new-balance }))
+    (asserts! (>= vault-loan-amount amount) err-balance-negative)
+    (map-set loans loan-id (merge loan { vault-loan: (- vault-loan-amount amount) }))
     (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin transfer amount (get owner loan) sample-protocol-contract none)) err-stablecoin-repay-failed)
   )
 )
@@ -232,7 +231,7 @@
     (begin
       (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
       (try! (set-status loan-id status-pre-repaid))
-      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid u0))) err-contract-call-failed)
+      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid u0)) err-contract-call-failed)
     )
   )
 )
@@ -257,24 +256,14 @@
   )
 )
 
-;; @desc Closing flow with price data.
-;; (define-public (attempt-liquidate (loan-id uint))
-;;   (let (
-;;     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
-;;     (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
-;;     )
-;;     (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 get-btc-price uuid))) err-contract-call-failed)
-;;   )
-;; )
-
-;; @desc Called by the dlc-manager contract with the validated BTC price.
-;; Liquidates loan if necessary at given level
+;; @desc Liquidates loan if necessary at given level
 (define-public (attempt-liquidate (btc-price uint) (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid) err-cant-get-loan-id-by-uuid ))
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     )
     (asserts! (unwrap! (check-liquidation loan-id btc-price) err-cant-unwrap-check-liquidation) err-doesnt-need-liquidation)
+    (print { liquidator: tx-sender })
     (ok (unwrap! (liquidate-loan loan-id btc-price) err-cant-unwrap-liquidate-loan))
   )
 )

@@ -1,5 +1,4 @@
 // deno-lint-ignore-file require-await no-explicit-any prefer-const
-// @ts-ignore
 import {
   Clarinet,
   Tx,
@@ -14,8 +13,8 @@ import {
   shiftPriceValue,
   PricePackage,
   Block,
-  // getIntValueFromPrintOutput,
-  // getStringValueFromPrintOutput,
+  customShiftValue,
+  //@ts-ignore-next-line
 } from './deps.ts';
 
 // Unfortunately it is not straightforward to import "../src/stacks-redstone.ts"
@@ -35,6 +34,8 @@ const BTChex = 'BTC';
 const nftAssetContract = 'open-dlc';
 const dlcManagerContract = 'dlc-manager-v1';
 const sampleProtocolContract = 'sample-contract-loan-v1';
+const stableCoinContract = 'dlc-stablecoin';
+const stableCoinDecimals = 6;
 
 const contractPrincipal = (deployer: Account, contract: string) => `${deployer.address}.${contract}`;
 
@@ -219,94 +220,476 @@ Clarinet.test({
   },
 });
 
-// Clarinet.test({
-//   name: "close-loan on sample protocol contract should close the loan, emit a dlclink event, and burn the nft",
-//   async fn(chain: Chain, accounts: Map<string, Account>) {
-//     const deployer = accounts.get('deployer')!;
-//     const deployer_2 = accounts.get('deployer_2')!;
+Clarinet.test({
+  name: 'close-loan on sample protocol contract should close the loan, emit a dlclink event, and burn the nft',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
-//     openLoan(chain, deployer, contractPrincipal(deployer_2, sampleProtocolContract));
+    const UUID = openLoan(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      deployer,
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract)
+    );
 
-//     let block = chain.mineBlock([
-//       Tx.contractCall(contractPrincipal(deployer_2, sampleProtocolContract), "close-loan", [types.uint(1)], deployer_2.address)
-//     ]);
-//     assertStringIncludes(block.receipts[0].events[0].contract_event.value, 'status: "pre-repaid", uuid: 0x66616b6575756964');
-//     assertStringIncludes(block.receipts[0].events[1].contract_event.value, 'callback-contract: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, caller: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, creator: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, event-source: "dlclink:close-dlc:v0-1", outcome: u0, uuid: 0x66616b6575756964')
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'close-loan',
+        [types.uint(1)],
+        protocol_contract_user.address
+      ),
+    ]);
 
-//     const block2 = chain.mineBlock([
-//       Tx.contractCall(dlcManagerContract, "post-close-dlc", [types.buff(UUID), types.principal(contractPrincipal(deployer_2, sampleProtocolContract))], deployer.address)
-//     ]);
+    assertStringIncludes(
+      block.receipts[0].events[0].contract_event.value,
+      `{loan-id: u1, status: "pre-repaid", uuid: (some ${UUID})}`
+    );
+    assertStringIncludes(
+      block.receipts[0].events[1].contract_event.value,
+      `{creator: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, event-source: "dlclink:close-dlc:v1", outcome: u0, uuid: ${UUID}}`
+    );
 
-//     assertStringIncludes(block2.receipts[0].events[0].contract_event.value, 'closing-price: none, event-source: "dlclink:close-dlc-internal:v0", uuid: 0x66616b6575756964')
-//     const burnEvent = block2.receipts[0].events[2];
-//     assertEquals(typeof burnEvent, 'object');
-//     assertEquals(burnEvent.type, 'nft_burn_event');
-//     assertEquals(burnEvent.nft_burn_event.asset_identifier.split("::")[1], nftAssetContract);
-//     assertEquals(burnEvent.nft_burn_event.sender.split(".")[1], dlcManagerContract);
-//     assertEquals(hex2ascii(burnEvent.nft_burn_event.value), UUID);
+    const burnEvent = block.receipts[0].events[2];
+    assertEquals(typeof burnEvent, 'object');
+    assertEquals(burnEvent.type, 'nft_burn_event');
+    assertEquals(burnEvent.nft_burn_event.asset_identifier.split('::')[1], nftAssetContract);
+    assertEquals(burnEvent.nft_burn_event.sender.split('.')[1], dlcManagerContract);
+    assertEquals(burnEvent.nft_burn_event.value, UUID);
 
-//     let block3 = chain.mineBlock([
-//       Tx.contractCall(contractPrincipal(deployer_2, sampleProtocolContract), "get-loan", [types.uint(1)], deployer.address)
-//     ]);
-//     //The loan account in the sample protocl contact
-//     const loan: any = block3.receipts[0].result.expectSome().expectTuple();
-//     const dlcUuid = loan.dlc_uuid.expectSome();
+    let block2 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'get-loan',
+        [types.uint(1)],
+        deployer.address
+      ),
+    ]);
+    //The loan account in the sample protocl contact
+    const loan: any = block2.receipts[0].result.expectSome().expectTuple();
+    const dlcUuid = loan.dlc_uuid.expectSome();
 
-//     assertEquals(hex2ascii(dlcUuid), "fakeuuid");
-//     assertEquals(loan.status, '"repaid"');
-//     assertEquals(loan['closing-price'], "none");
-//     assertEquals(loan['vault-collateral'], "u100000000");
-//     assertEquals(loan['vault-loan'], "u1000000");
-//   },
-// });
+    assertEquals(dlcUuid, UUID);
+    assertEquals(loan.status, '"pre-repaid"');
+    assertEquals(loan['vault-collateral'], 'u100000000');
+    assertEquals(loan['vault-loan'], 'u0');
+  },
+});
 
-// Clarinet.test({
-//   name: "liquidate loan on sample contract should close the loan, emit a dlclink event, and burn the nft",
-//   async fn(chain: Chain, accounts: Map<string, Account>) {
-//     const deployer = accounts.get('deployer')!;
-//     const deployer_2 = accounts.get('deployer_2')!;
+Clarinet.test({
+  name: 'cannot borrow on unfunded vault',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
-//     openLoan(chain, deployer, contractPrincipal(deployer_2, sampleProtocolContract));
-//     setTrustedOracle(chain, deployer.address);
+    const UUID = openLoan(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      deployer,
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract)
+    );
 
-//     let liquidateCall = chain.mineBlock([
-//       Tx.contractCall(contractPrincipal(deployer_2, sampleProtocolContract), "liquidate-loan", [types.uint(1), types.uint(10000)], deployer_2.address),
-//     ]);
-//     assertStringIncludes(liquidateCall.receipts[0].events[0].contract_event.value, 'btc-price: u10000, status: "pre-liquidated", uuid: 0x66616b6575756964');
-//     assertStringIncludes(liquidateCall.receipts[0].events[1].contract_event.value, 'caller: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, creator: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1, event-source: "dlclink:close-dlc-liquidate:v0", uuid: 0x66616b6575756964');
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'borrow',
+        [types.uint(1), types.uint(100000000)],
+        protocol_contract_user.address
+      ),
+    ]);
 
-//     let block = chain.mineBlock([
-//       Tx.contractCall(dlcManagerContract, "close-dlc-liquidate-internal", [types.buff(UUID), packageCVForLiquidation.timestamp, packageCVForLiquidation.prices, signatureForLiquidation, types.principal(contractPrincipal(deployer_2, sampleProtocolContract))], deployer.address),
-//       Tx.contractCall(dlcManagerContract, "get-dlc", [types.buff(UUID)], deployer.address)
-//     ]);
+    block.receipts[0].result.expectErr().expectUint(1009);
+  },
+});
 
-//     block.receipts[0].result.expectOk().expectBool(true);
-//     const printEvent2 = block.receipts[0].events[0];
+function setupAndBorrow(
+  chain: Chain,
+  protocol_contract_user: Account,
+  protocol_contract_deployer: Account,
+  protocol_wallet: Account,
+  deployer: Account,
+  borrowAmount: number
+) {
+  let mintStablecoinToProtocolContract = chain.mineBlock([
+    Tx.contractCall(
+      contractPrincipal(deployer, stableCoinContract),
+      'mint',
+      [
+        types.uint(1000000000000),
+        types.principal(contractPrincipal(protocol_contract_deployer, sampleProtocolContract)),
+      ],
+      deployer.address
+    ),
+  ]);
 
-//     assertEquals(typeof printEvent2, 'object');
-//     assertEquals(printEvent2.type, 'contract_event');
-//     assertEquals(printEvent2.contract_event.topic, "print");
-//     assertStringIncludes(printEvent2.contract_event.value, 'actual-closing-time: u1647332, closing-price: u1358866993200, event-source: "dlclink:close-dlc-liquidate-internal:v0", payout-ratio: (ok u80949850), uuid: 0x66616b6575756964')
+  const UUID = openLoan(
+    chain,
+    protocol_contract_user,
+    protocol_contract_deployer,
+    deployer,
+    contractPrincipal(protocol_contract_deployer, sampleProtocolContract)
+  );
 
-//     const burnEvent = block.receipts[0].events[2];
+  let ssf = chain.mineBlock([
+    Tx.contractCall(
+      dlcManagerContract,
+      'set-status-funded',
+      [UUID, types.principal(contractPrincipal(protocol_contract_deployer, sampleProtocolContract))],
+      protocol_wallet.address
+    ),
+  ]);
 
-//     assertEquals(typeof burnEvent, 'object');
-//     assertEquals(burnEvent.type, 'nft_burn_event');
-//     assertEquals(burnEvent.nft_burn_event.asset_identifier.split("::")[1], nftAssetContract);
-//     assertEquals(burnEvent.nft_burn_event.sender.split(".")[1], dlcManagerContract);
+  ssf.receipts[0].result.expectOk().expectBool(true);
 
-//     const dlc: any = block.receipts[1].result.expectSome().expectTuple();
-//     assertEquals(dlc['closing-price'], "(some u1358866993200)")
+  let block = chain.mineBlock([
+    Tx.contractCall(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'borrow',
+      [types.uint(1), types.uint(borrowAmount)],
+      protocol_contract_user.address
+    ),
+  ]);
 
-//     let block2 = chain.mineBlock([
-//       Tx.contractCall(contractPrincipal(deployer_2, sampleProtocolContract), "get-loan", [types.uint(1)], deployer.address)
-//     ]);
-//     //The loan account in the sample protocl contact
-//     const loan: any = block2.receipts[0].result.expectSome().expectTuple();
-//     const dlcUuid = loan.dlc_uuid.expectSome();
+  block.receipts[0].result.expectOk().expectBool(true);
+  return UUID;
+}
 
-//     assertEquals(hex2ascii(dlcUuid), "fakeuuid");
-//     assertEquals(loan.status, '"liquidated"');
-//     assertEquals(loan['closing-price'], "(some u1358866993200)");
-//   },
-// });
+Clarinet.test({
+  name: 'borrow increases the loan amount',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const borrowAmount = 100000000; // $100
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    let block2 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'get-loan',
+        [types.uint(1)],
+        deployer.address
+      ),
+    ]);
+    //The loan account in the sample protocl contact
+    const loan: any = block2.receipts[0].result.expectSome().expectTuple();
+    const dlcUuid = loan.dlc_uuid.expectSome();
+
+    assertEquals(dlcUuid, UUID);
+    assertEquals(loan.status, '"funded"');
+    assertEquals(loan['vault-collateral'], 'u100000000');
+    assertEquals(loan['vault-loan'], `u${borrowAmount}`);
+  },
+});
+
+Clarinet.test({
+  name: 'cannot close loan if not repaid',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const borrowAmount = 100000000; // $100
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'close-loan',
+        [types.uint(1)],
+        protocol_contract_user.address
+      ),
+    ]);
+
+    block.receipts[0].result.expectErr().expectUint(1013);
+  },
+});
+
+Clarinet.test({
+  name: 'repay decreases the loan amount',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const borrowAmount = 100000000; // $100
+    const repayAmount = 50000000; // $50
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'get-loan',
+        [types.uint(1)],
+        deployer.address
+      ),
+    ]);
+    //The loan account in the sample protocl contact
+    const loan: any = block.receipts[0].result.expectSome().expectTuple();
+    const dlcUuid = loan.dlc_uuid.expectSome();
+
+    assertEquals(dlcUuid, UUID);
+    assertEquals(loan['vault-loan'], `u${borrowAmount}`);
+
+    let block2 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'repay',
+        [types.uint(1), types.uint(repayAmount)],
+        protocol_contract_user.address
+      ),
+    ]);
+
+    block2.receipts[0].result.expectOk().expectBool(true);
+
+    let block3 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'get-loan',
+        [types.uint(1)],
+        deployer.address
+      ),
+    ]);
+
+    //The loan account in the sample protocl contact
+    const loan2: any = block3.receipts[0].result.expectSome().expectTuple();
+    assertEquals(loan2['vault-loan'], `u${borrowAmount - repayAmount}`);
+  },
+});
+
+Clarinet.test({
+  name: 'cannot repay more than borrowed amount',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const borrowAmount = 100000000; // $100
+    const repayAmount = 500000000; // $500
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    let block2 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'repay',
+        [types.uint(1), types.uint(repayAmount)],
+        protocol_contract_user.address
+      ),
+    ]);
+
+    block2.receipts[0].result.expectErr().expectUint(1012);
+  },
+});
+
+Clarinet.test({
+  name: 'check-liquidation works as expected',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const borrowAmount = customShiftValue(10000, stableCoinDecimals); // $10,000
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    const btcPrice = shiftPriceValue(30000); // $30,000
+    let cl = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'check-liquidation',
+      [types.uint(1), types.uint(btcPrice)],
+      deployer.address
+    );
+    cl.result.expectOk().expectBool(false);
+
+    const btcPrice2 = shiftPriceValue(15000); // $15,000
+    let cl2 = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'check-liquidation',
+      [types.uint(1), types.uint(btcPrice2)],
+      deployer.address
+    );
+    cl2.result.expectOk().expectBool(false);
+
+    // We expect liquidation at $14,000 for a loan of $10,000, with a 140% collateralization ratio
+    const btcPrice3 = shiftPriceValue(14000); // $14,000
+    let cl3 = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'check-liquidation',
+      [types.uint(1), types.uint(btcPrice3)],
+      deployer.address
+    );
+    cl3.result.expectOk().expectBool(true);
+  },
+});
+
+Clarinet.test({
+  name: 'get-payout-ratio works as expected',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const borrowAmount = customShiftValue(10000, stableCoinDecimals); // $10,000
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    let btcPrice = shiftPriceValue(30000); // $30,000
+    let cl = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'get-payout-ratio',
+      [types.uint(1), types.uint(btcPrice)],
+      deployer.address
+    );
+    cl.result.expectOk().expectUint(0);
+
+    btcPrice = shiftPriceValue(15000); // $15,000
+    cl = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'get-payout-ratio',
+      [types.uint(1), types.uint(btcPrice)],
+      deployer.address
+    );
+    cl.result.expectOk().expectUint(0);
+
+    // We expect liquidation at $14,000 for a loan of $10,000, with a 140% collateralization ratio
+    btcPrice = shiftPriceValue(14000); // $14,000
+    cl = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'get-payout-ratio',
+      [types.uint(1), types.uint(btcPrice)],
+      deployer.address
+    );
+    cl.result.expectOk().expectUint(7857);
+
+    btcPrice = shiftPriceValue(10000); // $10,000
+    cl = chain.callReadOnlyFn(
+      contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+      'get-payout-ratio',
+      [types.uint(1), types.uint(btcPrice)],
+      deployer.address
+    );
+
+    // We expect that the payout ratio is capped at 100%
+    cl.result.expectOk().expectUint(10000);
+  },
+});
+
+Clarinet.test({
+  name: 'attempt-liquidate fails if the loan is not underwater',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const liquidator_user = accounts.get('wallet_3')!;
+    const borrowAmount = customShiftValue(10000, stableCoinDecimals); // $10,000
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    const btcPrice = shiftPriceValue(30000); // $30,000
+
+    let block2 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'attempt-liquidate',
+        [types.uint(btcPrice), UUID],
+        liquidator_user.address
+      ),
+    ]);
+
+    block2.receipts[0].result.expectErr().expectUint(1007);
+  },
+});
+
+Clarinet.test({
+  name: 'attempt-liquidate should call the dlc-manager contract to close the dlc',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_user = accounts.get('protocol_contract_user')!;
+    const protocol_wallet = accounts.get('protocol_wallet')!;
+    const liquidator_user = accounts.get('wallet_3')!;
+    const borrowAmount = customShiftValue(10000, stableCoinDecimals); // $10,000
+
+    const UUID = setupAndBorrow(
+      chain,
+      protocol_contract_user,
+      protocol_contract_deployer,
+      protocol_wallet,
+      deployer,
+      borrowAmount
+    );
+
+    const btcPrice = shiftPriceValue(14000);
+
+    let block2 = chain.mineBlock([
+      Tx.contractCall(
+        contractPrincipal(protocol_contract_deployer, sampleProtocolContract),
+        'attempt-liquidate',
+        [types.uint(btcPrice), UUID],
+        liquidator_user.address
+      ),
+    ]);
+
+    console.log(block2);
+  },
+});

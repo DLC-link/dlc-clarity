@@ -75,7 +75,7 @@ plan:
             path: contracts/dlc-manager-v1.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: callback-contract
+            contract-name: callback-contract-v1
             emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             path: tests/callback-contract-mock-v1.clar
             clarity-version: 2

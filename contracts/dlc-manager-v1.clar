@@ -198,7 +198,7 @@
       (status (get status dlc))
     )
     (asserts! (is-eq creator tx-sender) err-unauthorized)
-    (asserts! (is-eq status status-funded) err-dlc-in-invalid-state-for-request)
+    (asserts! (or (is-eq status status-created) (is-eq status status-funded)) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
       (merge
         dlc
