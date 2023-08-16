@@ -84,7 +84,14 @@
 (define-map attestors
   uint
   {
-    dns: (string-ascii 32)
+    dns: (string-ascii 64)
+  }
+)
+
+(define-map attestors-by-dns
+  (string-ascii 64)
+  {
+    id: uint
   }
 )
 
@@ -195,9 +202,10 @@
   (let (
       (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
       (creator (get creator dlc))
+      (callback-contract (get callback-contract dlc))
       (status (get status dlc))
     )
-    (asserts! (is-eq creator tx-sender) err-unauthorized)
+    (asserts! (or (is-eq creator tx-sender) (is-eq callback-contract tx-sender)) err-unauthorized)
     (asserts! (or (is-eq status status-created) (is-eq status status-funded)) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
       (merge
@@ -245,7 +253,7 @@
 ;; and hand into the createDLC function all those ids mashed together in a buff
 ;; and we would parse it in contract, make sure they're all valid NFTs, and then
 ;; print the corresponding DNS values into the createDLC create function
-(define-public (register-attestor (dns (string-ascii 32)))
+(define-public (register-attestor (dns (string-ascii 64)))
   (let (
       (id (var-get attestor-id))
     )
@@ -254,14 +262,23 @@
     (map-set attestors id {
       dns: dns,
     })
+    (map-set attestors-by-dns dns {
+      id: id,
+    })
     (var-set attestor-id (+ id u1))
     (ok id)
   )
 )
 
-(define-public (get-registered-attestor (id uint))
+(define-read-only (get-registered-attestor (id uint))
   (begin
     (ok (unwrap! (map-get? attestors id) err-unknown-attestor))
+  )
+)
+
+(define-read-only (get-registered-attestor-id (dns (string-ascii 64)))
+  (begin
+    (ok (unwrap-panic (map-get? attestors-by-dns dns)))
   )
 )
 
@@ -269,8 +286,15 @@
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     (unwrap! (nft-burn? dlc-attestors id dlc-manager-contract) err-burn-nft)
+    (map-delete attestors-by-dns (get dns (unwrap-panic (map-get? attestors id))))
     (map-delete attestors id)
     (ok id)
+  )
+)
+
+(define-public (deregister-attestor-by-dns (dns (string-ascii 64)))
+  (begin
+    (deregister-attestor (get id (unwrap-panic (get-registered-attestor-id dns))))
   )
 )
 
@@ -292,7 +316,7 @@
   )
 )
 
-(define-public (is-contract-whitelisted (contract-address principal))
+(define-read-only (is-contract-whitelisted (contract-address principal))
   (begin
     (if (is-eq (map-get? whitelisted-contracts contract-address) none)
       (ok false)
@@ -350,7 +374,7 @@
   )
 )
 
-(define-public (get-dlc-from-map (uuid (buff 32)))
+(define-read-only (get-dlc-from-map (uuid (buff 32)))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
     ;; (ok (try! (map-get? dlcs uuid)))

@@ -260,7 +260,7 @@
 (define-public (attempt-liquidate (btc-price uint) (uuid (buff 32)))
   (let (
     (loan-id (unwrap! (get-loan-id-by-uuid uuid) err-cant-get-loan-id-by-uuid ))
-    (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
+    ;; (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     )
     (asserts! (unwrap! (check-liquidation loan-id btc-price) err-cant-unwrap-check-liquidation) err-doesnt-need-liquidation)
     (print { liquidator: tx-sender })
@@ -295,7 +295,7 @@
     )
     (begin
       (try! (set-status loan-id status-pre-liquidated))
-      (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid payout-ratio)) err-contract-call-failed)
+      (unwrap! (ok (as-contract (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 close-dlc uuid payout-ratio))) err-contract-call-failed)
     )
   )
 )

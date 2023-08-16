@@ -690,6 +690,21 @@ Clarinet.test({
       ),
     ]);
 
-    console.log(block2);
+    block2.receipts[0].result.expectOk().expectBool(true);
+
+    const closeEvent = block2.receipts[0].events.find((event) =>
+      event?.contract_event.value.includes('dlclink:close-dlc:v1')
+    );
+
+    assertStringIncludes(closeEvent?.contract_event.value, 'dlclink:close-dlc:v1');
+
+    const nftBurnEvent = block2.receipts[0].events.find(
+      (event) =>
+        event?.nft_burn_event?.asset_identifier == 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1::open-dlc'
+    );
+    assertEquals(
+      nftBurnEvent?.nft_burn_event.asset_identifier,
+      'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1::open-dlc'
+    );
   },
 });
