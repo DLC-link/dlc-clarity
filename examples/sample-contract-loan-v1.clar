@@ -39,6 +39,16 @@
 ;; Contract name bindings
 (define-constant sample-protocol-contract .sample-contract-loan-v1)
 
+(define-data-var protocol-wallet-address principal 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP)
+
+(define-public (set-protocol-wallet-address (address principal))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (var-set protocol-wallet-address address)
+    (ok address)
+  )
+)
+
 ;; @desc A map to store "loans": information about a DLC
 (define-map loans
   uint ;; The loan-id
@@ -136,14 +146,14 @@
 ;; - Calls the dlc-manager-contract's create-dlc function to initiate the creation
 ;; The DLC Contract will call back into the provided 'target' contract with the resulting UUID (and the provided loan-id).
 ;; See scripts/setup-loan.ts for an example of calling it.
-(define-public (setup-loan (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
+(define-public (setup-loan (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint) (attestor-ids (buff 32)))
     (let
       (
         (loan-id (+ (var-get last-loan-id) u1))
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
           ;; Call to create-dlc returns the list of attestors, as well as the uuid of the dlc
-        (uuid (get uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP 0x0002)) err-contract-call-failed))))
+        (uuid (get uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target (var-get protocol-wallet-address) attestor-ids)) err-contract-call-failed))))
       )
       (var-set last-loan-id loan-id)
       (begin

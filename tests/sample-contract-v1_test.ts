@@ -91,6 +91,7 @@ function openLoan(
         types.uint(loanParams.liquidationRatio),
         types.uint(loanParams.liquidationFee),
         types.uint(10),
+        types.buff([0, 2]),
       ],
       protocol_contract_user.address
     ),
