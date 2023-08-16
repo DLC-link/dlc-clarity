@@ -10,40 +10,37 @@ contract_id = 'STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify'
 
 [[project.requirements]]
 contract_id = 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard'
-[contracts.callback-contract]
-path = 'tests/callback-contract-mock.clar'
-clarity_version = 1
-epoch = 2.05
 
-[contracts.dlc-link-callback-trait-v2]
-path = 'contracts/dlc-link-callback-trait.clar'
-clarity_version = 1
-epoch = 2.05
+[contracts.callback-contract-v1]
+path = 'tests/callback-contract-mock-v1.clar'
+clarity_version = 2
+epoch = 2.3
 
-[contracts.dlc-manager-priced-v0-1]
-path = 'contracts/dlc-manager.clar'
-clarity_version = 1
-epoch = 2.05
+[contracts.dlc-link-callback-trait-v1]
+path = 'contracts/dlc-link-callback-trait-v1.clar'
+clarity_version = 2
+epoch = 2.3
 
 [contracts.dlc-manager-v1]
 path = 'contracts/dlc-manager-v1.clar'
-clarity_version = 1
-epoch = 2.05
+clarity_version = 2
+epoch = 2.3
 
 [contracts.dlc-stablecoin]
 path = 'contracts/dlc-stablecoin.clar'
-clarity_version = 1
-epoch = 2.0
+clarity_version = 2
+epoch = 2.3
 
-[contracts.sample-contract-loan-v0-1]
-path = 'examples/sample-contract-loan.clar'
-clarity_version = 1
-epoch = 2.05
+[contracts.sample-contract-loan-v1]
+path = 'examples/sample-contract-loan-v1.clar'
+clarity_version = 2
+epoch = 2.3
+
 [repl.analysis]
 passes = []
 
 [repl.analysis.check_checker]
 strict = false
-trusted_sender = false
-trusted_caller = false
-callee_filter = false
+trusted_sender = true
+trusted_caller = true
+callee_filter = true
