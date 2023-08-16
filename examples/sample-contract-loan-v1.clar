@@ -174,22 +174,6 @@
     )
 )
 
-;; @desc Callback function after succesful DLC creation
-;; Implemented from the trait, this is what is used to pass back the uuid created by the DLC system
-;; called by the dlc-manager contract
-;; (define-public (post-create-dlc-handler (loan-id uint) (uuid (buff 32)))
-;;     (begin
-;;       ;; If creation was successful, we save the results in the local maps
-;;         (map-set loans loan-id (
-;;             merge (unwrap! (map-get? loans loan-id) err-unknown-loan-contract ) {
-;;             dlc_uuid: (some uuid)
-;;         }))
-;;         (try! (set-status loan-id status-ready))
-;;         (map-set uuid-loan-id uuid loan-id)
-;;         (ok true)
-;;     )
-;; )
-
 ;; @desc Externally set a given DLCs status to funded.
 ;; Called by the dlc-manager contract after the necessary BTC events have happened.
 (define-public (set-status-funded (uuid (buff 32)))

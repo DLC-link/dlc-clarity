@@ -107,109 +107,6 @@ Clarinet.test({
 });
 
 //////////////////////////////
-// Contracts
-//////////////////////////////
-
-Clarinet.test({
-  name: 'Whitelist Contract function',
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-    const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
-
-    let checkStatus = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'is-contract-whitelisted',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    checkStatus.receipts[0].result.expectOk();
-    assertEquals(checkStatus.receipts[0].result, '(ok false)');
-
-    let block = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'whitelist-contract',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-
-    block.receipts[0].result.expectOk().expectBool(true);
-
-    checkStatus = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'is-contract-whitelisted',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    checkStatus.receipts[0].result.expectOk().expectBool(true);
-    // assertEquals(checkStatus.receipts[0].result, '(ok true)');
-  },
-});
-
-Clarinet.test({
-  name: 'De-whitelist Contract function',
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-    const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
-
-    let checkStatus = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'is-contract-whitelisted',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    checkStatus.receipts[0].result.expectOk().expectBool(false);
-
-    let block = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'whitelist-contract',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    block.receipts[0].result.expectOk().expectBool(true);
-
-    checkStatus = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'is-contract-whitelisted',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    checkStatus.receipts[0].result.expectOk().expectBool(true);
-
-    block = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'de-whitelist-contract',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    block.receipts[0].result.expectOk().expectBool(true);
-
-    checkStatus = chain.mineBlock([
-      Tx.contractCall(
-        dlcManagerContract,
-        'is-contract-whitelisted',
-        [types.principal(protocol_contract_deployer.address)],
-        deployer.address
-      ),
-    ]);
-    checkStatus.receipts[0].result.expectOk().expectBool(false);
-  },
-});
-
-//////////////////////////////
 // Creating the dlcs
 //////////////////////////////
 Clarinet.test({
@@ -235,7 +132,7 @@ Clarinet.test({
     chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -265,7 +162,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -314,7 +211,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -335,9 +232,9 @@ Clarinet.test({
 
     let uuid = getUUIDFromResponse(createDlcBlock);
 
-    let block = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address)]);
+    let block = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
 
-    block.receipts[0].result.expectOk();
+    block.receipts[0].result.expectSome();
     assertMatch(block.receipts[0].result, /status: u0/);
   },
 });
@@ -352,7 +249,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -397,7 +294,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -427,10 +324,8 @@ Clarinet.test({
       ),
     ]);
 
-    let statusCheck = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address),
-    ]);
-    statusCheck.receipts[0].result.expectOk();
+    let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
     assertMatch(statusCheck.receipts[0].result, /status: u1/);
   },
 });
@@ -446,7 +341,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -490,7 +385,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -520,10 +415,8 @@ Clarinet.test({
       ),
     ]);
 
-    let statusCheck = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address),
-    ]);
-    statusCheck.receipts[0].result.expectOk();
+    let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
     assertMatch(statusCheck.receipts[0].result, /status: u1/);
 
     let setStatus = chain.mineBlock([
@@ -549,7 +442,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -605,7 +498,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -659,7 +552,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -724,7 +617,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -796,7 +689,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -826,10 +719,8 @@ Clarinet.test({
       ),
     ]);
 
-    let statusCheck = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address),
-    ]);
-    statusCheck.receipts[0].result.expectOk();
+    let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
 
     let closeCall = chain.mineBlock([
       Tx.contractCall(
@@ -852,8 +743,8 @@ Clarinet.test({
     ]);
     postClose.receipts[0].result.expectOk();
 
-    statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address)]);
-    statusCheck.receipts[0].result.expectOk();
+    statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
     assertMatch(statusCheck.receipts[0].result, /status: u3/);
   },
 });
@@ -869,7 +760,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -899,10 +790,8 @@ Clarinet.test({
       ),
     ]);
 
-    let statusCheck = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address),
-    ]);
-    statusCheck.receipts[0].result.expectOk();
+    let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
 
     let closeCall = chain.mineBlock([
       Tx.contractCall(
@@ -938,7 +827,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -968,10 +857,8 @@ Clarinet.test({
       ),
     ]);
 
-    let statusCheck = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address),
-    ]);
-    statusCheck.receipts[0].result.expectOk();
+    let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
 
     let closeCall = chain.mineBlock([
       Tx.contractCall(
@@ -1017,7 +904,7 @@ Clarinet.test({
     let whitelist_event = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
-        'whitelist-contract',
+        'register-contract',
         [types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
         deployer.address
       ),
@@ -1047,10 +934,8 @@ Clarinet.test({
       ),
     ]);
 
-    let statusCheck = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-dlc-from-map', [uuid], deployer.address),
-    ]);
-    statusCheck.receipts[0].result.expectOk();
+    let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
+    statusCheck.receipts[0].result.expectSome();
 
     let closeCall = chain.mineBlock([
       Tx.contractCall(
@@ -1080,5 +965,86 @@ Clarinet.test({
     assertEquals(event.contract_event.topic, 'print');
     assertStringIncludes(event.contract_event.value, `event-source: "callback-mock-post-close", uuid: ${uuid}`);
     assertStringIncludes(event.contract_event.value, `btc-tx-id: "${btcTxId}"`);
+  },
+});
+
+////////////////// Contract Registration
+
+Clarinet.test({
+  name: 'only contract-owner can register contracts',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const deployer_2 = accounts.get('protocol_contract_deployer')!;
+
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        dlcManagerContract,
+        'register-contract',
+        [types.principal(contractPrincipal(deployer_2, callbackContract))],
+        deployer_2.address
+      ),
+    ]);
+
+    const err = block.receipts[0].result.expectErr();
+    assertEquals(err, 'u101'); // err-unauthorised
+  },
+});
+
+Clarinet.test({
+  name: 'is-contract-registered returns true for registered contract',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const deployer_2 = accounts.get('protocol_contract_deployer')!;
+
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        dlcManagerContract,
+        'register-contract',
+        [types.principal(contractPrincipal(deployer_2, callbackContract))],
+        deployer.address
+      ),
+      Tx.contractCall(
+        dlcManagerContract,
+        'is-contract-registered',
+        [types.principal(contractPrincipal(deployer_2, callbackContract))],
+        deployer_2.address
+      ),
+    ]);
+
+    block.receipts[0].result.expectOk().expectBool(true);
+    block.receipts[1].result.expectBool(true);
+  },
+});
+
+Clarinet.test({
+  name: 'is-contract-registered returns false for unregistered contract',
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const deployer = accounts.get('deployer')!;
+    const deployer_2 = accounts.get('protocol_contract_deployer')!;
+
+    let block = chain.mineBlock([
+      Tx.contractCall(
+        dlcManagerContract,
+        'register-contract',
+        [types.principal(contractPrincipal(deployer_2, callbackContract))],
+        deployer.address
+      ),
+      Tx.contractCall(
+        dlcManagerContract,
+        'unregister-contract',
+        [types.principal(contractPrincipal(deployer_2, callbackContract))],
+        deployer.address
+      ),
+      Tx.contractCall(
+        dlcManagerContract,
+        'is-contract-registered',
+        [types.principal(contractPrincipal(deployer_2, callbackContract))],
+        deployer_2.address
+      ),
+    ]);
+
+    block.receipts[0].result.expectOk().expectBool(true);
+    block.receipts[1].result.expectOk().expectBool(true);
+    block.receipts[2].result.expectBool(false);
   },
 });

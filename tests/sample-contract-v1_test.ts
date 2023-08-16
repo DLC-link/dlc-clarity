@@ -76,7 +76,7 @@ function openLoan(
   chain.mineBlock([
     Tx.contractCall(
       dlcManagerContract,
-      'whitelist-contract',
+      'register-contract',
       [types.principal(contractPrincipal(protocol_contract_deployer, sampleProtocolContract))],
       deployer.address
     ),

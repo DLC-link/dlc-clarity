@@ -1,8 +1,5 @@
 
-;; title: dlc-manager-v1
-;; version:
-;; summary:
-;; description:
+;; dlc-manager-v1
 
 ;; Error codes
 (define-constant err-unauthorized (err u101))
@@ -26,15 +23,6 @@
 (define-constant err-unknown-contract (err u119))
 (define-constant err-dlc-in-invalid-state-for-request (err u120))
 
-;; traits
-;;
-
-;; token definitions
-;;
-
-;; constants
-;;
-
 ;; Contract owner
 (define-constant contract-owner tx-sender)
 
@@ -47,23 +35,8 @@
 (define-constant status-closing u2)
 (define-constant status-closed u3)
 
-;; data vars
-;;
-
 ;; @desc An incrementing id for attestors
 (define-data-var attestor-id uint u0)
-
-;; data maps
-;;
-
-;; public functions
-;;
-
-;; read only functions
-;;
-
-;; private functions
-;;
 
 ;; Importing the trait to use it as a type
 (use-trait cb-trait .dlc-link-callback-trait-v1.dlc-link-callback-trait-v1)
@@ -88,17 +61,11 @@
   }
 )
 
+;; A map of all registered attestors by dns
 (define-map attestors-by-dns
   (string-ascii 64)
   {
     id: uint
-  }
-)
-
-(define-map whitelisted-contracts
-  principal
-  {
-    status: bool
   }
 )
 
@@ -148,7 +115,7 @@
     (uuid (unwrap! (get-random-uuid (var-get attestor-id)) err-failed-building-uuid))
     (attestor-urls-list (get-url-list-from-buff attestor-ids))
     )
-    (asserts! (unwrap-panic (is-contract-whitelisted contract-caller)) err-unknown-contract)
+    (asserts! (is-contract-registered contract-caller) err-unknown-contract)
     (asserts! (is-none (map-get? dlcs uuid)) err-dlc-already-added)
     (map-set dlcs uuid {
       uuid: uuid,
@@ -174,6 +141,7 @@
 )
 
 ;; @desc indicate that a DLC was funded on Bitcoin
+;; This function is called by the relevant protocol-wallet
 (define-public (set-status-funded (uuid (buff 32)) (callback-contract <cb-trait>))
   (let (
       (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
@@ -223,8 +191,7 @@
   )
 )
 
-
-;; @desc indicate that a DLC was funded on Bitcoin
+;; @desc indicate that a DLC was closed on Bitcoin
 (define-public (post-close (uuid (buff 32)) (btc-tx-id (string-ascii 64)) (callback-contract <cb-trait>))
   (let (
       (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
@@ -250,9 +217,7 @@
 
 ;; The idea here is that we would mint an nft with a unique id for each attestor
 ;; then a JS app would query all the NFTs and choose n at random
-;; and hand into the createDLC function all those ids mashed together in a buff
-;; and we would parse it in contract, make sure they're all valid NFTs, and then
-;; print the corresponding DNS values into the createDLC create function
+;; then call the create-request with that buff of attestor nft ids
 (define-public (register-attestor (dns (string-ascii 64)))
   (let (
       (id (var-get attestor-id))
@@ -295,33 +260,6 @@
 (define-public (deregister-attestor-by-dns (dns (string-ascii 64)))
   (begin
     (deregister-attestor (get id (unwrap-panic (get-registered-attestor-id dns))))
-  )
-)
-
-(define-public (whitelist-contract (contract-address principal))
-  (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
-    (map-set whitelisted-contracts contract-address {
-      status: true,
-    })
-    (ok true)
-  )
-)
-
-(define-public (de-whitelist-contract (contract-address principal))
-  (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
-    (map-delete whitelisted-contracts contract-address)
-    (ok true)
-  )
-)
-
-(define-read-only (is-contract-whitelisted (contract-address principal))
-  (begin
-    (if (is-eq (map-get? whitelisted-contracts contract-address) none)
-      (ok false)
-      (ok true)
-    )
   )
 )
 
@@ -373,15 +311,6 @@
       (unwrap-panic (map-get? attestors id))
   )
 )
-
-(define-read-only (get-dlc-from-map (uuid (buff 32)))
-  (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
-    ;; (ok (try! (map-get? dlcs uuid)))
-    (ok (map-get? dlcs uuid))
-  )
-)
-
 
 (define-constant byte-list 0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff)
 
