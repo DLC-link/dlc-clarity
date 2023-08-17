@@ -31,9 +31,11 @@ export const sendContractCall = async (txOptions: SignedContractCallOptions, net
   return broadcastResponse;
 };
 
-export const callReadOnly = async (txOptions: ReadOnlyFunctionOptions) => {
+export const callReadOnly = async (txOptions: ReadOnlyFunctionOptions, dirDepth: number = 3) => {
   const transaction = await callReadOnlyFunction(txOptions);
-  console.log('readOnly transaction:', transaction);
-  console.log('readOnly cvToValue():', cvToValue(transaction));
+  console.log('[readOnly] transaction:');
+  console.dir(transaction, { depth: dirDepth });
+  console.log('[readOnly] cvToValue():');
+  console.dir(cvToValue(transaction), { depth: dirDepth });
   return { cv: transaction, cvToValue: cvToValue(transaction) };
 };

@@ -135,8 +135,8 @@ open index.html
 ```
 ## Useful to note
 
-### Small App for scripts
-This repo contains a small react app to help running small scripts & showcasing some interactions with our contracts. It is a work in progress. Can be found [here](app/).
+### Scripts
+This repo contains scripts that help interacting with our contracts. Create a `.env` in the root folder, following the `.env.template` file. Then, after an `npm install`, scripts can be ran using `dlc-link-stacks`. Run `dlc-link-stacks --help` to see the possibilities. Scripts can be found [here](scripts/).
 ### Mocknet deployment
 
 This repo temporarily contains the older versions of our contracts in the `legacy-contracts` folder.

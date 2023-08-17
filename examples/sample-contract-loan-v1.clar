@@ -60,7 +60,8 @@
     vault-collateral: uint, ;; btc deposit in sats
     liquidation-ratio: uint, ;; the collateral/loan ratio below which liquidation can happen, with two decimals precision (140% = u14000)
     liquidation-fee: uint,  ;; additional fee taken during liquidation, two decimals precision (10% = u1000)
-    owner: principal ;; the stacks account owning this loan
+    owner: principal, ;; the stacks account owning this loan
+    attestors: (list 32 (tuple (dns (string-ascii 64))))
   }
 )
 
@@ -153,7 +154,9 @@
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
           ;; Call to create-dlc returns the list of attestors, as well as the uuid of the dlc
-        (uuid (get uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target (var-get protocol-wallet-address) attestor-ids)) err-contract-call-failed))))
+        (create-return (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target (var-get protocol-wallet-address) attestor-ids)) err-contract-call-failed)))
+        (attestors (get attestors create-return))
+        (uuid (get uuid create-return))
       )
       (var-set last-loan-id loan-id)
       (begin
@@ -164,7 +167,8 @@
             vault-collateral: btc-deposit,
             liquidation-ratio: liquidation-ratio,
             liquidation-fee: liquidation-fee,
-            owner: tx-sender
+            owner: tx-sender,
+            attestors: attestors
           })
           (try! (set-status loan-id status-ready))
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))
