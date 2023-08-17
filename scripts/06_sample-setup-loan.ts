@@ -23,7 +23,7 @@ export default async function setupLoan(
     validateWithAbi: true,
     network,
     fee: 100000,
-    anchorMode: AnchorMode.Any,
+    anchorMode: AnchorMode.OnChainOnly,
   };
   await sendContractCall(txOptions, network);
 }

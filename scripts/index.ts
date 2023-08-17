@@ -11,6 +11,7 @@ import deregisterAttestorByDNS from './04_deregister-attestor-by-dns';
 import registerContract from './05_register-contract';
 import getLoan from './07_sample-get-loan';
 import setupLoan from './06_sample-setup-loan';
+import closeLoan from './08_sample-close-loan';
 
 async function main() {
   const program = new Command();
@@ -59,6 +60,12 @@ async function main() {
     .description('get loan by id from sample contract')
     .argument('<id>', 'id of the loan')
     .action(getLoan);
+
+  program
+    .command('close-loan')
+    .description('close loan by id from sample contract')
+    .argument('<id>', 'id of the loan')
+    .action(closeLoan);
 
   const rootDir = path.join(__dirname, '..');
   process.chdir(rootDir);
