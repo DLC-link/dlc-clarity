@@ -58,5 +58,5 @@
 
 ;; Initialize the contract
 (begin
-  (try! (ft-mint? dlc-stablecoin u1000000000000 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v0-1)) ;; 1 million DLC USDC
+  (try! (ft-mint? dlc-stablecoin u1000000000000 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1)) ;; 1 million DLC USDC
 )

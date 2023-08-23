@@ -12,6 +12,7 @@ import registerContract from './05_register-contract';
 import getLoan from './07_sample-get-loan';
 import setupLoan from './06_sample-setup-loan';
 import closeLoan from './08_sample-close-loan';
+import mintStablecoin from './09_mint-stablecoin';
 
 async function main() {
   const program = new Command();
@@ -66,6 +67,13 @@ async function main() {
     .description('close loan by id from sample contract')
     .argument('<id>', 'id of the loan')
     .action(closeLoan);
+
+  program
+    .command('mint-stablecoin')
+    .description('mint stablecoin')
+    .argument('<amount>', 'amount to mint')
+    .argument('<recipient>', 'recipient of minted stablecoin')
+    .action(mintStablecoin);
 
   const rootDir = path.join(__dirname, '..');
   process.chdir(rootDir);
