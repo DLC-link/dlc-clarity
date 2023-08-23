@@ -49,6 +49,34 @@
   )
 )
 
+(define-data-var liquidation_ratio uint u14000)
+
+(define-public (set-liquidation-ratio (ratio uint))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (var-set liquidation_ratio ratio)
+    (ok ratio)
+  )
+)
+
+(define-read-only (get-liquidation-ratio)
+  (ok (var-get liquidation_ratio))
+)
+
+(define-data-var liquidation_fee uint u10000)
+
+(define-public (set-liquidation-fee (fee uint))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (var-set liquidation_fee fee)
+    (ok fee)
+  )
+)
+
+(define-read-only (get-liquidation-fee)
+  (ok (var-get liquidation_fee))
+)
+
 ;; @desc A map to store "loans": information about a DLC
 (define-map loans
   uint ;; The loan-id
@@ -147,9 +175,11 @@
 ;; - Calls the dlc-manager-contract's create-dlc function to initiate the creation
 ;; The DLC Contract will call back into the provided 'target' contract with the resulting UUID (and the provided loan-id).
 ;; See scripts/setup-loan.ts for an example of calling it.
-(define-public (setup-loan (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint) (attestor-ids (buff 32)))
+(define-public (setup-loan (btc-deposit uint) (attestor-ids (buff 32)))
     (let
       (
+        (liquidation-ratio (var-get liquidation_ratio))
+        (liquidation-fee (var-get liquidation_fee))
         (loan-id (+ (var-get last-loan-id) u1))
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
