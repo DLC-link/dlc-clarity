@@ -50,9 +50,6 @@ async function main() {
     .command('setup-loan')
     .description('setup loan in sample contract')
     .argument('[btcDeposit]', 'btc deposit', 100000000)
-    .argument('[liqRatio]', 'liquidation ratio', 14000)
-    .argument('[liqFee]', 'liquidation fee', 1000)
-    .argument('[ERT]', 'emergency refund time', 10)
     .argument('[attestorIDs...]', 'ids of attestors', [0, 1, 2])
     .action(setupLoan);
 
