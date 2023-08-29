@@ -16,6 +16,9 @@ plan:
             cost: 8400
             path: ".cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar"
             clarity-version: 1
+      epoch: "2.0"
+    - id: 1
+      transactions:
         - requirement-publish:
             contract-id: STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify
             remap-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
@@ -24,39 +27,42 @@ plan:
             cost: 46150
             path: ".cache/requirements/STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify.clar"
             clarity-version: 1
+      epoch: "2.05"
+    - id: 2
+      transactions:
         - contract-publish:
-            contract-name: callback-contract
+            contract-name: callback-contract-v1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 1411440
-            path: tests/callback-contract-mock.clar
+            cost: 700075517
+            path: tests/callback-contract-mock-v1.clar
             anchor-block-only: true
-            clarity-version: 1
+            clarity-version: 2
         - contract-publish:
-            contract-name: dlc-link-callback-trait-v2
+            contract-name: dlc-link-callback-trait-v1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 1411085
-            path: contracts/dlc-link-callback-trait.clar
+            cost: 699901661
+            path: contracts/dlc-link-callback-trait-v1.clar
             anchor-block-only: true
-            clarity-version: 1
+            clarity-version: 2
         - contract-publish:
-            contract-name: dlc-manager-priced-v0-1
+            contract-name: dlc-manager-v1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 1415695
-            path: contracts/dlc-manager.clar
+            cost: 702118328
+            path: contracts/dlc-manager-v1.clar
             anchor-block-only: true
-            clarity-version: 1
+            clarity-version: 2
         - contract-publish:
             contract-name: dlc-stablecoin
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 1411706
+            cost: 700205909
             path: contracts/dlc-stablecoin.clar
             anchor-block-only: true
-            clarity-version: 1
+            clarity-version: 2
         - contract-publish:
-            contract-name: sample-contract-loan-v0-1
+            contract-name: sample-contract-loan-v1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 1416670
-            path: examples/sample-contract-loan.clar
+            cost: 702726825
+            path: examples/sample-contract-loan-v1.clar
             anchor-block-only: true
-            clarity-version: 1
-      epoch: "2.0"
+            clarity-version: 2
+      epoch: "2.3"

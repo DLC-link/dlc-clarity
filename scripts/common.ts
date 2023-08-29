@@ -7,13 +7,15 @@ import {
   ReadOnlyFunctionOptions,
   ClarityValue,
   TxBroadcastResult,
+  makeContractDeploy,
+  ContractDeployOptions,
 } from '@stacks/transactions';
 import { config } from './network-configs';
 import { StacksNetwork } from '@stacks/network';
 import { hexToBytes as hexToBytesMS } from 'micro-stacks/common';
 
 export const network = config.network;
-export const senderKey = config.privateKey;
+export const deployerPrivateKey = config.privateKey;
 export const contractAddress = config.contractAddress;
 export const exampleContractAddress = config.exampleContractAddress;
 export const apiBase = config.api_base;
@@ -52,6 +54,16 @@ export const callReadOnly = async (
   console.log('[readOnly] cvToValue():');
   console.dir(cvToValue(transaction), { depth: dirDepth });
   return { cv: transaction, cvToValue: cvToValue(transaction) };
+};
+
+export const deployContract = async (
+  txOptions: ContractDeployOptions,
+  network: StacksNetwork
+): Promise<TxBroadcastResult> => {
+  const transaction = await makeContractDeploy(txOptions);
+  const broadcastResponse = await broadcastTransaction(transaction, network);
+  console.log('broadcastResponse: ', broadcastResponse);
+  return broadcastResponse;
 };
 
 /**

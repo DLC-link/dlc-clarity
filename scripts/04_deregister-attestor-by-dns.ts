@@ -1,6 +1,6 @@
 import {
   network,
-  senderKey,
+  deployerPrivateKey,
   contractAddress,
   contractName,
   sendContractCall,
@@ -40,7 +40,7 @@ export default async function deregisterAttestorByDNS(attestor: string) {
     functionName: 'deregister-attestor-by-dns',
     functionArgs: [stringAsciiCV(attestor)],
     postConditions: [contractNonFungiblePostCondition],
-    senderKey: senderKey,
+    senderKey: deployerPrivateKey,
     validateWithAbi: true,
     network,
     fee: 100000,

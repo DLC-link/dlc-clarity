@@ -1,4 +1,4 @@
-import { network, senderKey, contractAddress, contractName, sendContractCall } from './common';
+import { network, deployerPrivateKey, contractAddress, contractName, sendContractCall } from './common';
 
 import { contractPrincipalCV, principalCV, uintCV } from '@stacks/transactions';
 
@@ -8,7 +8,7 @@ export default async function mintStablecoin(amount: number, recipient: string) 
     contractName: 'dlc-stablecoin',
     functionName: 'mint',
     functionArgs: [uintCV(amount), principalCV(recipient)],
-    senderKey: senderKey,
+    senderKey: deployerPrivateKey,
     validateWithAbi: true,
     network,
     fee: 100000,

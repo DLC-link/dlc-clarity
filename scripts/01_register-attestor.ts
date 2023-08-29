@@ -1,4 +1,4 @@
-import { network, senderKey, contractAddress, contractName, sendContractCall } from './common';
+import { network, deployerPrivateKey, contractAddress, contractName, sendContractCall } from './common';
 
 import { stringAsciiCV } from '@stacks/transactions';
 
@@ -8,7 +8,7 @@ export default async function addAttestor(attestor: string) {
     contractName: contractName,
     functionName: 'register-attestor',
     functionArgs: [stringAsciiCV(attestor)],
-    senderKey: senderKey,
+    senderKey: deployerPrivateKey,
     validateWithAbi: true,
     network,
     fee: 100000,

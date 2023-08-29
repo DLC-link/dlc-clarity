@@ -13,6 +13,7 @@ import getLoan from './07_sample-get-loan';
 import setupLoan from './06_sample-setup-loan';
 import closeLoan from './08_sample-close-loan';
 import mintStablecoin from './09_mint-stablecoin';
+import deployProtocolContract from './10_deploy-contract';
 
 async function main() {
   const program = new Command();
@@ -71,6 +72,14 @@ async function main() {
     .argument('<amount>', 'amount to mint')
     .argument('<recipient>', 'recipient of minted stablecoin')
     .action(mintStablecoin);
+
+  program
+    .command('deploy-protocol-contract')
+    .description('deploy protocol contract')
+    .argument('<path>', 'path to contract')
+    .argument('<contractName>', 'name of contract')
+    .argument('[deployerKey]', 'key of deployer')
+    .action(deployProtocolContract);
 
   const rootDir = path.join(__dirname, '..');
   process.chdir(rootDir);

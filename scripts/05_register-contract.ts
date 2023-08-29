@@ -1,4 +1,4 @@
-import { network, senderKey, contractAddress, contractName, sendContractCall } from './common';
+import { network, deployerPrivateKey, contractAddress, contractName, sendContractCall } from './common';
 
 import { contractPrincipalCV } from '@stacks/transactions';
 
@@ -8,7 +8,7 @@ export default async function registerContract(protocolAddress: string, protocol
     contractName: contractName,
     functionName: 'register-contract',
     functionArgs: [contractPrincipalCV(protocolAddress, protocolName)],
-    senderKey: senderKey,
+    senderKey: deployerPrivateKey,
     validateWithAbi: true,
     network,
     fee: 100000,
