@@ -1,0 +1,32 @@
+---
+id: 0
+name: Testnet deployment
+network: testnet
+stacks-node: 'https://api.testnet.hiro.so'
+bitcoin-node: 'http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332'
+plan:
+  batches:
+    - id: 0
+      transactions:
+        # - contract-publish:
+        #     contract-name: dlc-link-callback-trait-v1
+        #     expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
+        #     cost: 69990166
+        #     path: contracts/dlc-link-callback-trait-v1.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
+        # - contract-publish:
+        #     contract-name: dlc-manager-v1
+        #     expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
+        #     cost: 70211832
+        #     path: contracts/dlc-manager-v1.clar
+        #     anchor-block-only: true
+        #     clarity-version: 2
+        - contract-publish:
+            contract-name: sample-contract-loan-v1
+            expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
+            cost: 70272682
+            path: examples/sample-contract-loan-v1.clar
+            anchor-block-only: true
+            clarity-version: 2
+      epoch: '2.3'

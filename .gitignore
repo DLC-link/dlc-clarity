@@ -8,3 +8,7 @@ app/build
 history.txt
 
 settings/Testnet.toml
+
+node_modules
+.env
+dist

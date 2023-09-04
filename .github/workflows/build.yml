@@ -3,7 +3,7 @@ permissions:
   contents: read
 on:
   push:
-    branches: [ main ]
+    branches: [dev]
 jobs:
   build:
     name: Build & Push to S3
@@ -12,22 +12,22 @@ jobs:
       run:
         shell: bash
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2
-      with:
-        submodules: 'true'
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.TF_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-    - name: Compress source code
-      run: |
-        cd ..
-        tar --exclude .git --exclude .github --exclude .gitignore --exclude .gitmodules -zcvf dlc-clarity.tar.gz dlc-clarity
-        cd dlc-clarity
-        cp ../dlc-clarity.tar.gz .
-    - name: Upload artifact to S3
-      run: |
-        aws s3 cp dlc-clarity.tar.gz "s3://dlc-public-assets/snapshots/dlc-clarity.tar.gz"
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.TF_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.TF_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Compress source code
+        run: |
+          cd ..
+          tar --exclude .git --exclude .github --exclude .gitignore --exclude .gitmodules -zcvf dlc-clarity.tar.gz dlc-clarity
+          cd dlc-clarity
+          cp ../dlc-clarity.tar.gz .
+      - name: Upload artifact to S3
+        run: |
+          aws s3 cp dlc-clarity.tar.gz "s3://dlc-public-assets/snapshots/dlc-clarity.tar.gz"

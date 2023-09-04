@@ -1,0 +1,27 @@
+{
+  "name": "dlc-link-stacks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scripts/dist/index.js",
+  "bin": "scripts/dist/index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "tsc-watch --noClear -p ./tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@stacks/network": "^6.5.5",
+    "@stacks/transactions": "^6.7.0",
+    "commander": "^11.0.0",
+    "micro-stacks": "^1.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "dotenv": "^16.3.1",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.1.6"
+  }
+}
