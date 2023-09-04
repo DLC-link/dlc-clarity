@@ -3,7 +3,7 @@ permissions:
   contents: read
 on:
   push:
-    branches: [1.0/prerelease]
+    branches: [dev]
 jobs:
   build:
     name: Build & Push to S3

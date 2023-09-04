@@ -62,13 +62,9 @@ function openLoan(
   loanParams: {
     vaultAmount: number;
     btcDeposit: number;
-    liquidationRatio: number;
-    liquidationFee: number;
   } = {
     vaultAmount: 1000000,
     btcDeposit: 1,
-    liquidationRatio: 14000,
-    liquidationFee: 1000,
   }
 ) {
   registerAttestors(chain, deployer);
@@ -86,13 +82,7 @@ function openLoan(
     Tx.contractCall(
       callbackContract,
       'setup-loan',
-      [
-        types.uint(shiftPriceValue(loanParams.btcDeposit)),
-        types.uint(loanParams.liquidationRatio),
-        types.uint(loanParams.liquidationFee),
-        types.uint(10),
-        types.buff([0, 2]),
-      ],
+      [types.uint(shiftPriceValue(loanParams.btcDeposit)), types.buff([0, 2])],
       protocol_contract_user.address
     ),
   ]);
