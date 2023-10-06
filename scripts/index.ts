@@ -15,6 +15,8 @@ import closeLoan from './08_sample-close-loan';
 import mintStablecoin from './09_mint-stablecoin';
 import deployProtocolContract from './10_deploy-contract';
 import setLiquidationFee from './11_set-liquidation-fee';
+import setStatusFunded from './12_set-status-funded';
+import setProtocolWallet from './13_set-protocol-wallet';
 
 async function main() {
   const program = new Command();
@@ -87,6 +89,19 @@ async function main() {
     .description('set liquidation fee')
     .argument('<fee>', 'fee to set')
     .action(setLiquidationFee);
+
+  program
+    .command('set-status-funded')
+    .description('set status funded')
+    .argument('<uuid>', 'dlc uuid')
+    .argument('[callbackContract]', 'callback contract')
+    .action(setStatusFunded);
+
+  program
+    .command('set-protocol-wallet')
+    .description('set protocol wallet in sample contract')
+    .argument('<address>', 'protocol wallet address')
+    .action(setProtocolWallet);
 
   const rootDir = path.join(__dirname, '..');
   process.chdir(rootDir);
