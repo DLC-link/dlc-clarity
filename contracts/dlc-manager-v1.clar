@@ -22,6 +22,7 @@
 (define-constant err-burn-nft (err u118))
 (define-constant err-unknown-contract (err u119))
 (define-constant err-dlc-in-invalid-state-for-request (err u120))
+(define-constant err-not-connected-callback-contract (err u121))
 
 ;; Contract owner
 (define-constant contract-owner tx-sender)
@@ -147,8 +148,10 @@
       (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
       (protocol-wallet (get protocol-wallet dlc))
       (status (get status dlc))
+      (callback-contract-principal (contract-of callback-contract))
     )
     (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (asserts! (is-eq (get callback-contract dlc) callback-contract-principal) err-not-connected-callback-contract)
     (asserts! (is-eq status status-created) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
       (merge
@@ -197,8 +200,10 @@
       (dlc (unwrap! (map-get? dlcs uuid) err-unknown-dlc))
       (protocol-wallet (get protocol-wallet dlc))
       (status (get status dlc))
+      (callback-contract-principal (contract-of callback-contract))
     )
     (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (asserts! (is-eq (get callback-contract dlc) callback-contract-principal) err-not-connected-callback-contract)
     (asserts! (is-eq status status-closing) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
       (merge

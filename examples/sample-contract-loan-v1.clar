@@ -37,7 +37,7 @@
 (define-constant contract-owner tx-sender)
 
 ;; Contract name bindings
-(define-constant sample-protocol-contract .sample-contract-loan-v1)
+(define-constant sample-protocol-contract .sample-contract-loan-v1-3)
 
 (define-data-var protocol-wallet-address principal 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP)
 
@@ -89,7 +89,8 @@
     liquidation-ratio: uint, ;; the collateral/loan ratio below which liquidation can happen, with two decimals precision (140% = u14000)
     liquidation-fee: uint,  ;; additional fee taken during liquidation, two decimals precision (10% = u1000)
     owner: principal, ;; the stacks account owning this loan
-    attestors: (list 32 (tuple (dns (string-ascii 64))))
+    attestors: (list 32 (tuple (dns (string-ascii 64)))),
+    btc-tx-id: (optional (string-ascii 64))
   }
 )
 
@@ -157,8 +158,8 @@
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
     )
     (begin
-      (print { loan-id: loan-id, uuid: (get dlc_uuid loan), status: new-status })
       (map-set loans loan-id (merge loan { status: new-status }))
+      (print { loan-id: loan-id, uuid: (get dlc_uuid loan), status: (get status loan) })
     )
     (ok true)
   )
@@ -198,7 +199,8 @@
             liquidation-ratio: liquidation-ratio,
             liquidation-fee: liquidation-fee,
             owner: tx-sender,
-            attestors: attestors
+            attestors: attestors,
+            btc-tx-id: none
           })
           (try! (set-status loan-id status-ready))
           (map-set creator-loan-ids tx-sender (unwrap-panic (as-max-len? (append current-loan-ids loan-id) u50)))
@@ -218,7 +220,7 @@
     (asserts! (not (is-eq (get status loan) status-funded)) err-dlc-already-funded)
     (begin
       (try! (set-status loan-id status-funded))
-      (map-set loans loan-id (merge loan { status: status-funded }))
+      ;; (map-set loans loan-id (merge loan { status: status-funded }))
     )
     (ok true)
   )
@@ -278,6 +280,7 @@
             ) err-cant-unwrap)
     ))
     (begin
+      (map-set loans loan-id (merge loan { btc-tx-id: (some btc-tx-id) }))
       (try! (set-status loan-id newstatus))
     )
     (ok true)

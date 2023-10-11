@@ -1,6 +1,6 @@
 import { network, deployerPrivateKey, contractAddress, contractName, sendContractCall } from './common';
 
-import { contractPrincipalCV, principalCV, uintCV } from '@stacks/transactions';
+import { contractPrincipalCV, getNonce, principalCV, uintCV } from '@stacks/transactions';
 
 export default async function mintStablecoin(amount: number, recipient: string) {
   const txOptions = {
