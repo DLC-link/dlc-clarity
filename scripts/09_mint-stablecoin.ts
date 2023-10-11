@@ -13,7 +13,6 @@ export default async function mintStablecoin(amount: number, recipient: string) 
     network,
     fee: 100000,
     anchorMode: 1,
-    nonce: (await getNonce(contractAddress, network)) + 1n,
   };
   await sendContractCall(txOptions, network);
 }

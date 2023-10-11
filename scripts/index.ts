@@ -17,6 +17,8 @@ import deployProtocolContract from './10_deploy-contract';
 import setLiquidationFee from './11_set-liquidation-fee';
 import setStatusFunded from './12_set-status-funded';
 import setProtocolWallet from './13_set-protocol-wallet';
+import sendSTXTo from './14_send-stx';
+import deployAndSetupProtocolContract from './15_deploy-and-setup';
 
 async function main() {
   const program = new Command();
@@ -102,6 +104,21 @@ async function main() {
     .description('set protocol wallet in sample contract')
     .argument('<address>', 'protocol wallet address')
     .action(setProtocolWallet);
+
+  program
+    .command('send-stx')
+    .description('send stx')
+    .argument('<address>', 'address to send to')
+    .argument('<amount>', 'amount to send')
+    .action(sendSTXTo);
+
+  program
+    .command('deploy-and-setup')
+    .description('deploy and setup protocol contract')
+    .argument('<path>', 'path to contract')
+    .argument('<contractName>', 'name of contract')
+    .argument('[deployerKey]', 'key of deployer')
+    .action(deployAndSetupProtocolContract);
 
   const rootDir = path.join(__dirname, '..');
   process.chdir(rootDir);

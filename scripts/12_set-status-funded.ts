@@ -20,7 +20,7 @@ export default async function setStatusFunded(uuid: string, callbackContract: st
     senderKey: protocolPrivateKey,
     validateWithAbi: true,
     network,
-    fee: 100000,
+    fee: 500000,
     anchorMode: 1,
     nonce: (await getNonce(contractAddress, network)) + 1n,
   };

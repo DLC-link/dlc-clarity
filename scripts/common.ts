@@ -9,6 +9,9 @@ import {
   TxBroadcastResult,
   makeContractDeploy,
   ContractDeployOptions,
+  TokenTransferOptions,
+  makeSTXTokenTransfer,
+  SignedTokenTransferOptions,
 } from '@stacks/transactions';
 import { config } from './network-configs';
 import { StacksNetwork } from '@stacks/network';
@@ -61,6 +64,16 @@ export const deployContract = async (
   network: StacksNetwork
 ): Promise<TxBroadcastResult> => {
   const transaction = await makeContractDeploy(txOptions);
+  const broadcastResponse = await broadcastTransaction(transaction, network);
+  console.log('broadcastResponse: ', broadcastResponse);
+  return broadcastResponse;
+};
+
+export const sendTokenTransfer = async (
+  txOptions: SignedTokenTransferOptions,
+  network: StacksNetwork
+): Promise<TxBroadcastResult> => {
+  const transaction = await makeSTXTokenTransfer(txOptions);
   const broadcastResponse = await broadcastTransaction(transaction, network);
   console.log('broadcastResponse: ', broadcastResponse);
   return broadcastResponse;
