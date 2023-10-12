@@ -85,7 +85,7 @@ plan:
             path: contracts/dlc-stablecoin.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: sample-contract-loan-v1
+            contract-name: sample-contract-loan-v1-3
             emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             path: examples/sample-contract-loan-v1.clar
             clarity-version: 2

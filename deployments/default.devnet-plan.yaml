@@ -62,7 +62,7 @@ plan:
     - id: 3
       transactions:
         - contract-publish:
-            contract-name: sample-contract-loan-v1
+            contract-name: sample-contract-loan-v1-3
             expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 133530
             path: examples/sample-contract-loan-v1.clar

@@ -27,7 +27,7 @@ export const protocolPrivateKey = config.protocolPrivateKey;
 export const openDLCNFT = 'open-dlc';
 export const attestorNFT = 'dlc-attestors';
 export const registeredContractNFTName = `registered-contract`;
-export const exampleContractName = 'sample-contract-loan-v1';
+export const exampleContractName = 'sample-contract-loan-v1-3';
 export const contractName = 'dlc-manager-v1';
 export const contractFullName = `${contractAddress}.${contractName}`;
 
@@ -64,6 +64,7 @@ export const deployContract = async (
   network: StacksNetwork
 ): Promise<TxBroadcastResult> => {
   const transaction = await makeContractDeploy(txOptions);
+  console.log('transaction', transaction);
   const broadcastResponse = await broadcastTransaction(transaction, network);
   console.log('broadcastResponse: ', broadcastResponse);
   return broadcastResponse;

@@ -31,7 +31,7 @@ path = 'contracts/dlc-stablecoin.clar'
 clarity_version = 2
 epoch = 2.3
 
-[contracts.sample-contract-loan-v1]
+[contracts.sample-contract-loan-v1-3]
 path = 'examples/sample-contract-loan-v1.clar'
 clarity_version = 2
 epoch = 2.3
