@@ -150,7 +150,7 @@
       (status (get status dlc))
       (callback-contract-principal (contract-of callback-contract))
     )
-    (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (asserts! (is-eq protocol-wallet contract-caller) err-unauthorized)
     (asserts! (is-eq (get callback-contract dlc) callback-contract-principal) err-not-connected-callback-contract)
     (asserts! (is-eq status status-created) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
@@ -176,7 +176,7 @@
       (callback-contract (get callback-contract dlc))
       (status (get status dlc))
     )
-    (asserts! (or (is-eq creator tx-sender) (is-eq callback-contract tx-sender)) err-unauthorized)
+    (asserts! (is-eq callback-contract contract-caller) err-unauthorized)
     (asserts! (or (is-eq status status-created) (is-eq status status-funded)) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
       (merge
@@ -202,7 +202,7 @@
       (status (get status dlc))
       (callback-contract-principal (contract-of callback-contract))
     )
-    (asserts! (is-eq protocol-wallet tx-sender) err-unauthorized)
+    (asserts! (is-eq protocol-wallet contract-caller) err-unauthorized)
     (asserts! (is-eq (get callback-contract dlc) callback-contract-principal) err-not-connected-callback-contract)
     (asserts! (is-eq status status-closing) err-dlc-in-invalid-state-for-request)
     (map-set dlcs uuid
@@ -227,7 +227,7 @@
   (let (
       (id (var-get attestor-id))
     )
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
+    (asserts! (is-eq contract-owner contract-caller) err-unauthorized)
     (unwrap! (nft-mint? dlc-attestors id dlc-manager-contract) err-mint-nft)
     (map-set attestors id {
       dns: dns,
@@ -254,7 +254,7 @@
 
 (define-public (deregister-attestor (id uint))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
+    (asserts! (is-eq contract-owner contract-caller) err-unauthorized)
     (unwrap! (nft-burn? dlc-attestors id dlc-manager-contract) err-burn-nft)
     (map-delete attestors-by-dns (get dns (unwrap-panic (map-get? attestors id))))
     (map-delete attestors id)
@@ -276,7 +276,7 @@
 ;; This is picked up by the Observer infrastructure to start listening to contract-calls of our public functions.
 (define-public (register-contract (contract-address <cb-trait>))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
+    (asserts! (is-eq contract-owner contract-caller) err-unauthorized)
     (print {
       contract-address: contract-address,
       event-source: "dlclink:register-contract:v1" })
@@ -286,7 +286,7 @@
 
 (define-public (unregister-contract (contract-address <cb-trait>))
   (begin
-    (asserts! (is-eq contract-owner tx-sender) err-unauthorized)
+    (asserts! (is-eq contract-owner contract-caller) err-unauthorized)
     (print {
       contract-address: contract-address,
       event-source: "dlclink:unregister-contract:v1" })
