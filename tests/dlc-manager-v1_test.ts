@@ -529,12 +529,7 @@ Clarinet.test({
     ]);
 
     let closeCall = chain.mineBlock([
-      Tx.contractCall(
-        contractPrincipal(protocol_contract_deployer, callbackContract),
-        'close-dlc-request',
-        [uuid, types.uint(5)],
-        protocol_wallet.address
-      ),
+      Tx.contractCall(dlcManagerContract, 'close-dlc', [uuid, types.uint(5)], some_wallet.address),
     ]);
 
     closeCall.receipts[0].result.expectErr().expectUint(101);
@@ -570,8 +565,6 @@ Clarinet.test({
         protocol_contract_deployer.address
       ),
     ]);
-
-    console.log(createDlcBlock.receipts[0].events[0].contract_event.value);
 
     let uuid = getUUIDFromResponse(createDlcBlock);
 
