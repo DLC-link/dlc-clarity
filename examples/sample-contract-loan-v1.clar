@@ -49,6 +49,10 @@
   )
 )
 
+(define-read-only (get-protocol-wallet-address)
+  (ok (var-get protocol-wallet-address))
+)
+
 (define-data-var liquidation_ratio uint u14000)
 
 (define-public (set-liquidation-ratio (ratio uint))

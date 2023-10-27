@@ -2,8 +2,6 @@
 id: 0
 name: Devnet deployment
 network: devnet
-# stacks-node: 'http://stx-btc1.dlc.link:3999'
-# bitcoin-node: 'http://devnet:devnet@stx-btc1.dlc.link:18443'
 stacks-node: 'http://localhost:20443'
 bitcoin-node: 'http://devnet:devnet@localhost:18443'
 plan:
@@ -64,7 +62,7 @@ plan:
     - id: 3
       transactions:
         - contract-publish:
-            contract-name: sample-contract-loan-v1
+            contract-name: sample-contract-loan-v1-3
             expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             cost: 133530
             path: examples/sample-contract-loan-v1.clar
@@ -78,7 +76,15 @@ plan:
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             method: register-contract
             parameters:
-              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1"
+              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1-3"
+            cost: 6000
+        - contract-call:
+            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            method: mint
+            parameters:
+              - 'u1000000000000'
+              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1-3"
             cost: 6000
       epoch: '2.3'
     - id: 5
