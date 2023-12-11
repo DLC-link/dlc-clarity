@@ -11,11 +11,11 @@
 
 (define-public (create-dlc-request (vault-loan-amount uint) (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
   (let ((target .callback-contract-v1))
-    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP 0x0002 )) err-cant-unwrap)
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP emergency-refund-time )) err-cant-unwrap)
   )
 )
 
-(define-public (set-status-funded (uuid (buff 32)))
+(define-public (set-status-funded (uuid (buff 32)) (btc-tx-id (string-ascii 64)))
   (begin
     (print { uuid: uuid, event-source: "callback-set-status-funded" })
     (ok true)

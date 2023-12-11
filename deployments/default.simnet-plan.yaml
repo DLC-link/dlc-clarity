@@ -70,6 +70,11 @@ plan:
             path: contracts/dlc-link-callback-trait-v1.clar
             clarity-version: 2
         - emulated-contract-publish:
+            contract-name: dlc-manager-trait-v1
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: contracts/dlc-manager-trait-v1.clar
+            clarity-version: 2
+        - emulated-contract-publish:
             contract-name: dlc-manager-v1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/dlc-manager-v1.clar
@@ -85,7 +90,7 @@ plan:
             path: contracts/dlc-stablecoin.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: sample-contract-loan-v1-3
+            contract-name: sample-contract-loan-v1
             emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
             path: examples/sample-contract-loan-v1.clar
             clarity-version: 2
