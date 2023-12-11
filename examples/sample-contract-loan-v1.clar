@@ -85,7 +85,7 @@
 (define-map loans
   uint ;; The loan-id
   {
-    dlc_uuid: (optional (buff 32)),
+    dlc_uuid: (buff 32),
     ;; Other data about the loan and their specific contract
     status: (string-ascii 14),
     vault-loan: uint, ;; the borrowed amount
@@ -175,12 +175,12 @@
         (loan-id (+ (var-get last-loan-id) u1))
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
-        (uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc btc-deposit target (var-get protocol-wallet-address) u0)) err-contract-call-failed)))
+        (uuid (unwrap! (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc btc-deposit target (var-get protocol-wallet-address) u0)) err-contract-call-failed) err-contract-call-failed))
       )
       (var-set last-loan-id loan-id)
       (begin
           (map-set loans loan-id {
-            dlc_uuid: (some uuid),
+            dlc_uuid: uuid,
             status: status-ready,
             vault-loan: u0,
             vault-collateral: btc-deposit,
@@ -242,7 +242,7 @@
 (define-public (close-loan (loan-id uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
-    (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
+    (uuid (get dlc_uuid loan))
     )
     (begin
       (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
@@ -306,7 +306,7 @@
 (define-private (liquidate-loan (loan-id uint) (btc-price uint))
   (let (
     (loan (unwrap! (get-loan loan-id) err-unknown-loan-contract))
-    (uuid (unwrap! (get dlc_uuid loan) err-cant-unwrap))
+    (uuid (get dlc_uuid loan))
     (payout-ratio (unwrap! (get-payout-ratio loan-id btc-price) err-cant-unwrap))
     )
     (begin
