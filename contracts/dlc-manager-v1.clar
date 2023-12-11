@@ -47,6 +47,8 @@
     creator: principal,
     callback-contract: principal,
     protocol-wallet: principal,
+    value-locked: uint,
+    refund-delay: uint,
     status: uint,
     funding-tx-id: (optional (string-ascii 64)),
     closing-tx-id: (optional (string-ascii 64))
@@ -78,7 +80,7 @@
 ;; @param callback-contract; the contract-principal where the create-dlc will call back to
 ;; @param protocol-wallet; the principal of the protocol-wallet that will be used for this DLC
 ;; @param refund-delay  Delay in seconds before the creator can claim a refund. Set 0 to disable.
-(define-public (create-dlc (callback-contract principal) (protocol-wallet principal) (refund-deyal uint))
+(define-public (create-dlc (value-locked uint) (callback-contract principal) (protocol-wallet principal) (refund-deyal uint))
   (let (
     (uuid (unwrap! (get-random-uuid (var-get nonce)) err-failed-building-uuid))
     )
@@ -91,6 +93,8 @@
       creator: tx-sender,
       callback-contract: callback-contract,
       protocol-wallet: protocol-wallet,
+      value-locked: value-locked,
+      refund-delay: refund-deyal,
       status: status-created,
       funding-tx-id: none,
       closing-tx-id: none

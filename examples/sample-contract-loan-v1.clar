@@ -175,8 +175,7 @@
         (loan-id (+ (var-get last-loan-id) u1))
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
-          ;; Call to create-dlc returns the list of attestors, as well as the uuid of the dlc
-        (uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target (var-get protocol-wallet-address) u0)) err-contract-call-failed)))
+        (uuid (unwrap-panic (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc btc-deposit target (var-get protocol-wallet-address) u0)) err-contract-call-failed)))
       )
       (var-set last-loan-id loan-id)
       (begin

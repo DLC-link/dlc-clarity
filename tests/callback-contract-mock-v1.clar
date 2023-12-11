@@ -11,7 +11,7 @@
 
 (define-public (create-dlc-request (vault-loan-amount uint) (btc-deposit uint) (liquidation-ratio uint) (liquidation-fee uint) (emergency-refund-time uint))
   (let ((target .callback-contract-v1))
-    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP emergency-refund-time )) err-cant-unwrap)
+    (unwrap! (ok (contract-call? 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1 create-dlc btc-deposit target 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP emergency-refund-time )) err-cant-unwrap)
   )
 )
 
