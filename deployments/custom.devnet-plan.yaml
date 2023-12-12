@@ -38,17 +38,17 @@ plan:
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
+            contract-name: dlc-manager-trait-v1
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            cost: 4360
+            path: contracts/dlc-manager-trait-v1.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
             contract-name: dlc-manager-v1
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 116700
             path: contracts/dlc-manager-v1.clar
-            anchor-block-only: true
-            clarity-version: 2
-        - contract-publish:
-            contract-name: callback-contract-v1
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 11300
-            path: tests/callback-contract-mock-v1.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
@@ -62,8 +62,8 @@ plan:
     - id: 3
       transactions:
         - contract-publish:
-            contract-name: sample-contract-loan-v1-3
-            expected-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
+            contract-name: sample-contract-loan-v1
+            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             cost: 133530
             path: examples/sample-contract-loan-v1.clar
             anchor-block-only: true
@@ -76,7 +76,7 @@ plan:
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             method: register-contract
             parameters:
-              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1-3"
+              - "'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sample-contract-loan-v1"
             cost: 6000
         - contract-call:
             contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-stablecoin
@@ -84,30 +84,6 @@ plan:
             method: mint
             parameters:
               - 'u1000000000000'
-              - "'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1-3"
-            cost: 6000
-      epoch: '2.3'
-    - id: 5
-      transactions:
-        - contract-call:
-            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            method: register-attestor
-            parameters:
-              - '"https://devnet.dlc.link/attestor-1"'
-            cost: 6000
-        - contract-call:
-            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            method: register-attestor
-            parameters:
-              - '"https://devnet.dlc.link/attestor-2"'
-            cost: 6000
-        - contract-call:
-            contract-id: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1
-            expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            method: register-attestor
-            parameters:
-              - '"https://devnet.dlc.link/attestor-3"'
+              - "'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sample-contract-loan-v1"
             cost: 6000
       epoch: '2.3'
