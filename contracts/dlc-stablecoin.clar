@@ -55,8 +55,3 @@
     (ft-burn? dlc-stablecoin amount account-to-burn-from)
   )
 )
-
-;; Initialize the contract
-(begin
-  (try! (ft-mint? dlc-stablecoin u1000000000000 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1-3)) ;; 1 million DLC USDC
-)

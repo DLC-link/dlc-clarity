@@ -4,10 +4,8 @@ import path from 'path';
 import { Command } from 'commander';
 const version = require('../../package.json').version;
 
-import addAttestor from './01_register-attestor';
-import getRegisteredAttestor from './02_get-registered-attestor';
-import fetchAllAttestors from './03_fetch-all-attestors';
-import deregisterAttestorByDNS from './04_deregister-attestor-by-dns';
+import getDLC from './02_get-dlc';
+import getAllDLCs from './03_fetch-all-dlcs';
 import registerContract from './05_register-contract';
 import getLoan from './07_sample-get-loan';
 import setupLoan from './06_sample-setup-loan';
@@ -25,25 +23,9 @@ async function main() {
 
   program.name('dlc-link-stacks').description('CLI scripts to help with DLC.Link utilities').version(`v${version}`);
 
-  program
-    .command('register-attestor')
-    .description('register attestor')
-    .argument('<address>', 'address of attestor')
-    .action(addAttestor);
+  program.command('get-dlc').description('get dlc').argument('<uuid>', 'uuid of dlc').action(getDLC);
 
-  program
-    .command('get-registered-attestor')
-    .description('get registered attestor by id')
-    .argument('<id>', 'id of attestor')
-    .action(getRegisteredAttestor);
-
-  program.command('fetch-all-attestors').description('fetch all registered attestors').action(fetchAllAttestors);
-
-  program
-    .command('deregister-attestor-by-dns')
-    .description('deregister attestor by dns')
-    .argument('<address>', 'address of attestor')
-    .action(deregisterAttestorByDNS);
+  program.command('fetch-all-dlcs').description('fetch all DLCs').action(getAllDLCs);
 
   program
     .command('register-contract')

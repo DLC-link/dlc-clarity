@@ -10,10 +10,10 @@ import { assertMatch, shiftPriceValue } from './deps.ts';
 // const BTChex = "BTC";
 const UUID = 'fakeuuid';
 const nftAssetContract = 'open-dlc';
-const nftRegisterContract = 'dlc-attestors';
 const dlcManagerContract = 'dlc-manager-v1';
 const callbackContract = 'callback-contract-v1';
 const eventSourceVersion = '1';
+const mockFundingTxId = 'F4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16';
 
 const contractPrincipal = (deployer: Account, contract: string) => `${deployer.address}.${contract}`;
 
@@ -21,90 +21,12 @@ const contractPrincipal = (deployer: Account, contract: string) => `${deployer.a
 // helpers
 //////////////////////////////
 
-function registerAttestors(chain: Chain, deployer: Account) {
-  let register_1 = chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('1.2.3.4')], deployer.address),
-  ]);
-  let register_2 = chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('5.6.7.8')], deployer.address),
-  ]);
-  let register_3 = chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('9.10.11.12')], deployer.address),
-  ]);
-
-  return { register_1, register_2, register_3 };
-}
-
 function getUUIDFromResponse(createDlcBlock: any) {
-  const regex = new RegExp(/uuid: (0x[a-fA-F0-9]{64})/);
+  const regex = new RegExp(/ok (0x[a-fA-F0-9]{64})/);
   const result = regex.exec(createDlcBlock.receipts[0].result);
   let uuid = result && result[1];
   return uuid;
 }
-
-//////////////////////////////
-// Attestors
-//////////////////////////////
-
-Clarinet.test({
-  name: 'register Attestor function',
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-    const deployer = accounts.get('deployer')!;
-
-    let checkStatus = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-registered-attestor', [types.uint(0)], deployer.address),
-    ]);
-    checkStatus.receipts[0].result.expectErr();
-
-    let block = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('1.1.1.1')], deployer.address),
-    ]);
-
-    block.receipts[0].result.expectOk();
-    const mintEvent = block.receipts[0].events[0];
-    assertEquals(typeof mintEvent, 'object');
-    assertEquals(mintEvent.type, 'nft_mint_event');
-    assertEquals(mintEvent.nft_mint_event.asset_identifier.split('::')[1], nftRegisterContract);
-    assertEquals(mintEvent.nft_mint_event.recipient.split('.')[1], dlcManagerContract);
-
-    checkStatus = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-registered-attestor', [types.uint(0)], deployer.address),
-    ]);
-
-    checkStatus.receipts[0].result.expectOk();
-    assertMatch(checkStatus.receipts[0].result, /1.1.1.1/);
-  },
-});
-
-Clarinet.test({
-  name: 'deregister Attestor function',
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-    const deployer = accounts.get('deployer')!;
-
-    chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('1.1.1.1')], deployer.address),
-    ]);
-
-    let block = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-registered-attestor', [types.uint(0)], deployer.address),
-    ]);
-
-    block.receipts[0].result.expectOk();
-    assertEquals(block.receipts[0].result, '(ok {dns: "1.1.1.1"})');
-
-    let block2 = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'deregister-attestor', [types.uint(0)], deployer.address),
-    ]);
-
-    block2.receipts[0].result.expectOk().expectUint(0);
-
-    let block3 = chain.mineBlock([
-      Tx.contractCall(dlcManagerContract, 'get-registered-attestor', [types.uint(0)], deployer.address),
-    ]);
-
-    block3.receipts[0].result.expectErr().expectUint(113);
-  },
-});
 
 //////////////////////////////
 // Creating the dlcs
@@ -116,7 +38,7 @@ Clarinet.test({
     const creator = accounts.get('wallet_1');
     const deployer = accounts.get('deployer')!;
 
-    registerAttestors(chain, deployer);
+    // registerAttestors(chain, deployer);
 
     let block = chain.mineBlock([
       Tx.contractCall(
@@ -170,8 +92,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let block = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -189,8 +109,6 @@ Clarinet.test({
     assertStringIncludes(event.contract_event.value, 'creator: ' + 'STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6');
     assertStringIncludes(event.contract_event.value, 'protocol-wallet: ' + protocol_wallet.address);
     assertStringIncludes(event.contract_event.value, `event-source: "dlclink:create-dlc:v${eventSourceVersion}"`);
-    // Expects the IPs of the attestors to be elements 0 and 2, as per the call in callback-contract-mock.clar
-    assertStringIncludes(event.contract_event.value, `attestors: [{dns: "1.2.3.4"}, {dns: "9.10.11.12"}]`);
 
     const mintEvent = block.receipts[0].events[1];
 
@@ -218,8 +136,6 @@ Clarinet.test({
     ]);
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
-
-    registerAttestors(chain, deployer);
 
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
@@ -257,12 +173,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    let { register_1, register_2, register_3 } = registerAttestors(chain, deployer);
-
-    register_1.receipts[0].result.expectOk().expectUint(0);
-    register_2.receipts[0].result.expectOk().expectUint(1);
-    register_3.receipts[0].result.expectOk().expectUint(2);
-
     let block = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -273,9 +183,7 @@ Clarinet.test({
     ]);
 
     block.receipts[0].result.expectOk();
-    assertMatch(block.receipts[0].result, /uuid: 0x[a-fA-F0-9]{64}/);
-    // Expects the IPs of the attestors to be elements 0 and 2, as per the call in callback-contract-mock.clar
-    assertStringIncludes(block.receipts[0].result, 'attestors: [{dns: "1.2.3.4"}, {dns: "9.10.11.12"}]');
+    assertMatch(block.receipts[0].result, /ok 0x[a-fA-F0-9]{64}/);
   },
 });
 
@@ -302,8 +210,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -319,7 +225,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -349,8 +259,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -366,7 +274,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         deployer.address
       ),
     ]);
@@ -393,8 +305,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -410,7 +320,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -423,7 +337,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -450,8 +368,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -467,7 +383,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -506,8 +426,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -523,7 +441,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -555,8 +477,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -572,7 +492,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -618,8 +542,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -635,7 +557,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -690,8 +616,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -707,7 +631,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -761,8 +689,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -778,7 +704,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -828,8 +758,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -845,7 +773,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);
@@ -905,8 +837,6 @@ Clarinet.test({
 
     whitelist_event.receipts[0].result.expectOk().expectBool(true);
 
-    registerAttestors(chain, deployer);
-
     let createDlcBlock = chain.mineBlock([
       Tx.contractCall(
         contractPrincipal(protocol_contract_deployer, callbackContract),
@@ -922,7 +852,11 @@ Clarinet.test({
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
-        [uuid, types.principal(contractPrincipal(protocol_contract_deployer, callbackContract))],
+        [
+          uuid,
+          types.ascii(mockFundingTxId),
+          types.principal(contractPrincipal(protocol_contract_deployer, callbackContract)),
+        ],
         protocol_wallet.address
       ),
     ]);

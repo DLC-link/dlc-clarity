@@ -33,25 +33,12 @@ const BTChex = 'BTC';
 // const UUID = UUID;
 const nftAssetContract = 'open-dlc';
 const dlcManagerContract = 'dlc-manager-v1';
-const sampleProtocolContract = 'sample-contract-loan-v1-3';
+const sampleProtocolContract = 'sample-contract-loan-v1';
 const stableCoinContract = 'dlc-stablecoin';
 const stableCoinDecimals = 6;
+const mockFundingTxId = 'F4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16';
 
 const contractPrincipal = (deployer: Account, contract: string) => `${deployer.address}.${contract}`;
-
-function registerAttestors(chain: Chain, deployer: Account) {
-  let register_1 = chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('1.2.3.4')], deployer.address),
-  ]);
-  let register_2 = chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('5.6.7.8')], deployer.address),
-  ]);
-  let register_3 = chain.mineBlock([
-    Tx.contractCall(dlcManagerContract, 'register-attestor', [types.ascii('9.10.11.12')], deployer.address),
-  ]);
-
-  return { register_1, register_2, register_3 };
-}
 
 function openLoan(
   chain: Chain,
@@ -67,8 +54,6 @@ function openLoan(
     btcDeposit: 1,
   }
 ) {
-  registerAttestors(chain, deployer);
-
   chain.mineBlock([
     Tx.contractCall(
       dlcManagerContract,
@@ -82,21 +67,12 @@ function openLoan(
     Tx.contractCall(
       callbackContract,
       'setup-loan',
-      [types.uint(shiftPriceValue(loanParams.btcDeposit)), types.buff([0, 2])],
+      [types.uint(shiftPriceValue(loanParams.btcDeposit))],
       protocol_contract_user.address
     ),
   ]);
 
   block.receipts[0].result.expectOk();
-
-  const setupLoanPrintEvent = block.receipts[0].events.find((event: any) => {
-    return event.contract_event && event.contract_event.contract_identifier.includes('sample-contract-loan-v1-3');
-  });
-
-  assertEquals(typeof setupLoanPrintEvent, 'object');
-  assertEquals(setupLoanPrintEvent.type, 'contract_event');
-  assertEquals(setupLoanPrintEvent.contract_event.topic, 'print');
-  assertStringIncludes(setupLoanPrintEvent.contract_event.value, 'loan-id: u1, status: "ready"');
 
   const createDLCPrintEvent = block.receipts[0].events.find((event: any) => {
     return event.contract_event && event.contract_event.contract_identifier.includes('dlc-manager-v1');
@@ -105,12 +81,6 @@ function openLoan(
   assertEquals(typeof createDLCPrintEvent, 'object');
   assertEquals(createDLCPrintEvent.type, 'contract_event');
   assertEquals(createDLCPrintEvent.contract_event.topic, 'print');
-  let matchRegex = assertMatch(
-    createDLCPrintEvent.contract_event.value,
-    new RegExp(
-      /^{attestors: \[{dns: "1.2.3.4"}, {dns: "9.10.11.12"}\], callback-contract: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6.sample-contract-loan-v1-3, creator: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, event-source: "dlclink:create-dlc:v1", protocol-wallet: ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP, uuid: 0x[a-fA-F0-9]{64}}$/
-    )
-  );
 
   const mintEvent = block.receipts[0].events.find((event: any) => {
     return event.nft_mint_event && event.nft_mint_event.asset_identifier.includes('open-dlc');
@@ -206,7 +176,7 @@ Clarinet.test({
     const account: any = block.receipts[0].result.expectOk();
     assertStringIncludes(
       account,
-      `dlc_uuid: (some ${UUID}), liquidation-fee: u1000, liquidation-ratio: u14000, owner: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, status: "ready", vault-collateral: u100000000, vault-loan: u0`
+      `closing-tx-id: none, dlc_uuid: (some ${UUID}), funding-tx-id: none, liquidation-fee: u1000, liquidation-ratio: u14000, owner: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, status: "ready", vault-collateral: u100000000, vault-loan: u0`
     );
   },
 });
@@ -235,17 +205,12 @@ Clarinet.test({
       ),
     ]);
 
-    // NOTE: we expect it to print the previous state
     assertStringIncludes(
       block.receipts[0].events[0].contract_event.value,
-      `{loan-id: u1, status: "ready", uuid: (some ${UUID})}`
-    );
-    assertStringIncludes(
-      block.receipts[0].events[1].contract_event.value,
       `{creator: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, event-source: "dlclink:close-dlc:v1", outcome: u0, uuid: ${UUID}}`
     );
 
-    const burnEvent = block.receipts[0].events[2];
+    const burnEvent = block.receipts[0].events[1];
     assertEquals(typeof burnEvent, 'object');
     assertEquals(burnEvent.type, 'nft_burn_event');
     assertEquals(burnEvent.nft_burn_event.asset_identifier.split('::')[1], nftAssetContract);
@@ -331,7 +296,11 @@ function setupAndBorrow(
     Tx.contractCall(
       dlcManagerContract,
       'set-status-funded',
-      [UUID, types.principal(contractPrincipal(protocol_contract_deployer, sampleProtocolContract))],
+      [
+        UUID,
+        types.ascii(mockFundingTxId),
+        types.principal(contractPrincipal(protocol_contract_deployer, sampleProtocolContract)),
+      ],
       protocol_wallet.address
     ),
   ]);

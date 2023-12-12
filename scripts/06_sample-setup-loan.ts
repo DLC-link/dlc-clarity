@@ -6,7 +6,7 @@ export default async function setupLoan(btcDeposit: number, attestorIDs: number[
     contractAddress: exampleContractAddress,
     contractName: exampleContractName,
     functionName: 'setup-loan',
-    functionArgs: [uintCV(btcDeposit), bufferCV(Buffer.from(attestorIDs))],
+    functionArgs: [uintCV(btcDeposit)],
     senderKey: testCreatorKey,
     validateWithAbi: true,
     network,
