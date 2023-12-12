@@ -1,3 +1,5 @@
+[![Build & Push to S3](https://github.com/DLC-link/dlc-clarity/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/DLC-link/dlc-clarity/actions/workflows/build.yml)
+
 Join our Discord server for news and support!
 
 [![Discord Banner](https://discordapp.com/api/guilds/887360470955208745/widget.png?style=banner2)](https://discord.gg/JAkbs92N5H)
@@ -22,6 +24,17 @@ An example lending/borrowing contract is provided in `/examples/sample-contract-
 
 The following Clarity Traits must be implemented to interface with our dlc-manager contract. See `/contracts/dlc-link-callback-trait-v1.clar`
 
+### `set-status-funded`
+
+When a DLC is properly set up on the _Bitcoin_ blockchain, the DLC.Link infrastructure will use this function to notify Stacks of it's success.
+This allows the contracts to have confirmation about the DLC's status.
+
+Parameters:
+
+- `uuid`: string - UUID of the DLC that was succesfully funded on BTC
+- `btc-tx-id`: string - BTC funding transaction ID
+-
+
 ### `post-close-dlc-handler`
 
 Used to callback into the calling/protocol contract to notify when a DLC is closed successfully.
@@ -30,15 +43,6 @@ Parameters:
 
 - `uuid`: string - UUID of the DLC
 - `btc-tx-id`: string - BTC closing transaction ID
-
-### `set-staus-funded`
-
-When a DLC is properly set up on the _Bitcoin_ blockchain, the DLC.Link infrastructure will use this function to notify Stacks of it's success.
-This allows the contracts to have confirmation about the DLC's status.
-
-Parameters:
-
-- `uuid`: string - UUID of the DLC that was succesfully funded on BTC
 
 ## Functions to call
 
@@ -64,9 +68,10 @@ See the comments in the contract for further information about using this functi
 
 Parameters:
 
+- `value-locked`: uint - amount of BTC to lock in the DLC in Satoshis
 - `callback-contract`: principal - The contract that sends the request, and will accept the callback.
 - `protocol-wallet`: principal - router-wallet public key, that will trigger `set-status-funded` and `post-close-dlc` (see [dlc-stack](https://github.com/DLC-link/dlc-stack) repo for more information)
-- `attestor-ids`: (buff 32) - ids of the attestors in a concatenated buff, that will be used to create the DLC
+- `refund-delay`: uint - seconds until an emergency refund transaction can be broadcasted. Set 0 to disable this feature.
 
 ### Closing the DLC
 
