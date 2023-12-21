@@ -1,0 +1,68 @@
+---
+id: 1
+name: Devnet deployment
+network: devnet
+# stacks-node: 'http://localhost:20443'
+# bitcoin-node: 'http://devnet:devnet@localhost:18443'
+# You can use these endpoints to connect to the public devnet
+stacks-node: 'https://stx-btc1.dlc.link:20443'
+bitcoin-node: 'http://devnet:devnet@stx-btc1.dlc.link:18443'
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1q8fp65ng7fmw3svp80llv80ny88e4e97d048fmh
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qcnr4g23wp7m08xhquddcwnehndmhw5kvas7h27
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qtdp36gg86xacn984825arsqhh4ge7yza6rm0gt
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qve066efyw9wr23k0ge03m30w0t3dtt08dju58k
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qkm6dqj654evqpfwlqrr0djdgl7q3c7gv4lug72
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qqygkj3usflkel5m7z8fwlnx5r3acel5f7tq47p
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qjvpjq4pa9k9klknxf0qt5y76u9uc6q7ayxaupw
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qw8f2sm0qqdsrecx26vzuf4ssq8fq7x5svqtl8t
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qwauw7z4n9csjrq4ytsj8psmreh2dxtsz49pxe2
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qpvpqa8pz3wr2624fcqzagsrhzk023awhcvjadq
+            sats-amount: 100000000
+            sats-per-byte: 10
+        - btc-transfer:
+            expected-sender: mjSrB3wS4xab3kYqFktwBzfTdPg367ZJ2d
+            recipient: bcrt1qevw66czdu2zy0wm7wuep6ku6qcrh6zzls9y69k
+            sats-amount: 100000000
+            sats-per-byte: 10
