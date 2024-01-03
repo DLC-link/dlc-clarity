@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { network, deployerPrivateKey, deployContract } from './common';
+import { network, deployerPrivateKey, deployContract } from './common.js';
 
 import {
   AnchorMode,

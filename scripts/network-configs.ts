@@ -1,4 +1,5 @@
 import { StacksMainnet, StacksMocknet, StacksTestnet } from '@stacks/network';
+import { readConfig, readRemoteConfig, getDlcManagerDeployment, getSampleContractDeployment } from './read-config.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,8 +7,8 @@ const env = process.env.NETWORK as 'mocknet' | 'mocknet_cloud' | 'testnet' | 'ma
 
 const mocknet = {
   network: new StacksMocknet(),
-  contractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
-  exampleContractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+  configReader: readConfig,
+  deploymentFile: 'custom.devnet-plan.yaml',
   privateKey: '753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601',
   protocolPrivateKey: 'de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801',
   mnemonic:
@@ -17,8 +18,8 @@ const mocknet = {
 
 const mocknet_cloud = {
   network: new StacksMocknet({ url: process.env.MOCKNET_ADDRESS as string }),
-  contractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
-  exampleContractAddress: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+  configReader: readRemoteConfig,
+  deploymentFile: 'custom.devnet-plan.yaml',
   privateKey: '753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601',
   protocolPrivateKey: 'de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801',
   mnemonic:
@@ -28,8 +29,8 @@ const mocknet_cloud = {
 
 const testnet = {
   network: new StacksTestnet(),
-  contractAddress: 'ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3',
-  exampleContractAddress: 'ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3',
+  configReader: readConfig,
+  deploymentFile: 'custom.testnet-plan.yaml',
   privateKey: process.env.PRIVATE_KEY as string,
   protocolPrivateKey: process.env.PROTOCOL_PRIVATE_KEY as string,
   mnemonic: process.env.MNEMONIC as string,
@@ -38,8 +39,8 @@ const testnet = {
 
 const mainnet = {
   network: new StacksMainnet(),
-  contractAddress: '',
-  exampleContractAddress: '',
+  configReader: readRemoteConfig,
+  deploymentFile: 'custom.mainnet-plan.yaml',
   privateKey: process.env.PRIVATE_KEY as string,
   protocolPrivateKey: process.env.PROTOCOL_PRIVATE_KEY as string,
   mnemonic: process.env.MNEMONIC as string,

@@ -1,27 +1,25 @@
 #!/usr/bin/env node
-require('dotenv').config();
 import path from 'path';
 import { Command } from 'commander';
-const version = require('../../package.json').version;
 
-import getDLC from './02_get-dlc';
-import getAllDLCs from './03_fetch-all-dlcs';
-import registerContract from './05_register-contract';
-import getLoan from './07_sample-get-loan';
-import setupLoan from './06_sample-setup-loan';
-import closeLoan from './08_sample-close-loan';
-import mintStablecoin from './09_mint-stablecoin';
-import deployProtocolContract from './10_deploy-contract';
-import setLiquidationFee from './11_set-liquidation-fee';
-import setStatusFunded from './12_set-status-funded';
-import setProtocolWallet from './13_set-protocol-wallet';
-import sendSTXTo from './14_send-stx';
-import deployAndSetupProtocolContract from './15_deploy-and-setup';
+import getDLC from './02_get-dlc.js';
+import getAllDLCs from './03_fetch-all-dlcs.js';
+import registerContract from './05_register-contract.js';
+import getLoan from './07_sample-get-loan.js';
+import setupLoan from './06_sample-setup-loan.js';
+import closeLoan from './08_sample-close-loan.js';
+import mintStablecoin from './09_mint-stablecoin.js';
+import deployProtocolContract from './10_deploy-contract.js';
+import setLiquidationFee from './11_set-liquidation-fee.js';
+import setStatusFunded from './12_set-status-funded.js';
+import setProtocolWallet from './13_set-protocol-wallet.js';
+import sendSTXTo from './14_send-stx.js';
+// import deployAndSetupProtocolContract from './15_deploy-and-setup.js';
 
 async function main() {
   const program = new Command();
 
-  program.name('dlc-link-stacks').description('CLI scripts to help with DLC.Link utilities').version(`v${version}`);
+  program.name('dlc-link-stacks').description('CLI scripts to help with DLC.Link utilities');
 
   program.command('get-dlc').description('get dlc').argument('<uuid>', 'uuid of dlc').action(getDLC);
 
@@ -38,7 +36,6 @@ async function main() {
     .command('setup-loan')
     .description('setup loan in sample contract')
     .argument('[btcDeposit]', 'btc deposit', 100000000)
-    .argument('[attestorIDs...]', 'ids of attestors', [0, 1, 2])
     .action(setupLoan);
 
   program
@@ -94,16 +91,16 @@ async function main() {
     .argument('<amount>', 'amount to send')
     .action(sendSTXTo);
 
-  program
-    .command('deploy-and-setup')
-    .description('deploy and setup protocol contract')
-    .argument('<path>', 'path to contract')
-    .argument('<contractName>', 'name of contract')
-    .argument('[deployerKey]', 'key of deployer')
-    .action(deployAndSetupProtocolContract);
+  // program
+  //   .command('deploy-and-setup')
+  //   .description('deploy and setup protocol contract')
+  //   .argument('<path>', 'path to contract')
+  //   .argument('<contractName>', 'name of contract')
+  //   .argument('[deployerKey]', 'key of deployer')
+  //   .action(deployAndSetupProtocolContract);
 
-  const rootDir = path.join(__dirname, '..');
-  process.chdir(rootDir);
+  // const rootDir = path.join(__dirname, '..');
+  // process.chdir(rootDir);
 
   await program.parseAsync(process.argv);
 }

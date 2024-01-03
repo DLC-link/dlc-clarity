@@ -13,21 +13,26 @@ import {
   makeSTXTokenTransfer,
   SignedTokenTransferOptions,
 } from '@stacks/transactions';
-import { config } from './network-configs';
+import { config } from './network-configs.js';
 import { StacksNetwork } from '@stacks/network';
 import { hexToBytes as hexToBytesMS } from 'micro-stacks/common';
+import { getDlcManagerDeployment, getSampleContractDeployment, readConfig } from './read-config.js';
+
+let deployment = await config.configReader(config.deploymentFile, (process.env.FETCH_BRANCH as string) ?? 'dev');
+let dlcManagerDeployment = getDlcManagerDeployment(deployment);
+let sampleContractDeployment = getSampleContractDeployment(deployment);
 
 export const network = config.network;
 export const deployerPrivateKey = config.privateKey;
-export const contractAddress = config.contractAddress;
-export const exampleContractAddress = config.exampleContractAddress;
+export const contractAddress = dlcManagerDeployment['expected-sender'];
+export const exampleContractAddress = sampleContractDeployment['expected-sender'];
 export const apiBase = config.api_base;
 export const testCreatorKey = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
 export const protocolPrivateKey = config.protocolPrivateKey;
 export const openDLCNFT = 'open-dlc';
 export const registeredContractNFTName = `registered-contract`;
-export const exampleContractName = 'sample-contract-loan-v1';
-export const contractName = 'dlc-manager-v1';
+export const exampleContractName = sampleContractDeployment['contract-name'];
+export const contractName = dlcManagerDeployment['contract-name'];
 export const contractFullName = `${contractAddress}.${contractName}`;
 
 // Functions

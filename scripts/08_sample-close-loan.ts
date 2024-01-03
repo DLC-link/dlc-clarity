@@ -19,7 +19,7 @@ import {
   openDLCNFT,
   callReadOnly,
   hexToBytes,
-} from './common';
+} from './common.js';
 
 export default async function closeLoan(id: number) {
   const getLoanOptions = {

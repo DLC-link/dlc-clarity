@@ -1,5 +1,5 @@
 import { bufferCV } from '@stacks/transactions';
-import { network, callReadOnly, hexToBytes, contractAddress, contractName } from './common';
+import { network, callReadOnly, hexToBytes, contractAddress, contractName } from './common.js';
 
 export default async function getDLC(uuid: string) {
   const txOptions = {

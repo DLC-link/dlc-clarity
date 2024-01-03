@@ -4,6 +4,7 @@
   "description": "",
   "main": "scripts/dist/index.js",
   "bin": "scripts/dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "npx tsc",
     "dev": "tsc-watch --noClear -p ./tsconfig.json",
@@ -16,9 +17,11 @@
     "@stacks/network": "^6.5.5",
     "@stacks/transactions": "^6.7.0",
     "commander": "^11.0.0",
+    "js-yaml": "^4.1.0",
     "micro-stacks": "^1.2.1"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.5.0",
     "dotenv": "^16.3.1",
     "tsc-watch": "^6.0.4",
