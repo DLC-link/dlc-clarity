@@ -57,41 +57,33 @@ plan:
     - id: 1
       transactions:
         - emulated-contract-publish:
-            contract-name: redstone-verify
-            emulated-sender: STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB
-            path: '.cache/requirements/STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify.clar'
-            clarity-version: 1
-      epoch: '2.05'
-    - id: 2
-      transactions:
-        - emulated-contract-publish:
             contract-name: dlc-link-callback-trait-v1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dlc-link-callback-trait-v1.clar
+            path: contracts/dlc-link-callback-trait.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dlc-manager-trait-v1
+            contract-name: dlc-manager-trait-v1-1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dlc-manager-trait-v1.clar
+            path: contracts/dlc-manager-trait.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dlc-manager-v1
+            contract-name: dlc-manager-v1-1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/dlc-manager-v1.clar
+            path: contracts/dlc-manager.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: callback-contract-v1
+            contract-name: callback-contract-v1-1
             emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
-            path: tests/callback-contract-mock-v1.clar
+            path: tests/callback-contract-mock.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dlc-stablecoin
+            contract-name: dlc-stablecoin-v1-1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/dlc-stablecoin.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: sample-contract-loan-v1
-            emulated-sender: STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6
-            path: examples/sample-contract-loan-v1.clar
+            contract-name: sample-contract-loan-v1-1
+            emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
+            path: examples/sample-contract-loan.clar
             clarity-version: 2
       epoch: '2.3'
