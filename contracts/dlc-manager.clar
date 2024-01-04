@@ -1,4 +1,4 @@
-(impl-trait .dlc-manager-trait-v1.dlc-manager-trait-v1)
+(impl-trait .dlc-manager-trait-v1-2.dlc-manager-trait-v1-2)
 ;; dlc-manager-v1
 
 ;; Error codes
@@ -17,7 +17,7 @@
 (define-constant contract-owner tx-sender)
 
 ;; Current contract's name
-(define-constant dlc-manager-contract .dlc-manager-v1)
+(define-constant dlc-manager-contract .dlc-manager-v1-1)
 
 ;; Status enums
 (define-constant status-created u0)
@@ -29,7 +29,7 @@
 (define-data-var nonce uint u0)
 
 ;; Importing the trait to use it as a type
-(use-trait cb-trait .dlc-link-callback-trait-v1.dlc-link-callback-trait-v1)
+(use-trait cb-trait .dlc-link-callback-trait-v1-1.dlc-link-callback-trait-v1-1)
 
 ;; NFT to keep track of registered contracts
 (define-non-fungible-token registered-contract principal)
@@ -42,7 +42,6 @@
   (buff 32)
   {
     uuid: (buff 32),
-    actual-closing-time: uint,
     outcome: (optional uint),
     creator: principal,
     callback-contract: principal,
@@ -51,7 +50,9 @@
     refund-delay: uint,
     status: uint,
     funding-tx-id: (optional (string-ascii 64)),
-    closing-tx-id: (optional (string-ascii 64))
+    closing-tx-id: (optional (string-ascii 64)),
+    btc-fee-recipient: (string-ascii 64),
+    btc-fee-basis-points: uint
   }
 )
 
@@ -80,7 +81,7 @@
 ;; @param callback-contract; the contract-principal where the create-dlc will call back to
 ;; @param protocol-wallet; the principal of the protocol-wallet that will be used for this DLC
 ;; @param refund-delay  Delay in seconds before the creator can claim a refund. Set 0 to disable.
-(define-public (create-dlc (value-locked uint) (callback-contract principal) (protocol-wallet principal) (refund-deyal uint))
+(define-public (create-dlc (value-locked uint) (callback-contract principal) (protocol-wallet principal) (refund-delay uint) (btc-fee-recipient (string-ascii 64)) (btc-fee-basis-points uint))
   (let (
     (uuid (unwrap! (get-random-uuid (var-get nonce)) err-failed-building-uuid))
     )
@@ -89,15 +90,16 @@
     (map-set dlcs uuid {
       uuid: uuid,
       outcome: none,
-      actual-closing-time: u0,
       creator: tx-sender,
       callback-contract: callback-contract,
       protocol-wallet: protocol-wallet,
       value-locked: value-locked,
-      refund-delay: refund-deyal,
+      refund-delay: refund-delay,
       status: status-created,
       funding-tx-id: none,
-      closing-tx-id: none
+      closing-tx-id: none,
+      btc-fee-recipient: btc-fee-recipient,
+      btc-fee-basis-points: btc-fee-basis-points
     })
     (print {
       uuid: uuid,

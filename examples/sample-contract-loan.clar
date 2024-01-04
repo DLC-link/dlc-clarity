@@ -1,6 +1,6 @@
 
-(use-trait cb-trait .dlc-link-callback-trait-v1.dlc-link-callback-trait-v1)
-(impl-trait .dlc-link-callback-trait-v1.dlc-link-callback-trait-v1)
+(use-trait cb-trait .dlc-link-callback-trait-v1-1.dlc-link-callback-trait-v1-1)
+(impl-trait .dlc-link-callback-trait-v1-1.dlc-link-callback-trait-v1-1)
 
 ;; Error constants
 (define-constant err-cant-unwrap (err u1000))
@@ -37,8 +37,10 @@
 (define-constant contract-owner tx-sender)
 
 ;; Contract name bindings
-(define-constant sample-protocol-contract .sample-contract-loan-v1)
+(define-constant sample-protocol-contract .sample-contract-loan-v1-1)
 
+;; ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3 on Testnet
+;; ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP on Mocknet
 (define-data-var protocol-wallet-address principal 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP)
 
 (define-public (set-protocol-wallet-address (address principal))
@@ -51,6 +53,35 @@
 
 (define-read-only (get-protocol-wallet-address)
   (ok (var-get protocol-wallet-address))
+)
+
+
+(define-data-var btc-fee-recipient (string-ascii 64) "bcrt1qvgkz8m4m73kly4xhm28pcnv46n6u045lfq9ta3")
+
+(define-public (set-btc-fee-recipient (address (string-ascii 64)))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (var-set btc-fee-recipient address)
+    (ok address)
+  )
+)
+
+(define-read-only (get-btc-fee-recipient)
+  (ok (var-get btc-fee-recipient))
+)
+
+(define-data-var btc-fee-basis-points uint u100)
+
+(define-public (set-btc-fee-basis-points (bpts uint))
+  (begin
+    (asserts! (is-eq contract-owner tx-sender) err-unauthorised)
+    (var-set btc-fee-basis-points bpts)
+    (ok bpts)
+  )
+)
+
+(define-read-only (get-btc-fee-basis-points)
+  (ok (var-get btc-fee-basis-points))
 )
 
 (define-data-var liquidation_ratio uint u14000)
@@ -175,7 +206,7 @@
         (loan-id (+ (var-get last-loan-id) u1))
         (target sample-protocol-contract)
         (current-loan-ids (get-creator-loan-ids tx-sender))
-        (uuid (unwrap! (unwrap! (ok (contract-call? .dlc-manager-v1 create-dlc btc-deposit target (var-get protocol-wallet-address) u0)) err-contract-call-failed) err-contract-call-failed))
+        (uuid (unwrap! (unwrap! (ok (contract-call? .dlc-manager-v1-1 create-dlc btc-deposit target (var-get protocol-wallet-address) u0 (var-get btc-fee-recipient) (var-get btc-fee-basis-points))) err-contract-call-failed) err-contract-call-failed))
       )
       (var-set last-loan-id loan-id)
       (begin
@@ -221,7 +252,7 @@
     (asserts! (is-eq (get owner loan) tx-sender) err-unauthorised)
     (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
     (map-set loans loan-id (merge loan { vault-loan: (+ vault-loan-amount amount) }))
-    (unwrap! (ok (contract-call? .dlc-stablecoin transfer amount sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
+    (unwrap! (ok (contract-call? .dlc-stablecoin-v1-1 transfer amount sample-protocol-contract (get owner loan) none)) err-stablecoin-issue-failed)
   )
 )
 
@@ -234,7 +265,7 @@
     (asserts! (is-eq (get status loan) status-funded) err-dlc-not-funded)
     (asserts! (>= vault-loan-amount amount) err-balance-negative)
     (map-set loans loan-id (merge loan { vault-loan: (- vault-loan-amount amount) }))
-    (unwrap! (ok (contract-call? .dlc-stablecoin transfer amount (get owner loan) sample-protocol-contract none)) err-stablecoin-repay-failed)
+    (unwrap! (ok (contract-call? .dlc-stablecoin-v1-1 transfer amount (get owner loan) sample-protocol-contract none)) err-stablecoin-repay-failed)
   )
 )
 
@@ -247,7 +278,7 @@
     (begin
       (asserts! (is-eq (get vault-loan loan) u0) err-not-repaid)
       (map-set loans loan-id (merge loan { status: status-pre-repaid }))
-      (unwrap! (ok (contract-call? .dlc-manager-v1 close-dlc uuid u0)) err-contract-call-failed)
+      (unwrap! (ok (contract-call? .dlc-manager-v1-1 close-dlc uuid u0)) err-contract-call-failed)
     )
   )
 )
@@ -311,7 +342,7 @@
     )
     (begin
       (map-set loans loan-id (merge loan { status: status-pre-liquidated }))
-      (unwrap! (ok (as-contract (contract-call? .dlc-manager-v1 close-dlc uuid payout-ratio))) err-contract-call-failed)
+      (unwrap! (ok (as-contract (contract-call? .dlc-manager-v1-1 close-dlc uuid payout-ratio))) err-contract-call-failed)
     )
   )
 )

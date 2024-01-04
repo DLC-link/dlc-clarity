@@ -50,19 +50,19 @@ plan:
       transactions:
         - emulated-contract-publish:
             contract-name: sip-010-trait-ft-standard
-            emulated-sender: SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE
-            path: '.cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar'
+            emulated-sender: ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT
+            path: '.cache/requirements/ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard.clar'
             clarity-version: 1
       epoch: '2.0'
     - id: 1
       transactions:
         - emulated-contract-publish:
-            contract-name: dlc-link-callback-trait-v1
+            contract-name: dlc-link-callback-trait-v1-1
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/dlc-link-callback-trait.clar
             clarity-version: 2
         - emulated-contract-publish:
-            contract-name: dlc-manager-trait-v1-1
+            contract-name: dlc-manager-trait-v1-2
             emulated-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
             path: contracts/dlc-manager-trait.clar
             clarity-version: 2

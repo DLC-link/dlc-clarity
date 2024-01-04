@@ -2,8 +2,8 @@
 id: 0
 name: Testnet deployment
 network: testnet
-stacks-node: "https://api.testnet.hiro.so"
-bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+stacks-node: 'https://api.testnet.hiro.so'
+bitcoin-node: 'http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332'
 plan:
   batches:
     - id: 0
@@ -14,51 +14,51 @@ plan:
             remap-principals:
               SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
             cost: 8400
-            path: ".cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar"
+            path: '.cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar'
             clarity-version: 1
-      epoch: "2.0"
+      epoch: '2.0'
     - id: 1
       transactions:
         - contract-publish:
             contract-name: callback-contract-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 548684282
+            cost: 7494006
             path: tests/callback-contract-mock.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
-            contract-name: dlc-link-callback-trait-v1
+            contract-name: dlc-link-callback-trait-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 548548023
+            cost: 7492145
             path: contracts/dlc-link-callback-trait.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
-            contract-name: dlc-manager-trait-v1-1
+            contract-name: dlc-manager-trait-v1-2
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 548582087
+            cost: 7492610
             path: contracts/dlc-manager-trait.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
             contract-name: dlc-manager-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 549978751
+            cost: 7511686
             path: contracts/dlc-manager.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
             contract-name: dlc-stablecoin-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 548752412
+            cost: 7494936
             path: contracts/dlc-stablecoin.clar
             anchor-block-only: true
             clarity-version: 2
         - contract-publish:
             contract-name: sample-contract-loan-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 550762245
+            cost: 7522852
             path: examples/sample-contract-loan.clar
             anchor-block-only: true
             clarity-version: 2
-      epoch: "2.3"
+      epoch: '2.3'

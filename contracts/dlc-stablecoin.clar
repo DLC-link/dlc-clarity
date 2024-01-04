@@ -1,5 +1,8 @@
 ;; dlc-stablecoin
-(impl-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
+;; (impl-trait 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.sip-010-trait)
+
+;; Testnet
+(impl-trait 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard.sip-010-trait)
 
 (define-constant contract-owner tx-sender)
 (define-constant err-owner-only (err u100))
@@ -13,7 +16,7 @@
 )
 
 (define-read-only (get-symbol)
-    (ok "USDC")
+    (ok "USDLC")
 )
 
 (define-read-only (get-decimals)
