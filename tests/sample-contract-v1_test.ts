@@ -32,9 +32,9 @@ import {
 const BTChex = 'BTC';
 // const UUID = UUID;
 const nftAssetContract = 'open-dlc';
-const dlcManagerContract = 'dlc-manager-v1';
-const sampleProtocolContract = 'sample-contract-loan-v1';
-const stableCoinContract = 'dlc-stablecoin';
+const dlcManagerContract = 'dlc-manager-v1-1';
+const sampleProtocolContract = 'sample-contract-loan-v1-1';
+const stableCoinContract = 'dlc-stablecoin-v1-1';
 const stableCoinDecimals = 6;
 const mockFundingTxId = 'F4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16';
 
@@ -75,7 +75,7 @@ function openLoan(
   block.receipts[0].result.expectOk();
 
   const createDLCPrintEvent = block.receipts[0].events.find((event: any) => {
-    return event.contract_event && event.contract_event.contract_identifier.includes('dlc-manager-v1');
+    return event.contract_event && event.contract_event.contract_identifier.includes('dlc-manager-v1-1');
   });
 
   assertEquals(typeof createDLCPrintEvent, 'object');
@@ -98,20 +98,19 @@ function openLoan(
   //The loan account in the sample protocl contact
   const loan: any = loanBlock.receipts[0].result.expectSome().expectTuple();
 
-  assertMatch(loan.dlc_uuid, new RegExp(/^\(some 0x[a-fA-F0-9]{64}\)$/));
+  assertMatch(loan.dlc_uuid, new RegExp(/^0x[a-fA-F0-9]{64}$/));
   assertEquals(loan.status, '"ready"');
   assertEquals(loan['vault-collateral'], 'u100000000');
   assertEquals(loan['vault-loan'], 'u0');
 
-  const dlcUuid = loan.dlc_uuid.expectSome();
-  return dlcUuid;
+  return loan.dlc_uuid;
 }
 
 Clarinet.test({
   name: 'setup-loan on sample contract creates the loan, emits a dlclink event, and mints an nft',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
     const UUID = openLoan(
@@ -140,7 +139,7 @@ Clarinet.test({
 
     //The loan account in the sample protocl contact
     const loan: any = block2.receipts[0].result.expectSome().expectTuple();
-    const dlcUuid = loan.dlc_uuid.expectSome();
+    const dlcUuid = loan.dlc_uuid;
 
     assertEquals(dlcUuid, UUID);
     assertEquals(loan.status, '"ready"');
@@ -153,7 +152,7 @@ Clarinet.test({
   name: 'get-loan-by-uuid works after creating the loan',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
     const UUID = openLoan(
@@ -176,7 +175,7 @@ Clarinet.test({
     const account: any = block.receipts[0].result.expectOk();
     assertStringIncludes(
       account,
-      `closing-tx-id: none, dlc_uuid: (some ${UUID}), funding-tx-id: none, liquidation-fee: u1000, liquidation-ratio: u14000, owner: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, status: "ready", vault-collateral: u100000000, vault-loan: u0`
+      `closing-tx-id: none, dlc_uuid: ${UUID}, funding-tx-id: none, liquidation-fee: u1000, liquidation-ratio: u14000, owner: ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG, status: "ready", vault-collateral: u100000000, vault-loan: u0`
     );
   },
 });
@@ -185,7 +184,7 @@ Clarinet.test({
   name: 'close-loan on sample protocol contract should close the loan, emit a dlclink event, and burn the nft',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
     const UUID = openLoan(
@@ -227,7 +226,7 @@ Clarinet.test({
     ]);
     //The loan account in the sample protocl contact
     const loan: any = block2.receipts[0].result.expectSome().expectTuple();
-    const dlcUuid = loan.dlc_uuid.expectSome();
+    const dlcUuid = loan.dlc_uuid;
 
     assertEquals(dlcUuid, UUID);
     assertEquals(loan.status, '"pre-repaid"');
@@ -240,7 +239,7 @@ Clarinet.test({
   name: 'cannot borrow on unfunded vault',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
 
     const UUID = openLoan(
@@ -324,7 +323,7 @@ Clarinet.test({
   name: 'borrow increases the loan amount',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const borrowAmount = 100000000; // $100
@@ -348,7 +347,7 @@ Clarinet.test({
     ]);
     //The loan account in the sample protocl contact
     const loan: any = block2.receipts[0].result.expectSome().expectTuple();
-    const dlcUuid = loan.dlc_uuid.expectSome();
+    const dlcUuid = loan.dlc_uuid;
 
     assertEquals(dlcUuid, UUID);
     assertEquals(loan.status, '"funded"');
@@ -361,7 +360,7 @@ Clarinet.test({
   name: 'cannot close loan if not repaid',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const borrowAmount = 100000000; // $100
@@ -392,7 +391,7 @@ Clarinet.test({
   name: 'repay decreases the loan amount',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const borrowAmount = 100000000; // $100
@@ -417,7 +416,7 @@ Clarinet.test({
     ]);
     //The loan account in the sample protocl contact
     const loan: any = block.receipts[0].result.expectSome().expectTuple();
-    const dlcUuid = loan.dlc_uuid.expectSome();
+    const dlcUuid = loan.dlc_uuid;
 
     assertEquals(dlcUuid, UUID);
     assertEquals(loan['vault-loan'], `u${borrowAmount}`);
@@ -452,7 +451,7 @@ Clarinet.test({
   name: 'cannot repay more than borrowed amount',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const borrowAmount = 100000000; // $100
@@ -484,7 +483,7 @@ Clarinet.test({
   name: 'check-liquidation works as expected',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const borrowAmount = customShiftValue(10000, stableCoinDecimals); // $10,000
@@ -532,7 +531,7 @@ Clarinet.test({
   name: 'get-payout-ratio works as expected',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const borrowAmount = customShiftValue(10000, stableCoinDecimals); // $10,000
@@ -591,7 +590,7 @@ Clarinet.test({
   name: 'attempt-liquidate fails if the loan is not underwater',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const liquidator_user = accounts.get('wallet_3')!;
@@ -625,7 +624,7 @@ Clarinet.test({
   name: 'attempt-liquidate should call the dlc-manager contract to close the dlc',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get('deployer')!;
-    const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
+    const protocol_contract_deployer = accounts.get('deployer')!;
     const protocol_contract_user = accounts.get('protocol_contract_user')!;
     const protocol_wallet = accounts.get('protocol_wallet')!;
     const liquidator_user = accounts.get('wallet_3')!;
@@ -661,11 +660,12 @@ Clarinet.test({
 
     const nftBurnEvent = block2.receipts[0].events.find(
       (event) =>
-        event?.nft_burn_event?.asset_identifier == 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1::open-dlc'
+        event?.nft_burn_event?.asset_identifier ==
+        'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1-1::open-dlc'
     );
     assertEquals(
       nftBurnEvent?.nft_burn_event.asset_identifier,
-      'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1::open-dlc'
+      'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.dlc-manager-v1-1::open-dlc'
     );
   },
 });

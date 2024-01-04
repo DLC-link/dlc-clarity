@@ -5,7 +5,7 @@ import {
   exampleContractAddress,
   exampleContractName,
   deployerPrivateKey,
-} from './common';
+} from './common.js';
 
 import { uintCV } from '@stacks/transactions';
 

@@ -1,5 +1,5 @@
 import { uintCV } from '@stacks/transactions';
-import { network, callReadOnly, exampleContractAddress, exampleContractName } from './common';
+import { network, callReadOnly, exampleContractAddress, exampleContractName } from './common.js';
 
 export default async function getLoan(id: string) {
   const txOptions = {

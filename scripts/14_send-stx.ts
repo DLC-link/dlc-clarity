@@ -1,4 +1,4 @@
-import { network, protocolPrivateKey, sendTokenTransfer } from './common';
+import { network, protocolPrivateKey, sendTokenTransfer } from './common.js';
 
 import { SignedTokenTransferOptions } from '@stacks/transactions';
 

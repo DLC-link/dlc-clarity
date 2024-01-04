@@ -10,8 +10,8 @@ import { assertMatch, shiftPriceValue } from './deps.ts';
 // const BTChex = "BTC";
 const UUID = 'fakeuuid';
 const nftAssetContract = 'open-dlc';
-const dlcManagerContract = 'dlc-manager-v1';
-const callbackContract = 'callback-contract-v1';
+const dlcManagerContract = 'dlc-manager-v1-1';
+const callbackContract = 'callback-contract-v1-1';
 const eventSourceVersion = '1';
 const mockFundingTxId = 'F4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16';
 
@@ -156,7 +156,7 @@ Clarinet.test({
 });
 
 Clarinet.test({
-  name: 'create-dlc called from a protocol-contract returns a list of attestors and a uuid',
+  name: 'create-dlc called from a protocol-contract returns a uuid',
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const protocol_contract_deployer = accounts.get('protocol_contract_deployer')!;
     const creator = accounts.get('wallet_1');
@@ -221,7 +221,7 @@ Clarinet.test({
 
     let uuid = getUUIDFromResponse(createDlcBlock);
 
-    chain.mineBlock([
+    let ssfBlock = chain.mineBlock([
       Tx.contractCall(
         dlcManagerContract,
         'set-status-funded',
@@ -233,6 +233,8 @@ Clarinet.test({
         protocol_wallet.address
       ),
     ]);
+
+    console.log(ssfBlock);
 
     let statusCheck = chain.mineBlock([Tx.contractCall(dlcManagerContract, 'get-dlc', [uuid], deployer.address)]);
     statusCheck.receipts[0].result.expectSome();

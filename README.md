@@ -18,11 +18,11 @@ This contract acts to feed the outcome of the DLC. By using a smart contract for
 
 # How to interact with this contract
 
-An example lending/borrowing contract is provided in `/examples/sample-contract-loan-v1.clar`. This contract is a simple example of how to interact with the DLC Manager contract.
+An example lending/borrowing contract is provided in `/examples/sample-contract-loan.clar`. This contract is a simple example of how to interact with the DLC Manager contract.
 
 ## Clarity Traits
 
-The following Clarity Traits must be implemented to interface with our dlc-manager contract. See `/contracts/dlc-link-callback-trait-v1.clar`
+The following Clarity Traits must be implemented to interface with our dlc-manager contract. See `/contracts/dlc-link-callback-trait.clar`
 
 ### `set-status-funded`
 
@@ -72,6 +72,8 @@ Parameters:
 - `callback-contract`: principal - The contract that sends the request, and will accept the callback.
 - `protocol-wallet`: principal - router-wallet public key, that will trigger `set-status-funded` and `post-close-dlc` (see [dlc-stack](https://github.com/DLC-link/dlc-stack) repo for more information)
 - `refund-delay`: uint - seconds until an emergency refund transaction can be broadcasted. Set 0 to disable this feature.
+- `btc-fee-recipient`: (string-ascii 64) - BTC address to send the BTC fees to (sends the fees to the protocol wallet if set to "0x")
+- `btc-fee-basis-points`: uint - BTC fee basis points (1/100 of a percent) to send to the fee recipient (set 0 to disable this feature)
 
 ### Closing the DLC
 

@@ -1,6 +1,6 @@
-import getDLC from './02_get-dlc';
-import { apiBase, contractFullName, openDLCNFT } from './common';
-import { NFTHoldingsData } from './models/models';
+import getDLC from './02_get-dlc.js';
+import { apiBase, contractFullName, openDLCNFT } from './common.js';
+import { NFTHoldingsData } from './models/models.js';
 
 export async function getAllDLCs() {
   const url = `${apiBase}/extended/v1/tokens/nft/holdings?asset_identifiers=${contractFullName}::${openDLCNFT}&principal=${contractFullName}`;

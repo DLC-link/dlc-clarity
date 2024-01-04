@@ -1,4 +1,4 @@
-import { network, deployerPrivateKey, contractAddress, contractName, sendContractCall } from './common';
+import { network, deployerPrivateKey, contractAddress, contractName, sendContractCall } from './common.js';
 
 import { contractPrincipalCV } from '@stacks/transactions';
 

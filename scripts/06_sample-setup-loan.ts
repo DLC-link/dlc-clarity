@@ -1,7 +1,7 @@
 import { AnchorMode, SignedContractCallOptions, bufferCV, uintCV } from '@stacks/transactions';
-import { network, exampleContractAddress, exampleContractName, sendContractCall, testCreatorKey } from './common';
+import { network, exampleContractAddress, exampleContractName, sendContractCall, testCreatorKey } from './common.js';
 
-export default async function setupLoan(btcDeposit: number, attestorIDs: number[]) {
+export default async function setupLoan(btcDeposit: number) {
   const txOptions: SignedContractCallOptions = {
     contractAddress: exampleContractAddress,
     contractName: exampleContractName,
