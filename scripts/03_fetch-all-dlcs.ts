@@ -15,7 +15,7 @@ export default async function fetchAllDLCs() {
   console.dir(result, { depth: 3 });
   await Promise.all(
     result.results.map(async (dlc) => {
-      await getDLC(parseInt(dlc.value.repr.slice(1, dlc.value.repr.length)).toString());
+      await getDLC(dlc.value.repr);
     })
   );
 }
