@@ -19,7 +19,7 @@ import {
   openDLCNFT,
   callReadOnly,
   hexToBytes,
-} from './common';
+} from './common.js';
 
 export default async function closeLoan(id: number) {
   const getLoanOptions = {
@@ -31,7 +31,7 @@ export default async function closeLoan(id: number) {
     network,
   };
   const { cvToValue } = await callReadOnly(getLoanOptions);
-  const uuid = cvToValue.value.dlc_uuid.value.value;
+  const uuid = cvToValue.value.dlc_uuid.value;
 
   const contractNonFungiblePostCondition = makeContractNonFungiblePostCondition(
     contractAddress,

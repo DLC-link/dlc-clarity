@@ -1,7 +1,13 @@
 import { readFileSync } from 'fs';
-import { network, deployerPrivateKey, deployContract } from './common';
+import { network, deployerPrivateKey, deployContract } from './common.js';
 
-import { AnchorMode, ContractDeployOptions } from '@stacks/transactions';
+import {
+  AnchorMode,
+  ContractDeployOptions,
+  StacksTransaction,
+  estimateContractDeploy,
+  makeContractDeploy,
+} from '@stacks/transactions';
 
 export default async function deployProtocolContract(
   path: string,
@@ -14,6 +20,13 @@ export default async function deployProtocolContract(
     senderKey: deployerKey,
     network,
     anchorMode: AnchorMode.Any,
+    fee: 15000,
   };
+
+  const tx = await makeContractDeploy(txOptions);
+  const fee = await estimateContractDeploy(tx, network);
+
+  console.log(fee);
+
   await deployContract(txOptions, network);
 }

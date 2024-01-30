@@ -6,33 +6,38 @@ telemetry = false
 cache_dir = '.cache'
 
 [[project.requirements]]
-contract_id = 'STDBEG5X8XD50SPM1JJH0E5CTXGDV5NJTJTTH7YB.redstone-verify'
-
-[[project.requirements]]
 contract_id = 'SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard'
 
-[contracts.callback-contract-v1]
-path = 'tests/callback-contract-mock-v1.clar'
+[[project.requirements]]
+contract_id = 'ST1NXBK3K5YYMD6FD41MVNP3JS1GABZ8TRVX023PT.sip-010-trait-ft-standard'
+
+[contracts.callback-contract-v1-1]
+path = 'tests/callback-contract-mock.clar'
 clarity_version = 2
 epoch = 2.3
 
-[contracts.dlc-link-callback-trait-v1]
-path = 'contracts/dlc-link-callback-trait-v1.clar'
+[contracts.dlc-link-callback-trait-v1-1]
+path = 'contracts/dlc-link-callback-trait.clar'
 clarity_version = 2
 epoch = 2.3
 
-[contracts.dlc-manager-v1]
-path = 'contracts/dlc-manager-v1.clar'
+[contracts.dlc-manager-trait-v1-2]
+path = 'contracts/dlc-manager-trait.clar'
 clarity_version = 2
 epoch = 2.3
 
-[contracts.dlc-stablecoin]
+[contracts.dlc-manager-v1-1]
+path = 'contracts/dlc-manager.clar'
+clarity_version = 2
+epoch = 2.3
+
+[contracts.dlc-stablecoin-v1-1]
 path = 'contracts/dlc-stablecoin.clar'
 clarity_version = 2
 epoch = 2.3
 
-[contracts.sample-contract-loan-v1]
-path = 'examples/sample-contract-loan-v1.clar'
+[contracts.sample-contract-loan-v1-1]
+path = 'examples/sample-contract-loan.clar'
 clarity_version = 2
 epoch = 2.3
 

@@ -6,26 +6,8 @@ stacks-node: 'https://api.testnet.hiro.so'
 bitcoin-node: 'http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332'
 plan:
   batches:
-    - id: 0
-      transactions:
-        - requirement-publish:
-            contract-id: SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard
-            remap-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            remap-principals:
-              SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 8400
-            path: '.cache/requirements/SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE.sip-010-trait-ft-standard.clar'
-            clarity-version: 1
-      epoch: '2.0'
     - id: 1
       transactions:
-        - contract-publish:
-            contract-name: callback-contract-v1-1
-            expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
-            cost: 7494006
-            path: tests/callback-contract-mock.clar
-            anchor-block-only: true
-            clarity-version: 2
         - contract-publish:
             contract-name: dlc-link-callback-trait-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
@@ -54,6 +36,8 @@ plan:
             path: contracts/dlc-stablecoin.clar
             anchor-block-only: true
             clarity-version: 2
+    - id: 3
+      transactions:
         - contract-publish:
             contract-name: sample-contract-loan-v1-1
             expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
@@ -61,4 +45,20 @@ plan:
             path: examples/sample-contract-loan.clar
             anchor-block-only: true
             clarity-version: 2
-      epoch: '2.3'
+    - id: 4
+      transactions:
+        - contract-call:
+            contract-id: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3.dlc-manager-v1-1
+            expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
+            method: register-contract
+            parameters:
+              - "'ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3.sample-contract-loan-v1-1"
+            cost: 100000
+        - contract-call:
+            contract-id: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3.dlc-stablecoin-v1-1
+            expected-sender: ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3
+            method: mint
+            parameters:
+              - 'u1000000000000'
+              - "'ST1JHQ5GPQT249ZWG6V4AWETQW5DYA5RHJB0JSMQ3.sample-contract-loan-v1-1"
+            cost: 100000

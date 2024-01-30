@@ -3,11 +3,10 @@
     "rootDir": "scripts",
     "outDir": "scripts/dist",
     // "strict": true,
-    "target": "es6",
-    "module": "commonjs",
+    "target": "ESNext",
+    "module": "NodeNext",
     "sourceMap": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
 
   },
   "include": ["./scripts"]
