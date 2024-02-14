@@ -5,7 +5,7 @@ import { contractPrincipalCV, getNonce, principalCV, uintCV } from '@stacks/tran
 export default async function mintStablecoin(amount: number, recipient: string) {
   const txOptions = {
     contractAddress: contractAddress,
-    contractName: 'dlc-stablecoin',
+    contractName: 'dlc-stablecoin-v1-1',
     functionName: 'mint',
     functionArgs: [uintCV(amount), principalCV(recipient)],
     senderKey: deployerPrivateKey,
