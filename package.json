@@ -14,16 +14,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@stacks/network": "^6.5.5",
-    "@stacks/transactions": "^6.7.0",
-    "commander": "^11.0.0",
+    "@stacks/network": "^6.11.3",
+    "@stacks/transactions": "^6.11.3",
+    "commander": "^11.1.0",
     "js-yaml": "^4.1.0",
     "micro-stacks": "^1.2.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.5.0",
-    "dotenv": "^16.3.1",
+    "@types/node": "^20.11.0",
+    "dotenv": "^16.4.1",
     "tsc-watch": "^6.0.4",
     "typescript": "^5.1.6"
   }
