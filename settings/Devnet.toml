@@ -16,7 +16,7 @@ balance = 100_000_000_000_000
 # stx_address: ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
 # btc_address: mr1iPkD9N3RJZZxXRk7xF9d36gffa6exNC
 
-[accounts.protocol_contract_user]
+[accounts.wallet_2]
 mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
 balance = 100_000_000_000_000
 # secret_key: 530d9f61984c888536871c6573073bdfc0058896dc1adfe9a6a10dfacadc209101
@@ -65,7 +65,7 @@ balance = 100_000_000_000_000
 # stx_address: ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP
 # btc_address: n2v875jbJ4RjBnTjgbfikDfnwsDV5iUByw
 
-[accounts.protocol_contract_deployer]
+[accounts.faucet]
 mnemonic = "shadow private easily thought say logic fault paddle word top book during ignore notable orange flight clock image wealth health outside kitten belt reform"
 balance = 100_000_000_000_000
 # secret_key: de433bdfa14ec43aa1098d5be594c8ffb20a31485ff9de2923b2689471c401b801
@@ -104,24 +104,45 @@ stacks_api_image_url = "hirosystems/stacks-blockchain-api:latest"
 stacks_explorer_image_url = "hirosystems/explorer:latest"
 bitcoin_explorer_image_url = "quay.io/hirosystems/bitcoin-explorer:devnet"
 # postgres_image_url = "postgres:alpine"
+# enable_subnet_node = true
+# subnet_node_image_url = "hirosystems/stacks-subnets:0.8.1"
+# subnet_leader_mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+# subnet_leader_derivation_path = "m/44'/5757'/0'/0/0"
+# subnet_contract_id = "ST173JK7NZBA4BS05ZRATQH1K89YJMTGEH1Z5J52E.subnet-v3-0-1"
+# subnet_node_rpc_port = 30443
+# subnet_node_p2p_port = 30444
+# subnet_events_ingestion_port = 30445
+# subnet_node_events_observers = ["host.docker.internal:8002"]
+# subnet_api_image_url = "hirosystems/stacks-blockchain-api:latest"
+# subnet_api_postgres_database = "subnet_api"
+
+# For testing in epoch 2.1 / using Clarity2
+# epoch_2_0 = 100
+# epoch_2_05 = 100
+# epoch_2_1 = 101
+# epoch_2_2 = 102
+# epoch_2_3 = 103
+# epoch_2_4 = 104
+# epoch_2_5 = 105
+# epoch_3_0 = 121
 
 # Send some stacking orders
 [[devnet.pox_stacking_orders]]
-start_at_cycle = 3
+start_at_cycle = 2
 duration = 12
 wallet = "wallet_1"
 slots = 2
 btc_address = "mr1iPkD9N3RJZZxXRk7xF9d36gffa6exNC"
 
 [[devnet.pox_stacking_orders]]
-start_at_cycle = 3
+start_at_cycle = 2
 duration = 12
-wallet = "protocol_contract_user"
+wallet = "wallet_2"
 slots = 1
 btc_address = "muYdXKmX9bByAueDe6KFfHd5Ff1gdN9ErG"
 
 [[devnet.pox_stacking_orders]]
-start_at_cycle = 3
+start_at_cycle = 2
 duration = 12
 wallet = "wallet_3"
 slots = 1
